@@ -34,7 +34,7 @@ jobs:
         run: |
           python3 -m virtualenv venv
           source venv/bin/activate
-          pip3 install Cython==0.29.33 buildozer kivy-webview
+          pip3 install Cython==0.29.33 buildozer
           buildozer android debug
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.0
