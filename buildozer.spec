@@ -107,10 +107,10 @@ fullscreen = 0
 #android.minapi = 21
 
 # (int) Android SDK version to use
-#android.sdk = 35.0.2
+android.sdk = 35.0.2
 
 # (str) Android NDK version to use
-#android.ndk = 27c
+android.ndk = 27c
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 #android.ndk_api = 21
