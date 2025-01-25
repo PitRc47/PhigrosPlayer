@@ -110,10 +110,10 @@ fullscreen = 0
 #android.sdk = 35.0.2
 
 # (str) Android NDK version to use
-android.ndk = 26
+#android.ndk = 26
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-android.ndk_api = 24
+#android.ndk_api = 24
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
@@ -321,7 +321,7 @@ p4a.url = https://github.com/PitRc47/python-for-android
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = develop
+p4a.branch = master
 
 # (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
 #p4a.commit = HEAD
