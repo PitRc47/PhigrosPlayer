@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python Recipe
+        run: |
+          git clone https://github.com/PitRc47/python-for-android.git --depth 1
       - name: Set up JDK 17
         uses: actions/setup-java@v4.6.0
         with:
