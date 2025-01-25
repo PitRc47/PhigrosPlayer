@@ -330,7 +330,7 @@ android.allow_backup = True
 #p4a.source_dir =
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
-p4a.local_recipes = ./python-for-android/pythonforandroid/recipes
+p4a.local_recipes = /home/runner/work/PhigrosPlayer/PhigrosPlayer/python-for-android/pythonforandroid/
 
 # (str) Filename to the hook for p4a
 #p4a.hook =
