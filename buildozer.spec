@@ -107,10 +107,10 @@ fullscreen = 0
 #android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 35.0.2
+#android.sdk = 35.0.2
 
 # (str) Android NDK version to use
-android.ndk = 27c
+#android.ndk = 27c
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 #android.ndk_api = 21
@@ -283,7 +283,7 @@ android.accept_sdk_license = True
 
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
-android.archs = armeabi-v7a, arm64-v8a, x86, x86_64
+android.archs = armeabi-v7a, arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing
