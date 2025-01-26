@@ -136,7 +136,7 @@ if "--phira-chart" in sys.argv:
     pctid = sys.argv[sys.argv.index("--phira-chart") + 1]
     apiresult = requests.get(f"https://api.phira.cn/chart/{pctid}").json()
     if "error" in apiresult:
-        logging.error(f"phira api: {apiresult["error"]}")
+        logging.error(f"""phira api: {apiresult["error"]}""")
         raise SystemExit
     
     sys.argv.insert(1, f"{temp_dir}/phira-temp-chart.zip" if "--phira-chart-save" not in sys.argv else sys.argv[sys.argv.index("--phira-chart-save") + 1])
