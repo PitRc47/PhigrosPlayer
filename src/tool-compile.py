@@ -56,7 +56,7 @@ for t in ts: t.start()
 for t in ts: t.join()
 
 for file, _ in compile_files:
-    system(f"xcopy \".\\dist\\{file.replace(".py", "")}\\*\" .\\ /c /q /e /y")
+    system(f"""xcopy \".\\dist\\{file.replace(".py", "")}\\*\" .\\ /c /q /e /y""")
 
 system("rmdir .\\compile_venv /s /q")
 system("rmdir .\\build /s /q")
