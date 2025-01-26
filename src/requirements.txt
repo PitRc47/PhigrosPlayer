@@ -16,5 +16,4 @@ pygame==2.6.1
 websockets==13.1
 wheel
 setuptools
-kivy-webview
 kivy
