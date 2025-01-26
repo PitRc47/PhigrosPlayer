@@ -345,18 +345,18 @@ def pack_charts(infos: list[dict], rpe: bool):
     allcount = 0
     for info in infos:
         for li, l in enumerate(info["levels"]):
-            chartFile = f"./unpack-result/Chart_{l}/{info["soundIdBak"]}.json"
-            audioFile = f"./unpack-result/music/{info["soundIdBak"]}.ogg"
-            imageFile = f"./unpack-result/Illustration/{info["soundIdBak"]}.png"
+            chartFile = f'./unpack-result/Chart_{l}/{info["soundIdBak"]}.json'
+            audioFile = f'./unpack-result/music/{info["soundIdBak"]}.ogg'
+            imageFile = f'./unpack-result/Illustration/{info["soundIdBak"]}.png'
             csvData = "\n".join([
                 "Chart,Music,Image,Name,Artist,Level,Illustrator,Charter,AspectRatio,NoteScale,GlobalAlpha",
-                ",".join(map(lambda x: f"\"{x}\"" if " " in x else x, [
-                    f"{info["soundIdBak"]}.json",
-                    f"{info["soundIdBak"]}.ogg",
-                    f"{info["soundIdBak"]}.png",
+                ",".join(map(lambda x: f'"{x}"' if " " in x else x, [
+                    f'{info["soundIdBak"]}.json',
+                    f'{info["soundIdBak"]}.ogg',
+                    f'{info["soundIdBak"]}.png',
                     info["songName"],
                     info["composer"],
-                    f"{l} Lv.{int(info["difficulty"][li])}",
+                    f'{l} Lv.{int(info["difficulty"][li])}',
                     info["illustrator"],
                     info["charter"][li]
                 ]))
@@ -383,7 +383,7 @@ def pack_charts(infos: list[dict], rpe: bool):
                 mkdir(f"./unpack-temp/pack-{rid}")
                 with open(f"./unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
                     f.write(item[5])
-                popen(f".\\7z.exe a .\\unpack-result\\packed\\{item[0]}_{item[1]}{"_RPE" if p2r else ""}.zip {" ".join(map(lambda x: f"\"{x}\"", (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv")))} -y >> nul").read()
+                popen(f""".\\7z.exe a .\\unpack-result\\packed\\{item[0]}_{item[1]}{"_RPE" if p2r else ""}.zip {" ".join(map(lambda x: f"\"{x}\"", (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv")))} -y >> nul""").read()
                 packed_num += 1
             except Exception:
                 pass
