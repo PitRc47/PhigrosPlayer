@@ -193,7 +193,7 @@ class PILResourcePacker:
         
         img_vars = ",".join(map(self.cv.get_img_jsvarname, imnames))
         js_revoke = "[{}].forEach(im => URL.revokeObjectURL(im.src));".format(img_vars)
-    self.cv.run_js_code(js_revoke)
+        self.cv.run_js_code(js_revoke)
         
         def optimize():
             codes = []
