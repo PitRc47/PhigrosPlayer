@@ -219,7 +219,7 @@ class PILResourcePacker:
             self._imgopted[name].wait()
             self._imgopted.pop(name)
             
-        self.cv.run_js_code(f"{";".join(map(lambda x: f"delete {self.cv.get_img_jsvarname(x)}", names))};")
+        self.cv.run_js_code(f"""{";".join(map(lambda x: f"delete {self.cv.get_img_jsvarname(x)}", names))};""")
 
 def ban_threadtest_current_thread():
     obj = current_thread()
@@ -376,7 +376,7 @@ class WebCanvas:
         self._regres.pop(name)
     
     def get_imgcomplete_jseval(self, ns: list[str]) -> str:
-        return f"[{",".join([f"{self.get_img_jsvarname(item)}.complete" for item in ns])}]"
+        return f"""[{",".join([f"{self.get_img_jsvarname(item)}.complete" for item in ns])}]"""
     
     def wait_loadimgs(self, complete_code: str) -> None:
         while not all(self.run_js_code(complete_code)):
@@ -419,13 +419,13 @@ class WebCanvas:
     
     def _load_img(self, imgname: str) -> None:
         jsvarname = self.get_img_jsvarname(imgname)
-        code = f"\
+        code = f"""\
         if (!window.{jsvarname}){chr(123)}\
             {jsvarname} = document.createElement('img');\
             {jsvarname}.crossOrigin = \"Anonymous\";\
             {jsvarname}.src = 'http://{host}:{self.web_port + 1}/{imgname}';\
             {jsvarname}.loading = \"eager\";\
         {chr(125)}\
-        "
+        """
         self.run_js_code(code)
         self._is_loadimg[imgname] = True
