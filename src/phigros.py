@@ -169,7 +169,7 @@ def updateUserAvatar():
             udAvatar = assetConfig["avatars"][0]
         saveUserData()
         logging.warning("User avatar not found, reset to default")
-    root.run_js_code(f"{root.get_img_jsvarname("userAvatar")} = {root.get_img_jsvarname(f"avatar_{assetConfig["avatars"].index(getUserData("userdata-userAvatar"))}")};")
+    root.run_js_code(f"""{root.get_img_jsvarname("userAvatar")} = {root.get_img_jsvarname(f'avatar_{assetConfig["avatars"].index(getUserData("userdata-userAvatar"))}')};""")
 
 def Load_Resource():
     global note_max_width, note_max_height
@@ -334,7 +334,7 @@ def Load_Resource():
         root.reg_res(f.read(), "PhigrosFont.ttf")
     respacker.load(*respacker.pack())
     
-    root.wait_jspromise(f"loadFont('PhigrosFont', \"{root.get_resource_path("PhigrosFont.ttf")}\");")
+    root.wait_jspromise(f"""loadFont('PhigrosFont', \"{root.get_resource_path("PhigrosFont.ttf")}\");""")
     root.unreg_res("PhigrosFont.ttf")
     
     updateUserAvatar()
@@ -422,17 +422,17 @@ def drawBackground():
     p = getChapterP(imtc)
     
     root.run_js_code(
-        f"ctx.drawAlphaImage(\
+        f"""ctx.drawAlphaImage(\
             {root.get_img_jsvarname(f"chapter_{imfc.chapterId}_blur")},\
             0, 0, {w}, {h}, {1.0 - p}\
-        );",
+        );""",
         add_code_array = True
     )   
     root.run_js_code(
-        f"ctx.drawAlphaImage(\
+        f"""ctx.drawAlphaImage(\
             {root.get_img_jsvarname(f"chapter_{imtc.chapterId}_blur")},\
             0, 0, {w}, {h}, {p}\
-        );",
+        );""",
         add_code_array = True
     )
 
@@ -442,12 +442,12 @@ def drawFaculas():
             state = faManager.getFaculaState(facula)
             sizePx = facula["size"] * (w + h) / 40
             root.run_js_code(
-                f"ctx.drawAlphaImage(\
+                f"""ctx.drawAlphaImage(\
                     {root.get_img_jsvarname("facula")},\
                     {facula["x"] * w - sizePx / 2}, {state["y"] * h - sizePx / 2},\
                     {sizePx}, {sizePx},\
                     {state["alpha"] * 0.4}\
-                );",
+                );""",
                 add_code_array = True
             )
 
@@ -491,42 +491,42 @@ def drawChapterItem(item: phigame_obj.Chapter, dx: float, rectmap: dict):
     
     if p != 1.0:
         root.run_js_code(
-            f"ctx.drawDiagonalRectangleClipImage(\
+            f"""ctx.drawDiagonalRectangleClipImage(\
                 {",".join(map(str, chapterRect))},\
-                {root.get_img_jsvarname(f"chapter_{item.chapterId}_blur")},\
+                {root.get_img_jsvarname(f'chapter_{item.chapterId}_blur')},\
                 {- (chapterImWidth - chapterWidth) / 2}, 0, {chapterImWidth}, {h * (1.0 - 140 / 1080 * 2)},\
                 {dPower}, 1.0\
-            );",
+            );""",
             add_code_array = True
         )
     
     root.run_js_code(
-        f"ctx.drawDiagonalRectangleClipImage(\
+        f"""ctx.drawDiagonalRectangleClipImage(\
             {",".join(map(str, chapterRect))},\
-            {root.get_img_jsvarname(f"chapter_{item.chapterId}_raw")},\
+            {root.get_img_jsvarname(f'chapter_{item.chapterId}_raw')},\
             {- (chapterImWidth - chapterWidth) / 2}, 0, {chapterImWidth}, {h * (1.0 - 140 / 1080 * 2)},\
             {dPower}, {p}\
-        );",
+        );""",
         add_code_array = True
     )
     
     root.run_js_code(
-        f"ctx.drawDiagonalRectangleClipImage(\
+        f"""ctx.drawDiagonalRectangleClipImage(\
             {",".join(map(str, chapterRect))},\
             {root.get_img_jsvarname("imageBlackMask")},\
             {- (chapterImWidth - chapterWidth) / 2}, 0, {chapterImWidth}, {h * (1.0 - 140 / 1080 * 2)},\
             {dPower}, 1.0\
-        );",
+        );""",
         add_code_array = True
     )
     
     root.run_js_code(
-        f"ctx.drawRotateText2(\
+        f"""ctx.drawRotateText2(\
             '{processStringToLiteral(item.name)}',\
             {chapterRect[2] - dPower * chapterWidth - (w + h) / 150}, {chapterRect[3] - (w + h) / 150},\
             -75, 'rgba(255, 255, 255, {0.95 * (1.0 - tool_funcs.PhigrosChapterNameAlphaValueTransfrom(p))})', '{(w + h) / 50}px PhigrosFont',\
             'left', 'bottom'\
-        );",
+        );""",
         add_code_array = True
     )
     
@@ -573,19 +573,19 @@ def drawChapterItem(item: phigame_obj.Chapter, dx: float, rectmap: dict):
     
     if playButtonAlpha != 0.0:
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, playButtonRect))},\
                 {PlayButtonDPower}, 'rgba(255, 255, 255, {playButtonAlpha})'\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawTriangleFrame(\
+            f"""ctx.drawTriangleFrame(\
                 {",".join(map(str, playButtonTriangle))},\
                 'rgba(0, 0, 0, {playButtonAlpha})',\
                 {(w + h) / 800}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -700,22 +700,22 @@ def drawChapters(rectmap: dict):
 
 def drawButton(buttonName: typing.Literal["ButtonLeftBlack", "ButtonRightBlack"], iconName: str, buttonPos: tuple[float, float]):
     root.run_js_code(
-        f"ctx.drawImage(\
+        f"""ctx.drawImage(\
            {root.get_img_jsvarname(buttonName)},\
            {buttonPos[0]}, {buttonPos[1]}, {ButtonWidth}, {ButtonHeight}\
-        );",
+        );""",
         add_code_array = True
     )
     
     centerPoint = (0.35, 0.395) if buttonName == "ButtonLeftBlack" else (0.65, 0.605)
     
     root.run_js_code(
-        f"ctx.drawImage(\
+        f"""ctx.drawImage(\
            {root.get_img_jsvarname(iconName)},\
            {buttonPos[0] + ButtonWidth * centerPoint[0] - MainUIIconWidth / 2},\
            {buttonPos[1] + ButtonHeight * centerPoint[1] - MainUIIconHeight / 2},\
            {MainUIIconWidth}, {MainUIIconHeight}\
-        );",
+        );""",
         add_code_array = True
     )
 
@@ -746,20 +746,20 @@ def drawDialog(
     dialogDPower = tool_funcs.getDPower(*tool_funcs.getSizeByRect(dialogRect), 75)
     
     root.run_js_code(
-        f"dialog_canvas_ctx.save();\
+        f"""dialog_canvas_ctx.save();\
         dialog_canvas_ctx.clipDiagonalRectangle(\
             {",".join(map(str, dialogRect))},\
             {tool_funcs.getDPower(*tool_funcs.getSizeByRect(dialogRect), 75)}\
-        );",
+        );""",
         add_code_array = True
     )
     
     root.run_js_code(
-        f"dialog_canvas_ctx.drawAlphaImage(\
+        f"""dialog_canvas_ctx.drawAlphaImage(\
             {root.get_img_jsvarname(dialogImageName)},\
             {w / 2 - tempWidth / 2 + tempWidth * dialogDPower * (0.2 / 1.2)}, {dialogCenterY - tempHeight / 2},\
             {tempWidth}, {tempHeight}, {p}\
-        );",
+        );""",
         add_code_array = True
     )
     
@@ -771,26 +771,26 @@ def drawDialog(
     )
     
     root.run_js_code(
-        f"dialog_canvas_ctx.fillRectExByRect(\
+        f"""dialog_canvas_ctx.fillRectExByRect(\
             {",".join(map(str, diagonalRectangle))},\
             'rgba(0, 0, 0, {0.85 * p})'\
-        );",
+        );""",
         add_code_array = True
     )
     
     root.run_js_code(
-        f"dialog_canvas_ctx.drawDiagonalDialogRectangleText(\
+        f"""dialog_canvas_ctx.drawDiagonalDialogRectangleText(\
             {",".join(map(str, diagonalRectangle))},\
             {diagonalPower * 0.2},\
             '{processStringToLiteral(noText)}',\
             '{processStringToLiteral(yesText)}',\
             'rgba(255, 255, 255, {p})',\
             '{(w + h) / 95 * (0.65 + p * 0.35)}px PhigrosFont'\
-        );",
+        );""",
         add_code_array = True
     )
     
-    root.run_js_code(f"dialog_canvas_ctx.restore();", add_code_array=True)
+    root.run_js_code(f"""dialog_canvas_ctx.restore();""", add_code_array=True)
     
     return (
         diagonalRectangle[0] + diagonalRectanglePowerPx * 0.2, diagonalRectangle[1],
@@ -827,10 +827,10 @@ def showStartAnimation():
         clearCanvas(wait_execute = True)
         
         root.run_js_code(
-            f"ctx.drawAlphaImage(\
+            f"""ctx.drawAlphaImage(\
                 {root.get_img_jsvarname("logoipt")},\
                 0, 0, {w}, {h}, {tool_funcs.easeAlpha(p)}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -846,10 +846,10 @@ def showStartAnimation():
         clearCanvas(wait_execute = True)
         
         root.run_js_code(
-            f"ctx.drawAlphaImage(\
+            f"""ctx.drawAlphaImage(\
                 {root.get_img_jsvarname("warning")},\
                 0, 0, {w}, {h}, {tool_funcs.easeAlpha(p)}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -891,10 +891,10 @@ def showStartAnimation():
         drawBackground()
         
         root.run_js_code(
-            f"ctx.fillRectEx(\
+            f"""ctx.fillRectEx(\
                 0, 0, {w}, {h},\
                 'rgba(0, 0, 0, {(math.sin(atime / 1.5) + 1.0) / 5 + 0.15})'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -908,10 +908,10 @@ def showStartAnimation():
         drawFaculas()
         
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("phigros")},\
                 {",".join(map(str, phigros_logo_rect))}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -922,7 +922,7 @@ def showStartAnimation():
             textBlur = 0.0
         
         root.run_js_code(
-            f"ctx.shadowColor = '#FFFFFF'; ctx.shadowBlur = {textBlur};",
+            f"""ctx.shadowColor = '#FFFFFF'; ctx.shadowBlur = {textBlur};""",
             add_code_array = True
         )
         
@@ -955,9 +955,9 @@ def showStartAnimation():
         
         if atime <= 2.0:
             blurP = 1.0 - (1.0 - atime / 2.0) ** 3
-            root.run_js_code(f"mask.style.backdropFilter = 'blur({(w + h) / 60 * (1 - blurP)}px)';", add_code_array = True)
+            root.run_js_code(f"""mask.style.backdropFilter = 'blur({(w + h) / 60 * (1 - blurP)}px)';""", add_code_array = True)
         else:
-            root.run_js_code(f"mask.style.backdropFilter = '';", add_code_array = True)
+            root.run_js_code(f"""mask.style.backdropFilter = '';""", add_code_array = True)
         
         if a3_clicked and time.time() - a3_clicked_time <= 1.0:
             if not a3_sound_fadeout:
@@ -965,10 +965,10 @@ def showStartAnimation():
                 mixer.music.fadeout(500)
             
             root.run_js_code(
-                f"ctx.fillRectEx(\
+                f"""ctx.fillRectEx(\
                     0, 0, {w}, {h},\
                     'rgba(0, 0, 0, {1.0 - (1.0 - (time.time() - a3_clicked_time)) ** 2})'\
-                );",
+                );""",
                 add_code_array = True
             )
         
@@ -1214,10 +1214,10 @@ def mainRender():
         drawChapters(chapterPlayButtonRectMap)
         
         root.run_js_code(
-            f"ctx.drawAlphaImage(\
+            f"""ctx.drawAlphaImage(\
                 {root.get_img_jsvarname("message")},\
                 {",".join(map(str, messageRect))}, 0.7\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -1234,11 +1234,11 @@ def mainRender():
         
         if clickedMessage and time.time() - clickMessageTime <= 1.5:
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("JoinQQGuildBanner")},\
                     {JoinQQGuildBannerRect[0] - JoinQQGuildBannerWidth + (1.0 - (1.0 - ((time.time() - clickMessageTime) / 1.5)) ** 6) * JoinQQGuildBannerWidth}, {JoinQQGuildBannerRect[1]},\
                     {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );",
+                );""",
                 add_code_array = True
             )
         elif not clickedMessage and messageBacking:
@@ -1247,20 +1247,20 @@ def mainRender():
                 messageBackSt = time.time() - 1.5 # 防止回弹
                 canClickMessage = True
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("JoinQQGuildBanner")},\
                     {JoinQQGuildBannerRect[0] - (1.0 - (1.0 - ((time.time() - messageBackSt) / 1.5)) ** 6) * JoinQQGuildBannerWidth}, {JoinQQGuildBannerRect[1]},\
                     {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );",
+                );""",
                 add_code_array = True
             )
         elif clickedMessage:
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("JoinQQGuildBanner")},\
                     {JoinQQGuildBannerRect[0]}, {JoinQQGuildBannerRect[1]},\
                     {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );",
+                );""",
                 add_code_array = True
             )
         
@@ -1274,15 +1274,15 @@ def mainRender():
             ep = 1.0 - (1.0 - p) ** 2
             
             root.run_js_code(
-                f"ctx.fillRectEx(\
+                f"""ctx.fillRectEx(\
                     0, 0, {w}, {h},\
                     'rgba(0, 0, 0, {ep * 0.5})'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"mask.style.backdropFilter = 'blur({(w + h) / 120 * ep}px)';",
+                f"""mask.style.backdropFilter = 'blur({(w + h) / 120 * ep}px)';""",
                 add_code_array = True
             )
             
@@ -1312,10 +1312,10 @@ def mainRender():
             ep = 1.0 - (1.0 - p) ** 2
             
             root.run_js_code(
-                f"ctx.fillRectEx(\
+                f"""ctx.fillRectEx(\
                     0, 0, {w}, {h},\
                     'rgba(0, 0, 0, {ep * 0.5})'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1412,11 +1412,11 @@ def renderPhigrosWidgets(
                 x + max_width, y + h * ((41 + 6) / 1080)
             )
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, sliderShadowRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(sliderShadowRect), 75)},\
                     'rgba(0, 0, 0, 0.25)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1432,20 +1432,20 @@ def renderPhigrosWidgets(
             )
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, lConRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(lConRect), 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, rConRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(rConRect), 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1453,27 +1453,27 @@ def renderPhigrosWidgets(
                 ctp_l, ctp_r = tool_funcs.getCenterPointByRect(lConRect), tool_funcs.getCenterPointByRect(rConRect)
                 coniw_l, coniw_r = (w + h) * 0.003, (w + h) * 0.005 # 控制按钮图标线长度
                 root.run_js_code(
-                    f"ctx.drawLineEx(\
+                    f"""ctx.drawLineEx(\
                         {ctp_l[0] - coniw_l / 2}, {ctp_l[1]},\
                         {ctp_l[0] + coniw_l / 2}, {ctp_l[1]},\
                         {(w + h) * (1 / 1500)}, 'rgb(63, 63, 63)'\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 root.run_js_code(
-                    f"ctx.drawLineEx(\
+                    f"""ctx.drawLineEx(\
                         {ctp_r[0] - coniw_r / 2}, {ctp_r[1]},\
                         {ctp_r[0] + coniw_r / 2}, {ctp_r[1]},\
                         {(w + h) * (1 / 1500)}, 'rgb(63, 63, 63)'\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 root.run_js_code(
-                    f"ctx.drawLineEx(\
+                    f"""ctx.drawLineEx(\
                         {ctp_r[0]}, {ctp_r[1] - coniw_r / 2},\
                         {ctp_r[0]}, {ctp_r[1] + coniw_r / 2},\
                         {(w + h) * (1 / 1500)}, 'rgb(63, 63, 63)'\
-                    );",
+                    );""",
                     add_code_array = True
                 )
             
@@ -1488,11 +1488,11 @@ def renderPhigrosWidgets(
             )
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, sliderBlockRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(sliderBlockRect), 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1519,11 +1519,11 @@ def renderPhigrosWidgets(
                 x + w * 0.321875 + w * 0.06875, y + h * ((41 + 6) / 1080)
             )
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, checkboxShadowRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(checkboxShadowRect), 75)},\
                     'rgba(0, 0, 0, 0.25)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1540,21 +1540,21 @@ def renderPhigrosWidgets(
             )
             
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("checked")},\
                     {x + w * 0.340625 - CheckedIconWidth / 2},\
                     {y + tool_funcs.getSizeByRect(checkButtonRect)[1] / 2 - CheckedIconHeight / 2},\
                     {CheckedIconWidth}, {CheckedIconHeight}\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, checkButtonRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(checkButtonRect), 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1568,11 +1568,11 @@ def renderPhigrosWidgets(
             )
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, buttonRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(buttonRect), 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -1627,11 +1627,11 @@ def settingRender():
     chooseRects = {"avatars": {}, "backgrounds": {}}
     lastClickChooseAvatarOrBackgroundPos = (0.0, 0.0)
     settingUIOpenSourceLicenseSlideControler.maxValueY = root.run_js_code(
-        f"ctx.drawRectMultilineText(\
+        f"""ctx.drawRectMultilineText(\
             -{w}, -{h}, 0, 0,\
             {root.string2sctring_hqm(const.PHI_OPENSOURCELICENSE)},\
             'rgb(255, 255, 255)', '{(w + h) / 145}px PhigrosFont', {(w + h) / 145}, 1.25\
-        );"
+        );"""
     ) + h * (143 / 1080) * 2 - h
     
     mixer.music.load("./resources/Calibration.wav")
@@ -1639,8 +1639,8 @@ def settingRender():
     
     def updatebg():
         ubgjsname = root.get_img_jsvarname("userBackground")
-        bgimname = f"background_{assetConfig["backgrounds"].index(getUserData("userdata-userBackground"))}"
-        root.run_js_code(f"{ubgjsname} = blurImg({root.get_img_jsvarname(bgimname)}, {(w + h) / 125});")
+        bgimname = f"""background_{assetConfig["backgrounds"].index(getUserData("userdata-userBackground"))}"""
+        root.run_js_code(f"""{ubgjsname} = blurImg({root.get_img_jsvarname(bgimname)}, {(w + h) / 125});""")
     
     def unregEvents():
         eventManager.unregEvent(clickBackButtonEvent)
@@ -1736,7 +1736,7 @@ def settingRender():
         
         # 编辑用户名字
         if settingState.atis_a and tool_funcs.inrect(x, y, editUserNameRect) and editingUserData and not (showAvatars or showBackgrounds):
-            newName = root.run_js_code(f"prompt('请输入新名字', {root.string2sctring_hqm(getUserData("userdata-userName"))});")
+            newName = root.run_js_code(f"""prompt('请输入新名字', {root.string2sctring_hqm(getUserData("userdata-userName"))});""")
             if newName is not None:
                 setUserData("userdata-userName", newName)
                 updateFontSizes()
@@ -1744,7 +1744,7 @@ def settingRender():
         
         # 编辑用户介绍
         if settingState.atis_a and tool_funcs.inrect(x, y, editIntroductionRect) and editingUserData and not (showAvatars or showBackgrounds):
-            newName = root.run_js_code(f"prompt('请输入新介绍 (输入\"\\\\n\"可换行)', {root.string2sctring_hqm(getUserData("userdata-selfIntroduction").replace("\n", "\\n"))});")
+            newName = root.run_js_code(f"""prompt('请输入新介绍 (输入\"\\\\n\"可换行)', {root.string2sctring_hqm(getUserData("userdata-selfIntroduction").replace("\n", "\\n"))});""")
             if newName is not None:
                 setUserData("userdata-selfIntroduction", newName.replace("\\n", "\n"))
                 updateFontSizes()
@@ -1891,12 +1891,12 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("Arrow_Right_Black")},\
                 {x0 + (x1 - x0) / 2 - SettingUIOtherIconWidth / 2},\
                 {y0 + (y1 - y0) / 2 - SettingUIOtherIconHeight / 2},\
                 {SettingUIOtherIconWidth}, {SettingUIOtherIconHeight}\
-            );",
+            );""",
             add_code_array = True
         )
     
@@ -1930,7 +1930,7 @@ def settingRender():
         if alpha == 0.0: return
         
         root.run_js_code(
-            f"ctx.save(); ctx.translate({- dx}, 0); ctx.globalAlpha = {alpha};",
+            f"""ctx.save(); ctx.translate({- dx}, 0); ctx.globalAlpha = {alpha};""",
             add_code_array = True
         )
         
@@ -1945,11 +1945,11 @@ def settingRender():
         
         lineColor = "255, 255, 170" if getUserData("setting-enableFCAPIndicator") else "255, 255, 255"
         root.run_js_code( # 2 layers alpha
-            f"ctx.drawLineEx(\
+            f"""ctx.drawLineEx(\
                 {w * 0.49375}, {h * 0.8},\
                 {w}, {h * 0.8},\
                 {h * const.LINEWIDTH.PHI}, 'rgba({lineColor}, {alpha})'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -1962,11 +1962,11 @@ def settingRender():
             if CalibrationMusicPosition < 1.0:
                 noteY = h * 0.85 * CalibrationMusicPosition - h * 0.05
                 root.run_js_code(
-                    f"ctx.drawImage(\
+                    f"""ctx.drawImage(\
                         {root.get_img_jsvarname("Note_Tap")},\
                         {w * 0.75 - noteWidth / 2}, {noteY - noteHeight / 2},\
                         {noteWidth}, {noteHeight}\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 if CalibrationClickSoundPlayed:
@@ -2001,11 +2001,11 @@ def settingRender():
             y = h * 0.85 * ((p + getUserData("setting-chartOffset")) % 2.0) - h * 0.05
             lw = w * ap * 3.0
             root.run_js_code( # 这里alpha值化简了
-                f"ctx.drawLineEx(\
+                f"""ctx.drawLineEx(\
                     {w * 0.75 - lw / 2}, {y},\
                     {w * 0.75 + lw / 2}, {y},\
                     {h * const.LINEWIDTH.PHI * 0.75}, 'rgba(255, 255, 255, {(ap - 1.0) ** 2})'\
-                );",
+                );""",
                 add_code_array = True
             )
         
@@ -2013,7 +2013,7 @@ def settingRender():
         CalibrationClickEffects = list(filter(lambda x: time.time() - x[0] <= 0.5, CalibrationClickEffects))
         
         root.run_js_code(
-            f"ctx.restore();",
+            f"""ctx.restore();""",
             add_code_array = True
         )
     
@@ -2024,7 +2024,7 @@ def settingRender():
         if alpha == 0.0: return
         
         root.run_js_code(
-            f"ctx.save(); ctx.translate({- dx}, 0); ctx.globalAlpha = {alpha};",
+            f"""ctx.save(); ctx.translate({- dx}, 0); ctx.globalAlpha = {alpha};""",
             add_code_array = True
         )
         
@@ -2039,24 +2039,24 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangleClipImage(\
+            f"""ctx.drawDiagonalRectangleClipImage(\
                 {w * 0.0796875}, {h * 0.225},\
                 {w * 0.940625}, {h * 0.65},\
                 {root.get_img_jsvarname("userBackground")},\
                 0, {(h * 0.425 - w * 0.8609375 / 16 * 9) / 2},\
                 {w * 0.8609375}, {w * 0.8609375 / 16 * 9},\
                 {tool_funcs.getDPower(w * 0.8609375, h * 0.425, 75)}, 1.0\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {w * 0.0796875}, {h * 0.225},\
                 {w * 0.940625}, {h * 0.65},\
                 {tool_funcs.getDPower(w * 0.8609375, h * 0.425, 75)},\
                 'rgba(0, 0, 0, 0.375)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2068,42 +2068,42 @@ def settingRender():
             )
             editBackgroundRectSize = tool_funcs.getSizeByRect(editBackgroundRect)
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, editBackgroundRect))},\
                     {tool_funcs.getDPower(*editBackgroundRectSize, 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("edit")},\
                     {editBackgroundRect[0] + editBackgroundRectSize[0] / 2 - editBackgroundIconSize / 2},\
                     {editBackgroundRect[1] + editBackgroundRectSize[1] / 2 - editBackgroundIconSize / 2},\
                     {editBackgroundIconSize}, {editBackgroundIconSize}\
-                );",
+                );""",
                 add_code_array = True
             )
         
         leftBlackDiagonalX = 0.538
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {w * 0.0796875}, {h * 0.225},\
                 {w * ((0.940625 - 0.0796875) * leftBlackDiagonalX + 0.0796875)}, {h * 0.65},\
                 {tool_funcs.getDPower(w * ((0.940625 - 0.0796875) * leftBlackDiagonalX), h * 0.425, 75)},\
                 'rgba(0, 0, 0, 0.25)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {w * 0.121875}, {h * (283 / 1080)},\
                 {w * 0.465625}, {h * (397 / 1080)},\
                 {tool_funcs.getDPower(w * 0.34375, h * (114 / 1080), 75)},\
                 'rgba(0, 0, 0, 0.9)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2114,14 +2114,14 @@ def settingRender():
         )
         avatarWidth, avatarHeight = tool_funcs.getSizeByRect(avatarRect)
         root.run_js_code(
-            f"ctx.drawDiagonalRectangleClipImage(\
+            f"""ctx.drawDiagonalRectangleClipImage(\
                 {",".join(map(str, avatarRect))},\
                 {root.get_img_jsvarname("userAvatar")},\
                 {(avatarWidth - avatarSize) / 2},\
                 {(avatarHeight - avatarSize) / 2},\
                 {avatarSize}, {avatarSize},\
                 {tool_funcs.getDPower(avatarWidth, avatarHeight, 75)}, 1.0\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2135,21 +2135,21 @@ def settingRender():
             )
             editAvatarRectSize = tool_funcs.getSizeByRect(editAvatarRect)
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, editAvatarRect))},\
                     {tool_funcs.getDPower(*editAvatarRectSize, 75)},\
                     'rgb(255, 255, 255)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("edit")},\
                     {editAvatarRect[0] + editAvatarRectSize[0] / 2 - editAvatarIconSize / 2},\
                     {editAvatarRect[1] + editAvatarRectSize[1] / 2 - editAvatarIconSize / 2},\
                     {editAvatarIconSize}, {editAvatarIconSize}\
-                );",
+                );""",
                 add_code_array = True
             )
         
@@ -2170,17 +2170,17 @@ def settingRender():
             h * (397 / 1080)
         )
         root.run_js_code( # 这个矩形真头疼...
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, rankingScoreRect))},\
                 {tool_funcs.getDPower(rankingScoreRect[2] - rankingScoreRect[0], rankingScoreRect[3] - rankingScoreRect[1], 75)},\
                 'rgb(255, 255, 255)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         drawText(
             (rankingScoreRect[0] + rankingScoreRect[2]) / 2, (rankingScoreRect[1] + rankingScoreRect[3]) / 2,
-            f"{getUserData("userdata-rankingScore"):.2f}",
+            f"""{getUserData("userdata-rankingScore"):.2f}""",
             font = f"{(rankingScoreRect[3] - rankingScoreRect[1]) * 0.8}px PhigrosFont",
             textAlign = "center",
             textBaseline = "middle",
@@ -2190,13 +2190,13 @@ def settingRender():
         
         selfIntroduction_fontSize = (w + h) / 135
         root.run_js_code(
-            f"ctx.drawRectMultilineText(\
+            f"""ctx.drawRectMultilineText(\
                 {w * 0.1484375}, {h * (447 / 1080)},\
                 {w * 0.4546875}, {h * (660 / 1080)},\
                 {root.string2sctring_hqm(getUserData("userdata-selfIntroduction"))},\
                 'rgb(255, 255, 255)', '{selfIntroduction_fontSize}px PhigrosFont',\
                 {selfIntroduction_fontSize}, 1.15\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2205,18 +2205,18 @@ def settingRender():
             w * 0.921875, h * (220 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, editButtonRect))},\
                 {tool_funcs.getDPower(editButtonRect[2] - editButtonRect[0], editButtonRect[3] - editButtonRect[1], 75)},\
                 'rgb(255, 255, 255)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         drawText(
             (editButtonRect[0] + editButtonRect[2]) / 2, (editButtonRect[1] + editButtonRect[3]) / 2,
             "编辑" if not editingUserData else "完成",
-            font = f"{(editButtonRect[3] - editButtonRect[1]) * 0.7}px PhigrosFont",
+            font = f"""{(editButtonRect[3] - editButtonRect[1]) * 0.7}px PhigrosFont""",
             textAlign = "center",
             textBaseline = "middle",
             fillStyle = "rgb(83, 83, 83)",
@@ -2238,16 +2238,16 @@ def settingRender():
             w * 0.5109375, h * (910 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, loginButtonRect))},\
                 {tool_funcs.getDPower(loginButtonRect[2] - loginButtonRect[0], loginButtonRect[3] - loginButtonRect[1], 75)},\
                 'rgba(255, 255, 255, {1.0 if not editingUserData else 0.75})'\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangleClipImage(\
+            f"""ctx.drawDiagonalRectangleClipImage(\
                 {",".join(map(str, loginButtonRect))},\
                 {root.get_img_jsvarname("taptap")},\
                 {((loginButtonRect[2] - loginButtonRect[0]) - TapTapIconWidth) / 2},\
@@ -2255,7 +2255,7 @@ def settingRender():
                 {TapTapIconWidth}, {TapTapIconHeight},\
                 {tool_funcs.getDPower(loginButtonRect[2] - loginButtonRect[0], loginButtonRect[3] - loginButtonRect[1], 75)},\
                 {1.0 if not editingUserData else 0.75}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2264,18 +2264,18 @@ def settingRender():
             w * 0.5765625, h * (672 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, chartDataDifRect))},\
                 {tool_funcs.getDPower(chartDataDifRect[2] - chartDataDifRect[0], chartDataDifRect[3] - chartDataDifRect[1], 75)},\
                 'rgb(255, 255, 255)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         drawText(
             (chartDataDifRect[0] + chartDataDifRect[2]) / 2, (chartDataDifRect[1] + chartDataDifRect[3]) / 2,
             "IN",
-            font = f"{(chartDataDifRect[3] - chartDataDifRect[1]) * 0.55}px PhigrosFont",
+            font = f"""{(chartDataDifRect[3] - chartDataDifRect[1]) * 0.55}px PhigrosFont""",
             textAlign = "center",
             textBaseline = "middle",
             fillStyle = "rgb(50, 50, 50)",
@@ -2289,46 +2289,46 @@ def settingRender():
             chartDataDifRect[1] + (chartDataDifRect[3] - chartDataDifRect[1]) * (77 / 85),
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, chartDataRect))},\
                 {tool_funcs.getDPower(chartDataRect[2] - chartDataRect[0], chartDataRect[3] - chartDataRect[1], 75)},\
                 'rgb(0, 0, 0, 0.45)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         def _drawChartDataItem(x: float, text: str):
             root.run_js_code(
-                f"ctx.save(); ctx.font = '{(w + h) / 125}px PhigrosFont'; SlashWidth = ctx.measureText('/').width; ctx.restore();",
+                f"""ctx.save(); ctx.font = '{(w + h) / 125}px PhigrosFont'; SlashWidth = ctx.measureText('/').width; ctx.restore();""",
                 add_code_array = True
             )
             
             textHeight = h * (635 / 1080)
             
             root.run_js_code(
-                f"ctx.drawTextEx(\
+                f"""ctx.drawTextEx(\
                     '/',\
                     {x}, {textHeight}, '{(w + h) / 125}px PhigrosFont',\
                     'rgb(255, 255, 255)', 'center', 'bottom'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawTextEx(\
+                f"""ctx.drawTextEx(\
                     '-',\
                     {x} + SlashWidth, {textHeight}, '{(w + h) / 125}px PhigrosFont',\
                     'rgb(255, 255, 255)', 'left', 'bottom'\
-                );",
+                );""",
                 add_code_array = True
             )
             
             root.run_js_code(
-                f"ctx.drawTextEx(\
+                f"""ctx.drawTextEx(\
                     '0',\
                     {x} - SlashWidth, {textHeight}, '{(w + h) / 85}px PhigrosFont',\
                     'rgb(255, 255, 255)', 'right', 'bottom'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -2349,11 +2349,11 @@ def settingRender():
         if editingUserData:
             def _strokeRect(rect):
                 root.run_js_code(
-                    f"ctx.strokeRectEx(\
+                    f"""ctx.strokeRectEx(\
                         {rect[0]}, {rect[1]},\
                         {rect[2] - rect[0]}, {rect[3] - rect[1]},\
                         'rgb(255, 255, 255)', {(w + h) / 711.45141919810}\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 
@@ -2390,21 +2390,21 @@ def settingRender():
             )))
             
             root.run_js_code(
-                f"ctx.save(); ctx.clipDiagonalRectangle(\
+                f"""ctx.save(); ctx.clipDiagonalRectangle(\
                     {",".join(map(str, chooseDialogRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(chooseDialogRect), 75)},\
-                );",
+                );""",
                 add_code_array = True
             )
             drawBackground()
             root.run_js_code("ctx.restore();", add_code_array=True)
             
             root.run_js_code(
-                f"ctx.drawDiagonalRectangle(\
+                f"""ctx.drawDiagonalRectangle(\
                     {",".join(map(str, chooseDialogRect))},\
                     {tool_funcs.getDPower(*tool_funcs.getSizeByRect(chooseDialogRect), 75)},\
                     'rgba(0, 0, 0, 0.65)'\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -2426,11 +2426,11 @@ def settingRender():
             )
             closeButtonSize = (w + h) * 0.014
             root.run_js_code(
-                f"ctx.drawImage(\
+                f"""ctx.drawImage(\
                     {root.get_img_jsvarname("close")},\
                     {closeButtonCenterPoint[0] - closeButtonSize / 2}, {closeButtonCenterPoint[1] - closeButtonSize / 2},\
                     {closeButtonSize}, {closeButtonSize}\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -2443,16 +2443,16 @@ def settingRender():
             lcount = 0
             
             clipy0, clipy1 = top + h * (100 / 1080), h
-            root.run_js_code(f"ctx.save(); ctx.clipRect(0.0, {min(clipy0, clipy1)}, {w}, {max(clipy0, clipy1)});", add_code_array = True)
+            root.run_js_code(f"""ctx.save(); ctx.clipRect(0.0, {min(clipy0, clipy1)}, {w}, {max(clipy0, clipy1)});""", add_code_array = True)
             
             for imgindex, img in enumerate(imgs):
                 root.run_js_code(
-                    f"ctx.drawDiagonalRectangleClipImageOnlyHeight(\
+                    f"""ctx.drawDiagonalRectangleClipImageOnlyHeight(\
                         {imgx}, {imgy},\
                         {imgx + imgwidth}, {imgy + imgheight},\
                         {root.get_img_jsvarname(img)},\
                         {imgheight}, {imgdp}, 1.0\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 chooseRects[dialogrectname][imgindex] = (
@@ -2480,9 +2480,9 @@ def settingRender():
                 + h * (91 / 1080)
             )
             
-            root.run_js_code(f"ctx.restore();", add_code_array = True)
+            root.run_js_code(f"""ctx.restore();""", add_code_array = True)
         
-        avatar_imnames = [f"avatar_{i}" for i in range(len(assetConfig["avatars"]))]
+        avatar_imnames = [f"""avatar_{i}""" for i in range(len(assetConfig["avatars"]))]
         background_imnames = [f"background_{i}" for i in range(len(assetConfig["backgrounds"]))]
         
         if showAvatars:
@@ -2534,20 +2534,20 @@ def settingRender():
         phiIconWidth = w * 0.215625
         phiIconHeight = phiIconWidth / Resource["phigros"].width * Resource["phigros"].height
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("phigros")},\
                 {w * 0.3890625 - phiIconWidth / 2}, {h * ((0.275 + 371 / 1080) / 2) - phiIconHeight / 2},\
                 {phiIconWidth}, {phiIconHeight}\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawLineEx(\
+            f"""ctx.drawLineEx(\
                 {w * 0.5296875}, {h * 0.275},\
                 {w * 0.5296875}, {h * (371 / 1080)},\
                 {(w + h) / 2000}, 'rgb(138, 138, 138, 0.95)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2643,11 +2643,11 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("twitter")},\
                 {w * 0.0734375 - SettingUIOtherIconWidth / 2}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_Twitter / 2},\
                 {SettingUIOtherDownIconWidth}, {SettingUIOtherDownIconHeight_Twitter}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2662,11 +2662,11 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("bilibili")},\
                 {w * 0.203125 - SettingUIOtherIconWidth / 2}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_Bilibili / 2},\
                 {SettingUIOtherDownIconWidth}, {SettingUIOtherDownIconHeight_Bilibili}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2681,11 +2681,11 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawImage(\
+            f"""ctx.drawImage(\
                 {root.get_img_jsvarname("qq")},\
                 {w * 0.3328125 - SettingUIOtherIconWidth / 2 * 0.85}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_QQ / 2 * 0.85},\
                 {SettingUIOtherDownIconWidth * 0.85}, {SettingUIOtherDownIconHeight_QQ * 0.85}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2846,10 +2846,10 @@ def settingRender():
         ShadowDPower = tool_funcs.getDPower(ShadowRect[2] - ShadowRect[0], h, 75)
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, ShadowRect))},\
                 {ShadowDPower}, 'rgba(0, 0, 0, 0.2)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2862,10 +2862,10 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, BarRect))},\
                 {BarDPower}, 'rgba(0, 0, 0, 0.45)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2881,10 +2881,10 @@ def settingRender():
         )
         
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, LabelRect))},\
                 {LabelDPower}, '{"rgb(255, 255, 255)" if not editingUserData else "rgb(192, 192, 192)"}'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -2953,11 +2953,11 @@ def settingRender():
                 
                 root.run_js_code(f"ctx.fillRectEx(0, 0, {w}, {h}, 'rgba(0, 0, 0, 0.5)');", add_code_array = True)
                 root.run_js_code(
-                    f"ctx.drawRectMultilineText(\
+                    f"""ctx.drawRectMultilineText(\
                         {w * 0.2}, {settingUIOpenSourceLicenseSlideControler.getDy() + h * (143 / 1080)}, {w * 0.8}, {h},\
                         {root.string2sctring_hqm(const.PHI_OPENSOURCELICENSE)},\
                         'rgb(255, 255, 255)', '{(w + h) / 145}px PhigrosFont', {(w + h) / 145}, 1.25\
-                    );",
+                    );""",
                     add_code_array = True
                 )
                 drawButton("ButtonLeftBlack", "Arrow_Left", (0, 0))
@@ -2969,10 +2969,10 @@ def settingRender():
         if time.time() - settingRenderSt < 1.25:
             p = (time.time() - settingRenderSt) / 1.25
             root.run_js_code(
-                f"ctx.fillRectEx(\
+                f"""ctx.fillRectEx(\
                     0, 0, {w}, {h},\
                     'rgba(0, 0, 0, {(1.0 - p) ** 2})'\
-                );",
+                );""",
                 add_code_array = True
             )
         
@@ -3070,10 +3070,10 @@ def audioQARender():
             w * 0.9, h
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, shadowRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(shadowRect), 75)}, 'rgba(0, 0, 0, 0.25)'\
-            );",
+            );""",
             add_code_array = True
         )
     
@@ -3094,12 +3094,12 @@ def audioQARender():
         )
         
         root.run_js_code(
-            f"ctx.drawRectMultilineTextDiagonal(\
+            f"""ctx.drawRectMultilineTextDiagonal(\
                 {w * 0.28125}, {h * (241 / 1080)},\
                 {w * 0.7984375}, {h}, {root.string2sctring_hqm(const.DSP_SETTING_TIP)},\
                 'rgb(255, 255, 255)',\
                 '{(w + h) / 120}px PhigrosFont', {(w + h) / 120}, {- w * 0.0046875}, 1.25\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3172,11 +3172,11 @@ def aboutUsRender():
             alpha = 1.0 if clickedStartButtonTime != clickedStartButtonTime else ((time.time() - clickedStartButtonTime) / 0.75 - 1.0) ** 2
             
             root.run_js_code(
-                f"ctx.drawAlphaImage(\
+                f"""ctx.drawAlphaImage(\
                     {root.get_img_jsvarname("phigros")},\
                     {w / 2 - phiIconWidth / 2}, {h / 2 - phiIconHeight / 2},\
                     {phiIconWidth}, {phiIconHeight}, {alpha}\
-                );",
+                );""",
                 add_code_array = True
             )
             
@@ -3680,11 +3680,11 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
             w * 0.4921875, h
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, chartsShadowRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(chartsShadowRect), 75)},\
                 'rgba(0, 0, 0, 0.3)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3693,11 +3693,11 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
             w * 0.45, h * (505 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, songShadowRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(songShadowRect), 75)},\
                 'rgba(0, 0, 0, 0.6)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3706,11 +3706,11 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
             w * 0.49375, h * (123 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, barShadowRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(barShadowRect), 75)},\
                 'rgba(0, 0, 0, 0.6)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3719,11 +3719,11 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
             w * 0.440625, h * (513 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, difRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(difRect), 75)},\
                 'rgb(255, 255, 255)'\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3732,21 +3732,21 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
             w * 2.0, h * (1012 / 1080)
         )
         root.run_js_code(
-            f"ctx.drawDiagonalRectangle(\
+            f"""ctx.drawDiagonalRectangle(\
                 {",".join(map(str, playButtonRect))},\
                 {tool_funcs.getDPower(*tool_funcs.getSizeByRect(playButtonRect), 75)},\
                 'rgb(255, 255, 255)'\
-            );",
+            );""",
             add_code_array = True
         )
         
         root.run_js_code(
-            f"ctx.drawTriangleFrame(\
+            f"""ctx.drawTriangleFrame(\
                 {w * 0.93125}, {h * (905 / 1080)},\
                 {w * 0.93125}, {h * (967 / 1080)},\
                 {w * 0.959375}, {h * (936 / 1080)},\
                 'rgb(0, 0, 0)', {(w + h) * 0.001}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3761,12 +3761,12 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
         )
         
         root.run_js_code(
-            f"ctx.drawScaleImage(\
+            f"""ctx.drawScaleImage(\
                 {root.get_img_jsvarname("sort")},\
                 {w * 0.14843750}, {h * (72 / 1080)},\
                 {SortIconWidth}, {SortIconHeight},\
                 1, {-1 if choose_state.sort_reverse else 1}\
-            );",
+            );""",
             add_code_array = True
         )
         
@@ -3847,11 +3847,11 @@ def updateDSPConfig():
     })
 
 def updateSettingWidgets():
-    PlaySettingWidgets["OffsetLabel"].right_text = f"{int(getUserData("setting-chartOffset"))}ms"
+    PlaySettingWidgets["OffsetLabel"].right_text = f"""{int(getUserData("setting-chartOffset"))}ms"""
     PlaySettingWidgets["OffsetTip"].right_text = "*请调节至第三拍的声音与按键音恰好重合的状态" if getUserData("setting-enableClickSound") else "*请调节至第三拍的声音与按键爆开几乎同时的状态"
 
 def updateDSPWidgets():
-    dspSettingWidgets["ValueLabel"].right_text = f"{2 ** getUserData("internal-dspBufferExponential")}"
+    dspSettingWidgets["ValueLabel"].right_text = f"""{2 ** getUserData("internal-dspBufferExponential")}"""
 
 def updateConfig():
     rcfg = userData.copy()
@@ -3874,8 +3874,8 @@ def updateConfig():
 
 def applyConfig():
     if getUserData("setting-enableLowQuality"):
-        root.run_js_code(f"lowquality_scale = {1.0 / webdpr * getUserData("internal-lowQualityScale")};")
-        root.run_js_code(f"lowquality_imjscvscale_x = {getUserData("internal-lowQualityScale-JSLayer")};")
+        root.run_js_code(f"""lowquality_scale = {1.0 / webdpr * getUserData("internal-lowQualityScale")};""")
+        root.run_js_code(f"""lowquality_imjscvscale_x = {getUserData("internal-lowQualityScale-JSLayer")};""")
         root.run_js_code(f"ctx.imageSmoothingEnabled = false;")
     else:
         root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
