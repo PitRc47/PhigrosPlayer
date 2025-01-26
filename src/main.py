@@ -147,7 +147,7 @@ if "--phira-chart" in sys.argv:
     logging.info("Downloaded phira chart.")
 
 logging.info("Unpack Chart...")
-popen(f".\\7z.exe x \"{sys.argv[1]}\" -o\"{temp_dir}\" -y >> nul").read()
+popen(f""".\\7z.exe x \"{sys.argv[1]}\" -o\"{temp_dir}\" -y >> nul""").read()
 
 logging.info("Loading All Files of Chart...")
 files_dict = {
@@ -407,13 +407,13 @@ def Load_Resource():
                 chart_res[line.Texture] = (None, size)
                 name = f"lineTexture_{chart_obj.judgeLineList.index(line)}"
                 root.reg_res(mp4data, f"{name}.mp4")
-                root.wait_jspromise(f"loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');")
+                root.wait_jspromise(f"""loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');""")
     
     with open("./resources/font.ttf", "rb") as f:
         root.reg_res(f.read(),"PhigrosFont.ttf")
     respacker.load(*respacker.pack())
     
-    root.wait_jspromise(f"loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");")
+    root.wait_jspromise(f"""loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");""")
     root.unreg_res("PhigrosFont.ttf")
     
     # root.file_server.shutdown()
@@ -489,10 +489,10 @@ def Show_Start():
     
     def dle_warn(a: float):
         root.run_js_code(
-            f"ctx.drawAlphaImage(\
+            f"""ctx.drawAlphaImage(\
                 {root.get_img_jsvarname("le_warn")},\
                 0, 0, {w}, {h}, {a}\
-            );",
+            );""",
             add_code_array = True
         )
     
