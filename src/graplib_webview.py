@@ -56,7 +56,7 @@ def drawText(
     code.append(f"ctx.textBaseline = '{textBaseline}';")
     code.append(f"ctx.fillStyle = '{fillStyle}';") if method == "fill" else None
     code.append(f"ctx.strokeStyle = '{strokeStyle}';") if method == "stroke" else None
-    code.append(f"ctx.{method}Text({text}, {x}, {y}, {maxwidth if maxwidth is not None else "undefined"});")
+    code.append(f"""ctx.{method}Text({text}, {x}, {y}, {maxwidth if maxwidth is not None else "undefined"});""")
     code.append("ctx.restore();")
     root.run_js_code("".join(code), wait_execute)
 
