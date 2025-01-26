@@ -3815,7 +3815,7 @@ def chooseChartRender(chapter_item: phigame_obj.Chapter):
 def updateFontSizes():
     global userName_FontSize
     
-    userName_Width1px = root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(getUserData("userdata-userName"))}).width;") / 50
+    userName_Width1px = root.run_js_code(f"""ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(getUserData("userdata-userName"))}).width;""") / 50
     userName_FontSize = w * 0.209375 / (userName_Width1px if userName_Width1px != 0.0 else 1.0)
     if userName_FontSize > w * 0.0234375:
         userName_FontSize = w * 0.0234375
