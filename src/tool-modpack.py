@@ -53,7 +53,7 @@ def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.
                     realasset.save()
 
 def fail(mod: dict):
-    print(f"Failed to process mod: {mod["name"]}")
+    print(f"""Failed to process mod: {mod["name"]}""")
 
 modlist = json.load(open(argv[1], "r", encoding="utf-8"))
 info = json.load(open(argv[2], "r", encoding="utf-8"))
