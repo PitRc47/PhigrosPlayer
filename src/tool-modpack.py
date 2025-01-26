@@ -67,7 +67,7 @@ for mod in modlist:
                 fail(mod)
                 continue
             
-            exiitem = findexinfo_byinfo(iitem, f"Chart_{mod["level"]}.json")
+            exiitem = findexinfo_byinfo(iitem, f'Chart_{mod["level"]}.json')
             if exiitem is None:
                 fail(mod)
                 continue
@@ -75,9 +75,9 @@ for mod in modlist:
             chart = json.load(open(mod["content_path"], "r", encoding="utf-8"))
             if "META" in chart:
                 rpe2phi = input("rpe2phi runner: ").replace("/", "\\")
-                print(f"Mod {mod["name"]} is rpe format, converting...")
+                print(f'Mod {mod["name"]} is rpe format, converting...')
                 tdir = tempdir.createTempDir()
-                popen(f"{rpe2phi} \"{mod["content_path"]}\" \"{tdir}\\chart.json\"").read()
+                popen(f'{rpe2phi} \"{mod["content_path"]}\" \"{tdir}\\chart.json\"').read()
                 chart = json.load(open(f"{tdir}\\chart.json", "r", encoding="utf-8"))
             content = json.dumps(chart, ensure_ascii=False).encode("utf-8")
             
@@ -142,7 +142,7 @@ for mod in modlist:
             
             im = Image.open(mod["content_path"])
             if im.width / im.height != 2048 / 1080:
-                print(f"Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.")
+                print(f'Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.')
                 im = im.resize((2048, 1080))
             
             i1, i2, i3 = (
@@ -161,5 +161,5 @@ for mod in modlist:
             savebundle(b3, i3["fn"])
             
         case _:
-            print(f"Unknown mod type: {mod["type"]}")
+            print(f'Unknown mod type: {mod["type"]}')
             
