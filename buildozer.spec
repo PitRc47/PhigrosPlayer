@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pyjnius,Pillow,NumPy,opencv-python-headless,requests,PyYAML,websockets
+requirements = python3,kivy,pyjnius,Pillow,NumPy,opencv-python-headless,requests,PyYAML,websockets,plyer
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
