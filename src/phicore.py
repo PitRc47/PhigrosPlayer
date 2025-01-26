@@ -216,7 +216,7 @@ def processClickEffectBase(
         phira_resource_pack.globalPack.goodAlpha
     ) / 255
     
-    imn = f"Note_Click_Effect_{"Perfect" if perfect else "Good"}"
+    imn = f"""Note_Click_Effect_{"Perfect" if perfect else "Good"}"""
     effectSize = noteWidth * 1.375
     blockSize = noteWidth / 5
     
@@ -232,13 +232,13 @@ def processClickEffectBase(
             point = tool_funcs.rotate_point(x, y, deg, pointr)
             caller(
                 root.run_js_code,
-                f"ctx.addRoundRectData(\
+                f"""ctx.addRoundRectData(\
                     {point[0] - nowBlockSize / 2},\
                     {point[1] - nowBlockSize / 2},\
                     {nowBlockSize},\
                     {nowBlockSize},\
                     {nowBlockSize * rblocks_roundn}\
-                );",
+                );""",
                 add_code_array = True
             )
     
@@ -247,11 +247,11 @@ def processClickEffectBase(
     effectImageSize = effectSize * phira_resource_pack.globalPack.effectScale
     caller(
         root.run_js_code,
-        f"ctx.drawAlphaImage(\
+        f"""ctx.drawAlphaImage(\
             {root.get_img_jsvarname(f"{imn}_{int(p * (framecount - 1)) + 1}")},\
             {x - effectImageSize / 2}, {y - effectImageSize / 2},\
             {effectImageSize}, {effectImageSize}, {alpha}\
-        );",
+        );""",
         add_code_array = True
     )
 
@@ -281,7 +281,7 @@ def processBadEffect(
     this_note_img = Resource["Notes"]["Bad"]
     caller(
         root.run_js_code,
-        f"ctx.drawRotateImage(\
+        f"""ctx.drawRotateImage(\
             {root.get_img_jsvarname("Note_Bad")},\
             {x * w},\
             {y * h},\
@@ -289,7 +289,7 @@ def processBadEffect(
             {globalNoteWidth / this_note_img.width * this_note_img.height},\
             {rotate},\
             {1 - p ** 3}\
-        );",
+        );""",
         add_code_array = True
     )
 
@@ -332,10 +332,10 @@ def stringifyScore(score:float) -> str:
 
 def drawBg():
     root.run_js_code(
-        f"ctx.drawImage(\
+        f"""ctx.drawImage(\
            {root.get_img_jsvarname("background")},\
             0, 0, {w}, {h},\
-        );",
+        );""",
         add_code_array = True
     )
 
@@ -526,11 +526,11 @@ def delDrawuiDefaultVals(kwargs: dict) -> dict:
 def drawDebugText(text: str, x: float, y: float, rotate: float, color: str, Task: chartobj_phi.FrameRenderTask):
     Task(
         root.run_js_code,
-        f"ctx.drawRotateText(\
+        f"""ctx.drawRotateText(\
             {root.string2sctring_hqm(text)},\
             {",".join(map(str, tool_funcs.rotate_point(x, y, rotate, (w + h) / 75)))},\
             {90 + rotate}, {(w + h) / 85 / 0.75}, '{color}', 1.0, 1.0\
-        );",
+        );""",
         add_code_array = True,
         order = const.CHART_RENDER_ORDERS.DEBUG
     )
@@ -600,11 +600,11 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
         if (lineColor[-1] > 0.0 and tool_funcs.lineInScreen(w, h, lineDrawPos)) or debug:
             Task(
                 root.run_js_code,
-                f"ctx.drawLineEx(\
+                f"""ctx.drawLineEx(\
                     {",".join(map(str, lineDrawPos))},\
                     {h * const.LINEWIDTH.PHI},\
                     '{lineWebColor}'\
-                );",
+                );""",
                 add_code_array = True,
                 order = const.CHART_RENDER_ORDERS.LINE
             )
@@ -732,7 +732,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
                     if noteHadHead:
                         Task(
                             root.run_js_code,
-                            f"ctx.drawRotateImage(\
+                            f"""ctx.drawRotateImage(\
                                 {root.get_img_jsvarname(note.imgname)},\
                                 {x if not note.ishold else headpos[0]},\
                                 {y if not note.ishold else headpos[1]},\
@@ -740,7 +740,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
                                 {noteHeight},\
                                 {noteRotate},\
                                 1.0\
-                            );",
+                            );""",
                             add_code_array = True,
                             order = note.draworder
                         )
@@ -751,14 +751,14 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
                         
                         Task(
                             root.run_js_code,
-                            f"ctx.drawRotateImage(\
+                            f"""ctx.drawRotateImage(\
                                 {root.get_img_jsvarname(note.imgname_end)},\
                                 {endpos[0]}, {endpos[1]},\
                                 {noteWidth},\
                                 {noteEndHeight},\
                                 {noteRotate},\
                                 {missAlpha}\
-                            );",
+                            );""",
                             add_code_array = True,
                             order = note.draworder
                         )
@@ -823,7 +823,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
             (-90 if note.above else 90) + lineRotate,
             floorp * h * const.PGR_UH
         )
-        img_keyname = f"{note.type_string}{"_dub" if note.morebets else ""}"
+        img_keyname = f"""{note.type_string}{"_dub" if note.morebets else ""}"""
         noteImg = Resource["Notes"][img_keyname]
         imgname = f"Note_{img_keyname}"
         fix_scale = const.NOTE_DUB_FIXSCALE if note.morebets else 1.0
@@ -957,7 +957,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
                         )
                     Task(
                         root.run_js_code,
-                        f"{f"setColorMatrix{tuple(map(lambda x: x / 255, lineColor))}; ctx.filter = 'url(#textureLineColorFilter)'; " if lineColor != (255, 255, 255) else ""}\
+                        f"""{f"setColorMatrix{tuple(map(lambda x: x / 255, lineColor))}; ctx.filter = 'url(#textureLineColorFilter)'; " if lineColor != (255, 255, 255) else ""}\
                         ctx.drawRotateImage(\
                             {texturename},\
                             {linePos[0]},\
@@ -966,14 +966,14 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
                             {texture_height},\
                             {lineRotate},\
                             {lineAlpha}\
-                        ); {"ctx.filter = 'none';" if lineColor != (255, 255, 255) else ""}",
+                        ); {"ctx.filter = 'none';" if lineColor != (255, 255, 255) else ""}""",
                         add_code_array = True,
                         order = const.CHART_RENDER_ORDERS.LINE
                     )
             elif lineText is not None:
                 Task(
                     root.run_js_code,
-                    f"ctx.drawRPEMultipleRotateText(\
+                    f"""ctx.drawRPEMultipleRotateText(\
                         '{root.string2cstring(lineText)}',\
                         {linePos[0]},\
                         {linePos[1]},\
@@ -982,18 +982,18 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
                         '{lineWebColor}',\
                         {lineScaleX},\
                         {lineScaleY}\
-                    );",
+                    );""",
                     add_code_array = True,
                     order = const.CHART_RENDER_ORDERS.LINE
                 )
             elif tool_funcs.lineInScreen(w, h, lineDrawPos):
                 Task(
                     root.run_js_code,
-                    f"ctx.drawLineEx(\
+                    f"""ctx.drawLineEx(\
                         {",".join(map(str, lineDrawPos))},\
                         {lineWidth},\
                         '{lineWebColor}'\
-                    );",
+                    );""",
                     add_code_array = True,
                     order = const.CHART_RENDER_ORDERS.LINE
                 )
@@ -1209,7 +1209,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
                 (-90 if note.above else 90) + lineRotate,
                 floorp * h
             )
-            img_keyname = f"{note.type_string}{"_dub" if note.morebets else ""}"
+            img_keyname = f"""{note.type_string}{"_dub" if note.morebets else ""}"""
             noteImg = Resource["Notes"][img_keyname]
             imgname = f"Note_{img_keyname}"
             fix_scale = const.NOTE_DUB_FIXSCALE if note.morebets else 1.0
@@ -1741,9 +1741,9 @@ def initFinishAnimation(pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
     MaxCombo = chart_obj.note_num if not noautoplay else pplm.ppps.getMaxCombo()
     AccString = f"{(Acc * 100):.2f}%"
     ChartNameString = chart_information["Name"]
-    ChartNameStringFontSize = w * im_size * 0.65 / (root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(ChartNameString)}).width;") / 50)
+    ChartNameStringFontSize = w * im_size * 0.65 / (root.run_js_code(f"""ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(ChartNameString)}).width;""") / 50)
     ChartLevelString = chart_information["Level"]
-    ChartLevelStringFontSize = w * im_size * 0.275 / (root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(ChartLevelString)}).width;") / 50)
+    ChartLevelStringFontSize = w * im_size * 0.275 / (root.run_js_code(f"""ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(ChartLevelString)}).width;""") / 50)
     if ChartNameStringFontSize > w * 0.0275:
         ChartNameStringFontSize = w * 0.0275
     if ChartLevelStringFontSize > w * 0.0275 * 0.55:
@@ -1780,13 +1780,13 @@ def Chart_Finish_Animation_Frame(p: float, rjc: bool = True):
         baimg_drawh = baimg_w / baimg_rawr
     
     root.run_js_code(
-        f"ctx.drawDiagonalRectangleClipImage(\
+        f"""ctx.drawDiagonalRectangleClipImage(\
             {w * 0.315625 - baimg_w / 2 + im_ease_pos}, {h * (539 / 1080) - baimg_h / 2},\
             {w * 0.315625 + baimg_w / 2 + im_ease_pos}, {h * (539 / 1080) + baimg_h / 2},\
             {root.get_img_jsvarname("finish_animation_image")},\
             {baimg_w / 2 - baimg_draww / 2}, {baimg_h / 2 - baimg_drawh / 2},\
             {baimg_draww}, {baimg_drawh}, {dpower}, 1.0\
-        );",
+        );""",
         add_code_array = True
     )
     
@@ -1852,12 +1852,12 @@ def Chart_Finish_Animation_Frame(p: float, rjc: bool = True):
     )
     
     root.run_js_code(
-        f"ctx.drawAlphaCenterImage(\
+        f"""ctx.drawAlphaCenterImage(\
             {root.get_img_jsvarname(f"Level_{LevelName}")},\
             {w * 0.8578125 + data_block_1_ease_pos}, {h * (380 / 1080)},\
             {w * level_size}, {w * level_size},\
             {tool_funcs.finish_animation_eases.level_alpha_ease(p)}\
-        );",
+        );""",
         add_code_array = True
     )
     
