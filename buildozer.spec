@@ -109,7 +109,7 @@ android.permissions = android.permission.INTERNET
 #android.minapi = 29
 
 # (int) Android SDK version to use
-android.sdk = 35.0.2
+#android.sdk = 35.0.2
 
 # (str) Android NDK version to use
 android.ndk = 25b
@@ -118,7 +118,7 @@ android.ndk = 25b
 #android.ndk_api = 29
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-android.private_storage = False
+#android.private_storage = False
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
