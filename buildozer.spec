@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.12.8,kivy,Pillow,NumPy
+requirements = python3,kivy,Pillow,NumPy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -64,7 +64,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.12.8
+#osx.python_version = 3.12.8
 
 # Kivy version to use
 osx.kivy_version = 1.9.1
@@ -315,13 +315,13 @@ android.allow_backup = True
 #
 
 # (str) python-for-android URL to use for checkout
-p4a.url = https://github.com/PitRc47/python-for-android
+#p4a.url = https://github.com/PitRc47/python-for-android
 
 # (str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = master
+#p4a.branch = master
 
 # (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
 #p4a.commit = HEAD
