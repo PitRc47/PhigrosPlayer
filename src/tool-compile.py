@@ -11,14 +11,14 @@ if "-y" not in argv:
         raise SystemExit
 
 def compile(file:str, hideconsole:bool):
-    system(f"{pyi_makespec} \"{file}\" -i icon.ico {"-w" if hideconsole and not debug else ""}")
-    spec = f"{file.replace('.py', '')}.spec"
+    system(f"""{pyi_makespec} \"{file}\" -i icon.ico {"-w" if hideconsole and not debug else ""}""")
+    spec = f"""{file.replace('.py', '')}.spec"""
     with open(spec, "r", encoding="utf-8") as f:
         spec_data = f.read()
     with open(spec, "w", encoding="utf-8") as f:
         f.write(extend + spec_data)
     system(f"{pyinstaller} \"{spec}\"")
-    system(f"del {file.replace(".py", ".spec")}")
+    system(f"""del {file.replace(".py", ".spec")}""")
 
 debug = "--debug" in argv
 compile_files = [
