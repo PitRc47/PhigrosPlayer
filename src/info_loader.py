@@ -110,6 +110,6 @@ class InfoLoader:
         try:
             res["BackgroundDim"] = float(res["BackgroundDim"])
         except ValueError as e:
-            logging.error(f"BackgroundDim convert to float error: {e} ({res["BackgroundDim"]})")
+            logging.error(f"""BackgroundDim convert to float error: {e} ({res["BackgroundDim"]})""")
             
         return res
