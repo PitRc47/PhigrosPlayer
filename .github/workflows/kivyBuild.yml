@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev
+          sudo apt-get install -y zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
       - name: Set up JDK 17
         uses: actions/setup-java@v4.6.0
         with:
@@ -29,12 +34,9 @@ jobs:
         run: |
           python3 -m virtualenv venv
           source venv/bin/activate
-          sudo apt-get update
-          sudo apt-get install -y build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev
-          sudo apt-get install -y zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           pip3 install Cython==0.29.33 buildozer wheel setuptools
           buildozer android debug
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.0
         with:
-          path: .buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/myapp/build/outputs/apk
+          path: .buildozer/android/platform/build-armeabi-v7a_arm64-v8a/dists/PhigrosPlayer/build/outputs/apk
