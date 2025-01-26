@@ -1,9 +1,9 @@
-name: Build Kivy
+name: Build Android
 
 on:
   push:
     branches:
-      - dev-kivy
+      - Dev-Android
   workflow_dispatch:
 
 jobs:
