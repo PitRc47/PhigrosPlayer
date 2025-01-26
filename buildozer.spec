@@ -315,7 +315,7 @@ android.allow_backup = True
 #
 
 # (str) python-for-android URL to use for checkout
-#p4a.url = https://github.com/PitRc47/python-for-android
+#p4a.url = 
 
 # (str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)
 #p4a.fork = kivy
@@ -327,10 +327,10 @@ android.allow_backup = True
 #p4a.commit = HEAD
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-#p4a.source_dir =/home/runner/work/PhigrosPlayer/PhigrosPlayer/python-for-android
+#p4a.source_dir = 
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
-#p4a.local_recipes = /home/runner/work/PhigrosPlayer/PhigrosPlayer/python-for-android/pythonforandroid/
+#p4a.local_recipes =  
 
 # (str) Filename to the hook for p4a
 #p4a.hook =
