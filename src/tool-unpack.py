@@ -383,7 +383,11 @@ def pack_charts(infos: list[dict], rpe: bool):
                 mkdir(f"./unpack-temp/pack-{rid}")
                 with open(f"./unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
                     f.write(item[5])
-                popen(f""".\\7z.exe a .\\unpack-result\\packed\\{item[0]}_{item[1]}{"_RPE" if p2r else ""}.zip {" ".join(map(lambda x: f"\"{x}\"", (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv")))} -y >> nul""").read()
+                command_1 = '.\\7z.exe a .\\unpack-result\\packed\\{}_{}{}.zip {} -y >> nul'.format(
+                    item[0], item[1], '_RPE' if p2r else '',
+                    ' '.join(f'"{x}"' for x in (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv"))
+                )
+                popen(command_1).read()
                 packed_num += 1
             except Exception:
                 pass
