@@ -38,6 +38,7 @@ import phira_resource_pack
 import phicore
 import tempdir
 import socket_webviewbridge
+import wcv2matlike
 from dxsmixer import mixer
 from graplib_webview import *
 
@@ -121,6 +122,10 @@ if lfdaot_use_recordfile and lfdoat_file:
 if lfdaot and skip_time != 0.0:
     skip_time = 0.0
     logging.warning("if use --lfdaot, you cannot use --skip-time")
+    
+if lfdaot_render_video and disengage_webview:
+    disengage_webview = False
+    logging.warning("if use --lfdaot-render-video, you cannot use --disengage-webview")
 
 if "--clickeffect-easing" in sys.argv:
     phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
@@ -809,25 +814,19 @@ def PlayerStart():
             )
             
             if video_fp != "":
-                frameCount = 0
-                
-                @tool_funcs.ThreadFunc
-                def uploadFrame(dataUrl: str):
-                    nonlocal frameCount
-                    matlike = tool_funcs.DataUrl2MatLike(dataUrl)
+                def writeFrame(data: bytes):
+                    matlike = tool_funcs.bytes2matlike(data, w, h)
                     writer.write(matlike)
-                    frameCount += 1
-                    
-                root.jsapi.uploadFrame = uploadFrame
+                
+                wcv2matlike.callback = writeFrame
+                httpd, port = wcv2matlike.createServer()
                 
                 for Task in lfdaot_tasks.values():
                     Task.ExecTask()
-                    root.wait_jspromise("uploadFrame();")
-                    
-                    if root.run_js_code("lfdaot_render_video_stop;"):
-                        break
+                    root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
                 
                 writer.release()
+                httpd.shutdown()
                 
                 if "--lfdaot-render-video-autoexit" in sys.argv:
                     root.destroy()

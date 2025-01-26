@@ -173,16 +173,10 @@ def rpe_text_tween(sv: str, ev: str, t: float, isfill: bool) -> str:
         else:
             return sv.replace("%P%", "")
 
-def DataUrl2MatLike(dataurl: str) -> cv2.typing.MatLike:
-    return cv2.imdecode(
-        numpy.frombuffer(
-            base64.b64decode(
-                dataurl[dataurl.find(",") + 1:]
-            ),
-            dtype = numpy.uint8
-        ),
-        cv2.IMREAD_COLOR
-    )
+def bytes2matlike(data: bytes, w: int, h: int) -> cv2.typing.MatLike:
+    buf = numpy.frombuffer(data, dtype=numpy.uint8).reshape((h, w, 4))
+    matlike = cv2.cvtColor(buf, cv2.COLOR_BGRA2RGBA)
+    return matlike[:, :, :3]
 
 def easeAlpha(p: float):
     if 0.0 <= p <= 0.4: 

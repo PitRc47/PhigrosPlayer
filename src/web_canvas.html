@@ -190,7 +190,6 @@ void main() {
     lowquality_scale = 1.0;
     lowquality_imjscvscale_x = 1.0;
     lowquality_imjs_maxsize = 256;
-    lfdaot_render_video_stop = false;
     enable_jscanvas_bitmap = false;
     RPEVersion = -1;
     const colorMatrix = document.getElementById("colorMatrix");
@@ -290,9 +289,18 @@ void main() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function uploadFrame() {
-        dataUrl = canvas_ele.toDataURL("image/png");
-        await pywebview.api.call_attr("uploadFrame", dataUrl);
+    async function uploadFrame(url) {
+        const buffer = new Uint8Array(ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data.buffer);
+        try {
+            const resp = await fetch(url, {
+                method: "POST",
+                body: buffer
+            });
+        }
+        catch (e) {
+            console.error(e);
+            return await uploadFrame(url);
+        }
     }
 
     function PhigrosPlay_KeyEvent(cb, rp) {
