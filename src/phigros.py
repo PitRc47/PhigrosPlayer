@@ -1744,7 +1744,7 @@ def settingRender():
         
         # 编辑用户介绍
         if settingState.atis_a and tool_funcs.inrect(x, y, editIntroductionRect) and editingUserData and not (showAvatars or showBackgrounds):
-            newName = root.run_js_code(f"""prompt('请输入新介绍 (输入\"\\\\n\"可换行)', {root.string2sctring_hqm(getUserData("userdata-selfIntroduction").replace("\n", "\\n"))});""")
+            newName = root.run_js_code(f"""prompt('请输入新介绍 (输入"\\n"可换行)', '{root.string2string_hqm(getUserData("userdata-selfIntroduction").replace("\n", "\\n"))}')""")
             if newName is not None:
                 setUserData("userdata-selfIntroduction", newName.replace("\\n", "\n"))
                 updateFontSizes()
