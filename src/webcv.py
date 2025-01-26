@@ -182,12 +182,18 @@ class PILResourcePacker:
         return b"".join(datas), dataindexs
 
     def load(self, data: bytes, indexs: list[list[str, list[int, int]]]):
-        rid = f"pilrespacker_{randint(0, 2 << 31)}"
+        rid = "pilrespacker_{}".format(randint(0, 2 << 31))
         self.cv.reg_res(data, rid)
-        imnames = self.cv.wait_jspromise(f"loadrespackage('{self.cv.get_resource_path(rid)}', {indexs});")
+        
+        js_command = "loadrespackage('{}', {})".format(self.cv.get_resource_path(rid), indexs)
+        imnames = self.cv.wait_jspromise(js_command)
+        
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
         self.cv.unreg_res(rid)
-        self.cv.run_js_code(f"[{",".join(map(self.cv.get_img_jsvarname, imnames))}].forEach(im => URL.revokeObjectURL(im.src));")
+        
+        img_vars = ",".join(map(self.cv.get_img_jsvarname, imnames))
+        js_revoke = "[{}].forEach(im => URL.revokeObjectURL(im.src));".format(img_vars)
+    self.cv.run_js_code(js_revoke)
         
         def optimize():
             codes = []
