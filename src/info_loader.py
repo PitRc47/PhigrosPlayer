@@ -1,4 +1,7 @@
+import init_logging as _
+
 import csv
+import logging
 from os.path import exists
 
 class InfoLoader:
@@ -103,4 +106,10 @@ class InfoLoader:
             
         res = self.default_info.copy()
         res.update(info)
+        
+        try:
+            res["BackgroundDim"] = float(res["BackgroundDim"])
+        except ValueError as e:
+            logging.error(f"BackgroundDim convert to float error: {e} ({res["BackgroundDim"]})")
+            
         return res

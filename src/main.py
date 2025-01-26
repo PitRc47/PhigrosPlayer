@@ -134,7 +134,7 @@ mixer.init()
 if "--phira-chart" in sys.argv:
     logging.info("Downloading phira chart...")
     pctid = sys.argv[sys.argv.index("--phira-chart") + 1]
-    apiresult = requests.get(f"https://api.phira.cn/chart/{pctid}").json()
+    apiresult = requests.get(f"https://phira.5wyxi.com/chart/{pctid}").json()
     if "error" in apiresult:
         logging.error(f"""phira api: {apiresult["error"]}""")
         raise SystemExit
@@ -489,13 +489,7 @@ def Show_Start():
     WaitLoading.fadeout(450)
     
     def dle_warn(a: float):
-        root.run_js_code(
-            f"""ctx.drawAlphaImage(\
-                {root.get_img_jsvarname("le_warn")},\
-                0, 0, {w}, {h}, {a}\
-            );""",
-            add_code_array = True
-        )
+        drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
     
     animationst = time.time()
     while time.time() - animationst < 1.0:
@@ -889,7 +883,6 @@ def PlayerStart():
                 a2_loop_clicked = True
         
         def continueClick(clientX, clientY):
-            print(clientX, clientY, w, h)
             nonlocal a2_continue_clicked
             if clientX >= w - w * const.FINISH_UI_BUTTON_SIZE and clientY >= h - w * const.FINISH_UI_BUTTON_SIZE / 190 * 145:
                 a2_continue_clicked = True

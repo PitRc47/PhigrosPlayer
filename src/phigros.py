@@ -421,34 +421,20 @@ def drawBackground():
     imfc, imtc = Chapters.items[f], Chapters.items[t]
     p = getChapterP(imtc)
     
-    root.run_js_code(
-        f"""ctx.drawAlphaImage(\
-            {root.get_img_jsvarname(f"chapter_{imfc.chapterId}_blur")},\
-            0, 0, {w}, {h}, {1.0 - p}\
-        );""",
-        add_code_array = True
-    )   
-    root.run_js_code(
-        f"""ctx.drawAlphaImage(\
-            {root.get_img_jsvarname(f"chapter_{imtc.chapterId}_blur")},\
-            0, 0, {w}, {h}, {p}\
-        );""",
-        add_code_array = True
-    )
+    drawAlphaImage(f"chapter_{imfc.chapterId}_blur", 0, 0, w, h, 1.0 - p, wait_execute=True)
+    drawAlphaImage(f"chapter_{imtc.chapterId}_blur", 0, 0, w, h, p, wait_execute=True)
 
 def drawFaculas():
     for facula in faManager.faculas:
         if facula["startTime"] <= time.time() <= facula["endTime"]:
             state = faManager.getFaculaState(facula)
             sizePx = facula["size"] * (w + h) / 40
-            root.run_js_code(
-                f"""ctx.drawAlphaImage(\
-                    {root.get_img_jsvarname("facula")},\
-                    {facula["x"] * w - sizePx / 2}, {state["y"] * h - sizePx / 2},\
-                    {sizePx}, {sizePx},\
-                    {state["alpha"] * 0.4}\
-                );""",
-                add_code_array = True
+            drawAlphaImage(
+                "facula",
+                facula["x"] * w - sizePx / 2, state["y"] * h - sizePx / 2,
+                sizePx, sizePx,
+                state["alpha"] * 0.4,
+                wait_execute = True
             )
 
 def getChapterP(chapter: phigame_obj.Chapter):
@@ -699,24 +685,17 @@ def drawChapters(rectmap: dict):
         chapterX += drawChapterItem(chapter, chapterX, rectmap)
 
 def drawButton(buttonName: typing.Literal["ButtonLeftBlack", "ButtonRightBlack"], iconName: str, buttonPos: tuple[float, float]):
-    root.run_js_code(
-        f"""ctx.drawImage(\
-           {root.get_img_jsvarname(buttonName)},\
-           {buttonPos[0]}, {buttonPos[1]}, {ButtonWidth}, {ButtonHeight}\
-        );""",
-        add_code_array = True
-    )
+    drawImage(buttonName, *buttonPos, ButtonWidth, ButtonHeight, wait_execute=True)
     
     centerPoint = (0.35, 0.395) if buttonName == "ButtonLeftBlack" else (0.65, 0.605)
     
-    root.run_js_code(
-        f"""ctx.drawImage(\
-           {root.get_img_jsvarname(iconName)},\
-           {buttonPos[0] + ButtonWidth * centerPoint[0] - MainUIIconWidth / 2},\
-           {buttonPos[1] + ButtonHeight * centerPoint[1] - MainUIIconHeight / 2},\
-           {MainUIIconWidth}, {MainUIIconHeight}\
-        );""",
-        add_code_array = True
+    drawImage(
+        iconName,
+        buttonPos[0] + ButtonWidth * centerPoint[0] - MainUIIconWidth / 2,
+        buttonPos[1] + ButtonHeight * centerPoint[1] - MainUIIconHeight / 2,
+        MainUIIconWidth,
+        MainUIIconHeight,
+        wait_execute = True
     )
 
 def drawDialog(
@@ -754,14 +733,17 @@ def drawDialog(
         add_code_array = True
     )
     
-    root.run_js_code(
-        f"""dialog_canvas_ctx.drawAlphaImage(\
-            {root.get_img_jsvarname(dialogImageName)},\
-            {w / 2 - tempWidth / 2 + tempWidth * dialogDPower * (0.2 / 1.2)}, {dialogCenterY - tempHeight / 2},\
-            {tempWidth}, {tempHeight}, {p}\
-        );""",
-        add_code_array = True
+    
+    setCtx("dialog_canvas_ctx")
+    drawAlphaImage(
+        dialogImageName,
+        w / 2 - tempWidth / 2 + tempWidth * dialogDPower * (0.2 / 1.2),
+        dialogCenterY - tempHeight / 2,
+        tempWidth, tempHeight,
+        p,
+        wait_execute = True
     )
+    setCtx("ctx")
     
     diagonalRectangle = (
         w / 2 - tempWidth / 2 - diagonalRectanglePowerPx * 0.2,
@@ -826,12 +808,11 @@ def showStartAnimation():
             
         clearCanvas(wait_execute = True)
         
-        root.run_js_code(
-            f"""ctx.drawAlphaImage(\
-                {root.get_img_jsvarname("logoipt")},\
-                0, 0, {w}, {h}, {tool_funcs.easeAlpha(p)}\
-            );""",
-            add_code_array = True
+        drawAlphaImage(
+            "logoipt",
+            0, 0, w, h,
+            tool_funcs.easeAlpha(p),
+            wait_execute = True
         )
         
         root.run_js_wait_code()
@@ -845,12 +826,11 @@ def showStartAnimation():
         
         clearCanvas(wait_execute = True)
         
-        root.run_js_code(
-            f"""ctx.drawAlphaImage(\
-                {root.get_img_jsvarname("warning")},\
-                0, 0, {w}, {h}, {tool_funcs.easeAlpha(p)}\
-            );""",
-            add_code_array = True
+        drawAlphaImage(
+            "warning",
+            0, 0, w, h,
+            tool_funcs.easeAlpha(p),
+            wait_execute = True
         )
         
         root.run_js_wait_code()
@@ -907,13 +887,7 @@ def showStartAnimation():
     
         drawFaculas()
         
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("phigros")},\
-                {",".join(map(str, phigros_logo_rect))}\
-            );""",
-            add_code_array = True
-        )
+        drawImage("phigros", *phigros_logo_rect, wait_execute = True)
         
         textBlurTime = atime % 5.5
         if textBlurTime > 3.0:
@@ -1213,12 +1187,10 @@ def mainRender():
         drawButton("ButtonRightBlack", "setting", (w - ButtonWidth, h - ButtonHeight))
         drawChapters(chapterPlayButtonRectMap)
         
-        root.run_js_code(
-            f"""ctx.drawAlphaImage(\
-                {root.get_img_jsvarname("message")},\
-                {",".join(map(str, messageRect))}, 0.7\
-            );""",
-            add_code_array = True
+        drawAlphaImage(
+            "message",
+            *messageRect, 0.7,
+            wait_execute = True
         )
         
         if clickedMessage and time.time() - clickMessageTime >= messageBackTime:
@@ -1233,35 +1205,28 @@ def mainRender():
                 messageBackTime = 7.0
         
         if clickedMessage and time.time() - clickMessageTime <= 1.5:
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("JoinQQGuildBanner")},\
-                    {JoinQQGuildBannerRect[0] - JoinQQGuildBannerWidth + (1.0 - (1.0 - ((time.time() - clickMessageTime) / 1.5)) ** 6) * JoinQQGuildBannerWidth}, {JoinQQGuildBannerRect[1]},\
-                    {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "JoinQQGuildBanner",
+                JoinQQGuildBannerRect[0] - JoinQQGuildBannerWidth + (1.0 - (1.0 - ((time.time() - clickMessageTime) / 1.5)) ** 6) * JoinQQGuildBannerWidth,
+                *JoinQQGuildBannerRect[1:],
+                wait_execute = True
             )
         elif not clickedMessage and messageBacking:
             if time.time() - messageBackSt > 1.5:
                 messageBacking = False
                 messageBackSt = time.time() - 1.5 # 防止回弹
                 canClickMessage = True
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("JoinQQGuildBanner")},\
-                    {JoinQQGuildBannerRect[0] - (1.0 - (1.0 - ((time.time() - messageBackSt) / 1.5)) ** 6) * JoinQQGuildBannerWidth}, {JoinQQGuildBannerRect[1]},\
-                    {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "JoinQQGuildBanner",
+                JoinQQGuildBannerRect[0] - (1.0 - (1.0 - ((time.time() - messageBackSt) / 1.5)) ** 6) * JoinQQGuildBannerWidth,
+                *JoinQQGuildBannerRect[1:],
+                wait_execute = True
             )
         elif clickedMessage:
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("JoinQQGuildBanner")},\
-                    {JoinQQGuildBannerRect[0]}, {JoinQQGuildBannerRect[1]},\
-                    {JoinQQGuildBannerRect[2]}, {JoinQQGuildBannerRect[3]}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "JoinQQGuildBanner",
+                *JoinQQGuildBannerRect,
+                wait_execute = True
             )
         
         if clickedMessage and canClickMessage:
@@ -1539,14 +1504,12 @@ def renderPhigrosWidgets(
                 x + w * 0.321875 + w * 0.0375 + checkButtonDx, y + h * (52 / 1080)
             )
             
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("checked")},\
-                    {x + w * 0.340625 - CheckedIconWidth / 2},\
-                    {y + tool_funcs.getSizeByRect(checkButtonRect)[1] / 2 - CheckedIconHeight / 2},\
-                    {CheckedIconWidth}, {CheckedIconHeight}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "checked",
+                x + w * 0.340625 - CheckedIconWidth / 2,
+                y + tool_funcs.getSizeByRect(checkButtonRect)[1] / 2 - CheckedIconHeight / 2,
+                CheckedIconWidth, CheckedIconHeight,
+                wait_execute = True
             )
             
             root.run_js_code(
@@ -1890,14 +1853,13 @@ def settingRender():
             add_code_array = True
         )
         
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("Arrow_Right_Black")},\
-                {x0 + (x1 - x0) / 2 - SettingUIOtherIconWidth / 2},\
-                {y0 + (y1 - y0) / 2 - SettingUIOtherIconHeight / 2},\
-                {SettingUIOtherIconWidth}, {SettingUIOtherIconHeight}\
-            );""",
-            add_code_array = True
+        drawImage(
+            "Arrow_Right_Black",
+            x0 + (x1 - x0) / 2 - SettingUIOtherIconWidth / 2,
+            y0 + (y1 - y0) / 2 - SettingUIOtherIconHeight / 2,
+            SettingUIOtherIconWidth,
+            SettingUIOtherIconHeight,
+            wait_execute = True
         )
     
     otherSettingButtonRects = [
@@ -1961,13 +1923,11 @@ def settingRender():
             noteHeight = noteWidth * Resource["Notes"]["Tap"].height / Resource["Notes"]["Tap"].width
             if CalibrationMusicPosition < 1.0:
                 noteY = h * 0.85 * CalibrationMusicPosition - h * 0.05
-                root.run_js_code(
-                    f"""ctx.drawImage(\
-                        {root.get_img_jsvarname("Note_Tap")},\
-                        {w * 0.75 - noteWidth / 2}, {noteY - noteHeight / 2},\
-                        {noteWidth}, {noteHeight}\
-                    );""",
-                    add_code_array = True
+                drawImage(
+                    "Note_Tap",
+                    w * 0.75 - noteWidth / 2, noteY - noteHeight / 2,
+                    noteWidth, noteHeight,
+                    wait_execute = True
                 )
                 if CalibrationClickSoundPlayed:
                     CalibrationClickSoundPlayed = False
@@ -2076,14 +2036,12 @@ def settingRender():
                 add_code_array = True
             )
             
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("edit")},\
-                    {editBackgroundRect[0] + editBackgroundRectSize[0] / 2 - editBackgroundIconSize / 2},\
-                    {editBackgroundRect[1] + editBackgroundRectSize[1] / 2 - editBackgroundIconSize / 2},\
-                    {editBackgroundIconSize}, {editBackgroundIconSize}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "edit",
+                editBackgroundRect[0] + editBackgroundRectSize[0] / 2 - editBackgroundIconSize / 2,
+                editBackgroundRect[1] + editBackgroundRectSize[1] / 2 - editBackgroundIconSize / 2,
+                editBackgroundIconSize, editBackgroundIconSize,
+                wait_execute = True
             )
         
         leftBlackDiagonalX = 0.538
@@ -2143,14 +2101,12 @@ def settingRender():
                 add_code_array = True
             )
             
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("edit")},\
-                    {editAvatarRect[0] + editAvatarRectSize[0] / 2 - editAvatarIconSize / 2},\
-                    {editAvatarRect[1] + editAvatarRectSize[1] / 2 - editAvatarIconSize / 2},\
-                    {editAvatarIconSize}, {editAvatarIconSize}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "edit",
+                editAvatarRect[0] + editAvatarRectSize[0] / 2 - editAvatarIconSize / 2,
+                editAvatarRect[1] + editAvatarRectSize[1] / 2 - editAvatarIconSize / 2,
+                editAvatarIconSize, editAvatarIconSize,
+                wait_execute = True
             )
         
         drawText(
@@ -2425,13 +2381,12 @@ def settingRender():
                 top + h * (50 / 1080)
             )
             closeButtonSize = (w + h) * 0.014
-            root.run_js_code(
-                f"""ctx.drawImage(\
-                    {root.get_img_jsvarname("close")},\
-                    {closeButtonCenterPoint[0] - closeButtonSize / 2}, {closeButtonCenterPoint[1] - closeButtonSize / 2},\
-                    {closeButtonSize}, {closeButtonSize}\
-                );""",
-                add_code_array = True
+            drawImage(
+                "close",
+                closeButtonCenterPoint[0] - closeButtonSize / 2,
+                closeButtonCenterPoint[1] - closeButtonSize / 2,
+                closeButtonSize, closeButtonSize,
+                wait_execute = True
             )
             
             scdy = settingUIChooseAvatarAndBackgroundSlideControler.getDy()
@@ -2533,13 +2488,12 @@ def settingRender():
 
         phiIconWidth = w * 0.215625
         phiIconHeight = phiIconWidth / Resource["phigros"].width * Resource["phigros"].height
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("phigros")},\
-                {w * 0.3890625 - phiIconWidth / 2}, {h * ((0.275 + 371 / 1080) / 2) - phiIconHeight / 2},\
-                {phiIconWidth}, {phiIconHeight}\
-            );""",
-            add_code_array = True
+        drawImage(
+            "phigros",
+            w * 0.3890625 - phiIconWidth / 2,
+            h * ((0.275 + 371 / 1080) / 2) - phiIconHeight / 2,
+            phiIconWidth, phiIconHeight,
+            wait_execute = True
         )
         
         root.run_js_code(
@@ -2642,13 +2596,13 @@ def settingRender():
             wait_execute = True
         )
         
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("twitter")},\
-                {w * 0.0734375 - SettingUIOtherIconWidth / 2}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_Twitter / 2},\
-                {SettingUIOtherDownIconWidth}, {SettingUIOtherDownIconHeight_Twitter}\
-            );""",
-            add_code_array = True
+        drawImage(
+            "twitter",
+            w * 0.0734375 - SettingUIOtherIconWidth / 2,
+            h * (1031 / 1080) - SettingUIOtherDownIconHeight_Twitter / 2,
+            SettingUIOtherDownIconWidth,
+            SettingUIOtherDownIconHeight_Twitter,
+            wait_execute = True
         )
         
         drawText(
@@ -2661,13 +2615,13 @@ def settingRender():
             wait_execute = True
         )
         
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("bilibili")},\
-                {w * 0.203125 - SettingUIOtherIconWidth / 2}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_Bilibili / 2},\
-                {SettingUIOtherDownIconWidth}, {SettingUIOtherDownIconHeight_Bilibili}\
-            );""",
-            add_code_array = True
+        drawImage(
+            "bilibili",
+            w * 0.203125 - SettingUIOtherIconWidth / 2,
+            h * (1031 / 1080) - SettingUIOtherDownIconHeight_Bilibili / 2,
+            SettingUIOtherDownIconWidth,
+            SettingUIOtherDownIconHeight_Bilibili,
+            wait_execute = True
         )
         
         drawText(
@@ -2680,13 +2634,13 @@ def settingRender():
             wait_execute = True
         )
         
-        root.run_js_code(
-            f"""ctx.drawImage(\
-                {root.get_img_jsvarname("qq")},\
-                {w * 0.3328125 - SettingUIOtherIconWidth / 2 * 0.85}, {h * (1031 / 1080) - SettingUIOtherDownIconHeight_QQ / 2 * 0.85},\
-                {SettingUIOtherDownIconWidth * 0.85}, {SettingUIOtherDownIconHeight_QQ * 0.85}\
-            );""",
-            add_code_array = True
+        drawImage(
+            "qq",
+            w * 0.3328125 - SettingUIOtherIconWidth / 2 * 0.85,
+            h * (1031 / 1080) - SettingUIOtherDownIconHeight_QQ / 2 * 0.85,
+            SettingUIOtherDownIconWidth * 0.85,
+            SettingUIOtherDownIconHeight_QQ * 0.85,
+            wait_execute = True
         )
         
         drawText(
@@ -3171,13 +3125,12 @@ def aboutUsRender():
             phiIconHeight = phiIconWidth / Resource["phigros"].width * Resource["phigros"].height
             alpha = 1.0 if clickedStartButtonTime != clickedStartButtonTime else ((time.time() - clickedStartButtonTime) / 0.75 - 1.0) ** 2
             
-            root.run_js_code(
-                f"""ctx.drawAlphaImage(\
-                    {root.get_img_jsvarname("phigros")},\
-                    {w / 2 - phiIconWidth / 2}, {h / 2 - phiIconHeight / 2},\
-                    {phiIconWidth}, {phiIconHeight}, {alpha}\
-                );""",
-                add_code_array = True
+            drawAlphaImage(
+                "phigros",
+                w / 2 - phiIconWidth / 2, h / 2 - phiIconHeight / 2,
+                phiIconWidth, phiIconHeight,
+                alpha,
+                wait_execute = True
             )
             
             drawText(
@@ -3488,15 +3441,15 @@ def chartPlayerRender(
         def _renderPauseUIButtons(p: float, dx: float):
             def _drawPauseButton(x: float, imname: str, scale: float):
                 ims = (w + h) * 0.0275
-                root.run_js_code(
-                    f"dialog_canvas_ctx.drawAlphaImage(\
-                        {root.get_img_jsvarname(imname)},\
-                        {x - ims / 2}, {h / 2 - ims / 2},\
-                        {ims * scale}, {ims * scale},\
-                        {1.0 - (1.0 - p) ** 2}\
-                    );",
-                    add_code_array = True
+                setCtx("dialog_canvas_ctx")
+                drawAlphaImage(
+                    imname,
+                    x - ims / 2, h / 2 - ims / 2,
+                    ims * scale, ims * scale,
+                    1.0 - (1.0 - p) ** 2,
+                    wait_execute = True
                 )
+                setCtx("ctx")
             _drawPauseButton(w * 0.5 - w * 0.1109375 + dx, "PUIBack", 1.0)
             _drawPauseButton(w * 0.5 + dx, "PUIRetry", 1.0)
             _drawPauseButton(w * 0.5 + w * 0.1109375 + dx, "PUIResume", 0.95)
