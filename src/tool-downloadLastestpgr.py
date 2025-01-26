@@ -34,8 +34,8 @@ if __name__ == "__main__":
         
     print("tip: 请不要多次运行, 以免触发 TapTap 的风控机制\n", file=stderr)
     result = get_download_info(PHIGROS_APPID)
-    print(f"Phigros版本: {result["data"]["apk"]["version_name"]}", file=stderr)
-    print(f"下载地址: {result["data"]["apk"]["download"]}", file=stderr)
+    print(f"""Phigros版本: {result["data"]["apk"]["version_name"]}""", file=stderr)
+    print(f"""下载地址: {result["data"]["apk"]["download"]}""", file=stderr)
     
     if "-c" in argv:
         print(result["data"]["apk"]["download"])
