@@ -37,7 +37,7 @@ version = 0.3
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography
+requirements = python3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow
 
 #Pillow,NumPy,opencv-python-headless,requests,PyYAML,websockets,
 
