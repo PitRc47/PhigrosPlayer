@@ -557,16 +557,13 @@ def processExTask(ExTask: list[tuple[str, typing.Any]]):
     return break_flag
 
 def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
-    global PlayChart_NowTime
-    
-    now_t *= speed
-    PlayChart_NowTime = now_t
     Task = chartobj_phi.FrameRenderTask([], [])
     if clear: Task(clearCanvas, wait_execute = True)
     rrmStart(Task)
     Task(drawBg)
     if noplaychart: Task.ExTask.append(("break", ))
-    
+        
+    now_t *= speed
     noautoplay = pplm is not None # reset a global variable
     if noautoplay:
         pplm.pc_update(now_t)
@@ -884,18 +881,16 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
     return Task
 
 def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
-    global PlayChart_NowTime
-    
-    now_t *= speed
     Task = chartobj_phi.FrameRenderTask([], [])
     if clear: Task(clearCanvas, wait_execute = True)
     rrmStart(Task)
     Task(drawBg)
-    PlayChart_NowTime = now_t
     if noplaychart: Task.ExTask.append(("break", ))
     
-    now_t -= chart_obj.META.offset / 1000
     attachUIData = {}
+        
+    now_t *= speed
+    now_t -= chart_obj.META.offset / 1000
     
     noautoplay = pplm is not None # reset a global variable
     if noautoplay:
