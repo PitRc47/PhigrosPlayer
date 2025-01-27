@@ -3,8 +3,8 @@ from __future__ import annotations
 import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
-
 import checksys
+
 import threading
 import typing
 import http.server
@@ -297,7 +297,7 @@ class WebCanvas:
         self.web.set_title(temp_title)
         
         self.web_hwnd = None
-        if platform.system() == "Windows":
+        if checksys.main == "Windows":
             while not self.web_hwnd:
                 self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
                 time.sleep(0.01)

@@ -26,7 +26,7 @@ source.exclude_dirs = src/__pycache__
 
 # (list) List of exclusions using pattern matching
 # Do not prefix with './'
-source.exclude_patterns = src/*.dll, src/*.exe
+source.exclude_patterns = src/*.dll, src/*.exe, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
 version = 0.3
