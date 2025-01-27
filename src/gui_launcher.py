@@ -101,7 +101,7 @@ def launch():
 root = tkinter.Tk()
 root.withdraw()
 root.title("Phigros Player Launcher")
-root.iconbitmap("icon.ico")
+root.iconbitmap("./resources/icon.ico")
 root.resizable(False, False)
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 file_input_label = tkinter.Label(root, text="谱面文件: ")

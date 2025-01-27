@@ -49,7 +49,7 @@ requirements = python3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensio
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-icon.filename = ./src/icon.ico
+icon.filename = ./src/resources/icon.ico
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse

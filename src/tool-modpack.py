@@ -111,7 +111,7 @@ for mod in modlist:
             tdir = tempdir.createTempDir()
             seg: AudioSegment = AudioSegment.from_file(mod["content_path"])
             seg.export(f"{tdir}/music.ogg", format="ogg")
-            popen(f".\\oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
+            popen(f"../bin/oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
             fsb = open(f"{tdir}/music.fsb", "rb").read()
 
             bundle = loadbundle(exiitem["fn"])
