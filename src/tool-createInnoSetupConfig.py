@@ -66,7 +66,7 @@ Filename: "{app}\\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange
 '''
 
 replacedict = {
-    "AppId": open("./Inno_AppId.txt", "r", encoding="utf-8").read(),
+    "AppId": "08986CF5-55F0-453B-B703-58A5D821C049",
     "AppName": "PhigrosPlayer",
     "AppVersion": argv[1],
     "AppURL": "https://github.com/qaqFei/PhigrosPlayer",
