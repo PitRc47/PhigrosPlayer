@@ -4,6 +4,9 @@ main = 'Linux'
 if platform.system() == "Windows":
     main = 'Windows'
 else:
-    from kivy.utils import platform as kivy_platform
-    if kivy_platform == 'android':
-        main = 'Android'
+    try:
+        from kivy.utils import platform as kivy_platform
+        if kivy_platform == 'android':
+            main = 'Android'
+    except:
+        pass
