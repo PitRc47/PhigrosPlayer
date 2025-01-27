@@ -1,7 +1,3 @@
-import webview
-import webcv
-import socket
-
 def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -30,6 +26,9 @@ def main():
         root.run_js_code("console.log('Hello, World!');")
 
 try:
+    import webview
+    import webcv
+    import socket
     client_socket = start_client()
     main()
 except Exception as e:
