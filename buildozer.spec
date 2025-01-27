@@ -222,7 +222,7 @@ android.add_assets = src/resources
 #android.add_resources =
 
 # (list) Gradle dependencies to add
-android.gradle_dependencies = -Dorg.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError
+#android.gradle_dependencies = 
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
