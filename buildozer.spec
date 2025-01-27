@@ -13,7 +13,7 @@ package.domain = org.qaqFei.PhigrosPlayer
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-#source.include_exts = 
+source.include_exts = py,html,js
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = src/resources/*
@@ -22,14 +22,14 @@ source.dir = .
 #source.exclude_exts = spec
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-#source.exclude_dirs = tests, bin, venv
+source.exclude_dirs = __pycache__, bin, venv
 
 # (list) List of exclusions using pattern matching
 # Do not prefix with './'
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.1
+version = 0.2
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pywebview,bottle,proxy-tools,typing_extensions,cryptography
+requirements = python3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography
 
 #Pillow,NumPy,opencv-python-headless,requests,PyYAML,websockets,
 
@@ -49,7 +49,7 @@ requirements = python3,kivy,pywebview,bottle,proxy-tools,typing_extensions,crypt
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = ./src/icon.ico
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -66,7 +66,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-#osx.python_version = 3.12.8
+osx.python_version = 3
 
 # Kivy version to use
 osx.kivy_version = 1.9.1

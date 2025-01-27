@@ -10,10 +10,12 @@ import time
 import logging
 import typing
 from threading import Thread
-from ctypes import windll
 from os import popen
 from os.path import exists
 from ntpath import basename
+from kivy.utils import platform as kivy_platform
+if kivy_platform != 'android':
+    from ctypes import windll
 
 import cv2
 import requests

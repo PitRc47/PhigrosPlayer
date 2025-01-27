@@ -4,6 +4,7 @@ import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
 
+import platform
 import threading
 import typing
 import http.server
@@ -12,9 +13,11 @@ import time
 import socket
 import sys
 import logging
-from ctypes import windll
+
 from os.path import abspath
 from random import randint
+from kivy.utils import platform as kivy_platform
+
 
 import webview
 from PIL import Image
@@ -22,8 +25,20 @@ from PIL import Image
 import graplib_webview
 
 current_thread = threading.current_thread
-screen_width = windll.user32.GetSystemMetrics(0)
-screen_height = windll.user32.GetSystemMetrics(1)
+
+screen_width = None
+screen_height = None
+if platform.system() == "Windows":
+    from ctypes import windll
+    screen_width = windll.user32.GetSystemMetrics(0)
+    screen_height = windll.user32.GetSystemMetrics(1)
+elif kivy_platform == 'android':
+    from jnius import autoclass
+    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+    metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
+    screen_width = metrics.widthPixels
+    screen_height = metrics.heightPixels
+
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
 logging.info(f"server host: {host}")
 
@@ -237,12 +252,12 @@ class WebCanvas:
         title: str = "WebCanvas",
         resizable: bool = True,
         frameless: bool = False,
-        html_path: str = ".\\web_canvas.html",
+        html_path: str = "./web_canvas.html",
         renderdemand: bool = False,
         renderasync: bool = False,
         hidden: bool = False,
         jslog: bool = False,
-        jslog_path: str = ".\\web_canvas.jslog.txt"
+        jslog_path: str = "./web_canvas.jslog.txt"
     ):
         self.jsapi = JsApi()
         self._destroyed = threading.Event()
@@ -281,10 +296,11 @@ class WebCanvas:
         temp_title = self.web.title + " " * randint(0, 4096)
         self.web.set_title(temp_title)
         
-        self.web_hwnd = 0
-        while not self.web_hwnd:
-            self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
-            time.sleep(0.01)
+        self.web_hwnd = None
+        if platform.system() == "Windows":
+            while not self.web_hwnd:
+                self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
+                time.sleep(0.01)
         self.web.set_title(title)
         
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
