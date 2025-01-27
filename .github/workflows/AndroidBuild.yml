@@ -32,10 +32,6 @@ jobs:
           pip3 install --user --upgrade virtualenv 
           export PATH=$PATH:~/.local/bin/
       
-      - name: Configure Gradle JVM arguments
-        run: | 
-            echo "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
-
       - name: Build Android
         run: |
           python3 -m virtualenv venv
