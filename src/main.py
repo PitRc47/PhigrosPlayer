@@ -4,6 +4,7 @@ import fix_workpath as _
 import import_argvs as _
 import check_edgechromium as _
 
+import zipfile
 import json
 import sys
 import time
@@ -14,6 +15,7 @@ from os import popen
 from os.path import exists
 from ntpath import basename
 from kivy.utils import platform as kivy_platform
+
 if kivy_platform != 'android':
     from ctypes import windll
 
@@ -46,10 +48,6 @@ from dxsmixer import mixer
 from graplib_webview import *
 
 import load_extended as _
-
-if not exists("./7z.exe") or not exists("./7z.dll"):
-    logging.fatal("7z.exe or 7z.dll Not Found")
-    raise SystemExit
 
 if len(sys.argv) == 1:
     print(ppr_help.HELP_ZH)
@@ -156,7 +154,8 @@ if "--phira-chart" in sys.argv:
 
 logging.info("Unpack Chart...")
 
-popen(r'.\7z.exe x "{}" -o"{}" -y >> nul'.format(sys.argv[1], temp_dir)).read()
+with zipfile.ZipFile(sys.argv[1], 'r') as zip_ref:
+    zip_ref.extractall(temp_dir)
 
 logging.info("Loading All Files of Chart...")
 files_dict = {
