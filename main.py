@@ -1,11 +1,6 @@
 def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        client_socket.connect((server_ip, server_port))
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        client_socket.close()
+    client_socket.connect((server_ip, server_port))
     return client_socket
 def main():
     root = webcv.WebCanvas(
