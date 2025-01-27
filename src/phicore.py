@@ -1304,7 +1304,12 @@ def getLevelNumber() -> str:
 def getLevelText() -> str:
     return chart_information["Level"].split(" ")[0]
 
-def BeginLoadingAnimation(p: float, sec: float, clear: bool = True, fcb: typing.Callable[[], typing.Any] = lambda: None) -> chartobj_phi.FrameRenderTask:
+def getFontSize(text: str, maxwidth: str, maxsize: float):
+    w1px = root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(text)}).width;") / 50
+    if w1px == 0: w1px = 1.0
+    return min(maxsize, maxwidth / w1px)
+
+def loadingAnimationFrame(p: float, sec: float, clear: bool = True, fcb: typing.Callable[[], typing.Any] = lambda: None) -> chartobj_phi.FrameRenderTask:
     Task = chartobj_phi.FrameRenderTask([], [])
     
     if clear: Task(clearCanvas, wait_execute = True)
@@ -1566,34 +1571,7 @@ def BeginLoadingAnimation(p: float, sec: float, clear: bool = True, fcb: typing.
     Task(root.run_js_wait_code)
     return Task
 
-def BeginJudgeLineAnimation(p: float, lineWidth: float, showLine: bool) -> chartobj_phi.FrameRenderTask:
-    Task = chartobj_phi.FrameRenderTask([], [])
-    val = rpe_easing.ease_funcs[12](p)
-    Task(
-        draw_ui,
-        animationing = True,
-        dy = h / 7 * val
-    )
-    
-    if showLine:
-        Task(
-            drawLine,
-            w / 2 - (val * w / 2), h / 2,
-            w / 2 + (val * w / 2), h / 2,
-            strokeStyle = const.JUDGELINE_PERFECT_COLOR,
-            lineWidth = lineWidth / render_range_more_scale if render_range_more else lineWidth,
-            wait_execute = True
-        )
-    
-    Task(root.run_js_wait_code)
-    return Task
-
-def getFontSize(text: str, maxwidth: str, maxsize: float):
-    w1px = root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(text)}).width;") / 50
-    if w1px == 0: w1px = 1.0
-    return min(maxsize, maxwidth / w1px)
-
-def Begin_Animation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = lambda: None):
+def loadingAnimation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = lambda: None):
     animation_time = 4.5
     
     chart_name_text = chart_information["Name"]
@@ -1606,7 +1584,7 @@ def Begin_Animation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = l
     
     infoframe_width = w * 0.321875
     
-    tip_font_size = getFontSize(tip, w * 0.9, w * 0.020833 / 1.25)
+    tip_font_size = getFontSize(tip, w * 0.84375 * 0.9, w * 0.020833 / 1.25)
     chart_name_font_text_size = getFontSize(chart_name_text, infoframe_width * 0.6, w * 0.025)
     chart_level_number_font_size = getFontSize(chart_level_number, infoframe_width * 0.125, h * (66 / 1080))
     chart_level_text_font_size = getFontSize(chart_level_text, infoframe_width * 0.075, h * (24 / 1080))
@@ -1643,10 +1621,10 @@ def Begin_Animation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = l
         if p > 1.0:
             break
         
-        Task = BeginLoadingAnimation(p, sec, clear, fcb)
+        Task = loadingAnimationFrame(p, sec, clear, fcb)
         Task.ExecTask()
         
-def ChartStart_Animation(fcb: typing.Callable[[], typing.Any] = lambda: None):
+def lineOpenAnimation(fcb: typing.Callable[[], typing.Any] = lambda: None):
     csat = 1.25
     st = time.time()
         
@@ -1694,12 +1672,26 @@ def ChartStart_Animation(fcb: typing.Callable[[], typing.Any] = lambda: None):
             break
         
         fcb()
-        Task = BeginJudgeLineAnimation(p, lineWidth, showLine)
-        Task.ExecTask()
+        val = rpe_easing.ease_funcs[12](p)
+        draw_ui(
+            animationing = True,
+            dy = h / 7 * val
+        )
+        
+        if showLine:
+            drawLine(
+                w / 2 - (val * w / 2), h / 2,
+                w / 2 + (val * w / 2), h / 2,
+                strokeStyle = const.JUDGELINE_PERFECT_COLOR,
+                lineWidth = lineWidth / render_range_more_scale if render_range_more else lineWidth,
+                wait_execute = True
+            )
+        
+        root.run_js_wait_code()
     
     time.sleep(0.15)
 
-def initFinishAnimation(pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
+def initSettlementAnimation(pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
     global im_size
     global ChartNameString, ChartNameStringFontSize
     global ChartLevelString, ChartLevelStringFontSize
@@ -1728,7 +1720,7 @@ def initFinishAnimation(pplm: tool_funcs.PhigrosPlayLogicManager|None = None):
     if ChartLevelStringFontSize > w * 0.0275 * 0.55:
         ChartLevelStringFontSize = w * 0.0275 * 0.55
 
-def Chart_Finish_Animation_Frame(p: float, rjc: bool = True):
+def settlementAnimationFrame(p: float, rjc: bool = True):
     clearCanvas(wait_execute = True)
     im_ease_value = tool_funcs.finish_animation_eases.all_ease(p)
     im_ease_pos = w * 1.25 * (1 - im_ease_value)
@@ -2018,7 +2010,7 @@ def Chart_Finish_Animation_Frame(p: float, rjc: bool = True):
     
     if rjc: root.run_js_wait_code()
 
-def Chart_BeforeFinish_Animation_Frame(p: float, a1_combo: int|None, rjc: bool = True):
+def lineCloseAimationFrame(p: float, a1_combo: int|None, rjc: bool = True):
     v = p ** 2
     if not noautoplay:
         draw_ui(

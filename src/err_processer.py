@@ -8,7 +8,11 @@ def excepthook(etype, value, tb):
     import os.path
     from ctypes import windll
     
+    import needrelease
+    
     try:
+        needrelease.run()
+        
         if isinstance(etype, KeyboardInterrupt) or KeyboardInterrupt in etype.mro():
             print("^C")
             windll.kernel32.ExitProcess(0)

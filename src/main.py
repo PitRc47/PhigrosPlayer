@@ -41,6 +41,7 @@ import phicore
 import tempdir
 import socket_webviewbridge
 import wcv2matlike
+import needrelease
 from dxsmixer import mixer
 from graplib_webview import *
 
@@ -426,19 +427,17 @@ def Load_Resource():
     
     # root.file_server.shutdown()
     note_max_width = globalNoteWidth * const.NOTE_DUB_FIXSCALE
-    note_max_height = max(
-        [
-            note_max_width / Resource["Notes"]["Tap"].width * Resource["Notes"]["Tap"].height,
-            note_max_width / Resource["Notes"]["Tap_dub"].width * Resource["Notes"]["Tap_dub"].height,
-            note_max_width / Resource["Notes"]["Drag"].width * Resource["Notes"]["Drag"].height,
-            note_max_width / Resource["Notes"]["Drag_dub"].width * Resource["Notes"]["Drag_dub"].height,
-            note_max_width / Resource["Notes"]["Flick"].width * Resource["Notes"]["Flick"].height,
-            note_max_width / Resource["Notes"]["Flick_dub"].width * Resource["Notes"]["Flick_dub"].height,
-            note_max_width / Resource["Notes"]["Hold_Head"].width * Resource["Notes"]["Hold_Head"].height,
-            note_max_width / Resource["Notes"]["Hold_Head_dub"].width * Resource["Notes"]["Hold_Head_dub"].height,
-            note_max_width / Resource["Notes"]["Hold_End"].width * Resource["Notes"]["Hold_End"].height
-        ]
-    )
+    note_max_height = max((
+        note_max_width / Resource["Notes"]["Tap"].width * Resource["Notes"]["Tap"].height,
+        note_max_width / Resource["Notes"]["Tap_dub"].width * Resource["Notes"]["Tap_dub"].height,
+        note_max_width / Resource["Notes"]["Drag"].width * Resource["Notes"]["Drag"].height,
+        note_max_width / Resource["Notes"]["Drag_dub"].width * Resource["Notes"]["Drag_dub"].height,
+        note_max_width / Resource["Notes"]["Flick"].width * Resource["Notes"]["Flick"].height,
+        note_max_width / Resource["Notes"]["Flick_dub"].width * Resource["Notes"]["Flick_dub"].height,
+        note_max_width / Resource["Notes"]["Hold_Head"].width * Resource["Notes"]["Hold_Head"].height,
+        note_max_width / Resource["Notes"]["Hold_Head_dub"].width * Resource["Notes"]["Hold_Head_dub"].height,
+        note_max_width / Resource["Notes"]["Hold_End"].width * Resource["Notes"]["Hold_End"].height
+    ))
     note_max_size_half = ((note_max_width ** 2 + note_max_height ** 2) ** 0.5) / 2
                 
     shaders = {
@@ -548,8 +547,8 @@ def PlayerStart():
     
     Resource["Over"].stop()
     
-    phicore.Begin_Animation()
-    phicore.ChartStart_Animation()
+    phicore.loadingAnimation()
+    phicore.lineOpenAnimation()
 
     show_start_time = time.time() - skip_time
     PhiCoreConfigObject.show_start_time = show_start_time
@@ -814,6 +813,7 @@ def PlayerStart():
                 frame_speed, (w, h),
                 True
             )
+            needrelease.add(writer.release)
             
             if video_fp != "":
                 def writeFrame(data: bytes):
@@ -827,15 +827,17 @@ def PlayerStart():
                     Task.ExecTask()
                     root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
                 
-                writer.release()
                 httpd.shutdown()
                 
                 if "--lfdaot-render-video-autoexit" in sys.argv:
                     root.destroy()
                     return
+            
+            writer.release()
+            needrelease.remove(writer.release)
     
     mixer.music.set_volume(1.0)
-    phicore.initFinishAnimation(pplm if noautoplay else None)
+    phicore.initSettlementAnimation(pplm if noautoplay else None)
     
     def Chart_Finish_Animation():
         animation_1_time = 0.75
@@ -845,7 +847,7 @@ def PlayerStart():
         while True:
             p = (time.time() - animation_1_start_time) / animation_1_time
             if p > 1.0: break
-            phicore.Chart_BeforeFinish_Animation_Frame(p, a1_combo)
+            phicore.lineCloseAimationFrame(p, a1_combo)
         
         time.sleep(0.25)
         Resource["Over"].play(-1)
@@ -898,10 +900,10 @@ def PlayerStart():
         while not a2_break:
             p = (time.time() - animation_2_start_time) / animation_2_time
             if p > 1.0: break
-            phicore.Chart_Finish_Animation_Frame(p)
+            phicore.settlementAnimationFrame(p)
         
         while not a2_break:
-            phicore.Chart_Finish_Animation_Frame(1.0)
+            phicore.settlementAnimationFrame(1.0)
     
     mixer.music.fadeout(250)
     Chart_Finish_Animation()

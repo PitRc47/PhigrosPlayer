@@ -135,7 +135,8 @@ arg_setting = [
     ("启用 BitmapImage", "enable-jscanvas-bitmap"),
     ("降级音频API", "soundapi-downgrade"),
     ("lfdaot渲染完成视频后自动退出", "lfdaot-render-video-autoexit"),
-    ("不清理临时文件", "nocleartemp")
+    ("不清理临时文件", "nocleartemp"),
+    ("脱离 WebView", "disengage-webview")
 ]
 
 kwarg_setting = [

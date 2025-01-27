@@ -406,7 +406,8 @@ class WebCanvas:
         setattr(self.web.events, name, getattr(self.web.events, name) + callback)
     
     def wait_for_close(self) -> None:
-        self._destroyed.wait()
+        while not self._destroyed.wait(0.1):
+            pass
         
         if self.jslog:
             self.jslog_f.write(f"\n\n// Webview closed.\n")

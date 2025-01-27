@@ -3311,7 +3311,7 @@ def chartPlayerRender(
     phicore.CoreConfigure(coreConfig)
     
     if startAnimation:
-        phicore.Begin_Animation(False, foregroundFrameRender)
+        phicore.loadingAnimation(False, foregroundFrameRender)
     
     if phicore.noautoplay:
         if CHART_TYPE == const.CHART_TYPE.PHI:
@@ -3394,7 +3394,7 @@ def chartPlayerRender(
             )):
                 paused, pauseAnimationSt = False, time.time()
                 
-        if rendingAnimation is not phicore.Chart_Finish_Animation_Frame or (time.time() - rendingAnimationSt) <= 0.5:
+        if rendingAnimation is not phicore.settlementAnimationFrame or (time.time() - rendingAnimationSt) <= 0.5:
             return
         
         if tool_funcs.inrect(x, y, (
@@ -3426,7 +3426,7 @@ def chartPlayerRender(
     # 前面初始化时间太长了, 放这里
     chartPlayerRenderSt = time.time()
     nextUI, tonextUI, tonextUISt = nextUI, False, float("nan")
-    rendingAnimation = phicore.Chart_BeforeFinish_Animation_Frame
+    rendingAnimation = phicore.lineCloseAimationFrame
     rendingAnimationSt = float("nan")
     stoped = False
     paused, pauseAnimationSt, pauseSt = False, 0.0, float("nan")
@@ -3509,19 +3509,19 @@ def chartPlayerRender(
                 break_flag = phicore.processExTask(Task.ExTask)
                 
                 if break_flag and not stoped:
-                    phicore.initFinishAnimation(pplm)
+                    phicore.initSettlementAnimation(pplm)
                     rendingAnimationSt = time.time()
                     stoped = True
             else:
-                if rendingAnimation is phicore.Chart_BeforeFinish_Animation_Frame:
+                if rendingAnimation is phicore.lineCloseAimationFrame:
                     if time.time() - rendingAnimationSt <= 0.75:
                         rendingAnimation((time.time() - rendingAnimationSt) / 0.75, pplm.ppps.getCombo() if phicore.noautoplay else phicore.chart_obj.note_num, False)
                     else:
-                        rendingAnimation, rendingAnimationSt = phicore.Chart_Finish_Animation_Frame, time.time()
+                        rendingAnimation, rendingAnimationSt = phicore.settlementAnimationFrame, time.time()
                         mixer.music.load("./resources/Over.mp3")
                         Thread(target=lambda: (time.sleep(0.25), mixer.music.play(-1)), daemon=True).start()
                 
-                if rendingAnimation is phicore.Chart_Finish_Animation_Frame: # 不能用elif, 不然会少渲染一个帧
+                if rendingAnimation is phicore.settlementAnimationFrame: # 不能用elif, 不然会少渲染一个帧
                     rendingAnimation(tool_funcs.fixorp((time.time() - rendingAnimationSt) / 3.5), False)
         
         if time.time() - chartPlayerRenderSt < 1.25 and blackIn:

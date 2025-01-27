@@ -26,6 +26,7 @@ HELP_ZH = '''\
   --soundapi-downgrade: 降级音频API, 从 DirectSound 降级到 SDL2_mixer
   --lfdaot-render-video-autoexit: 使用 --lfdaot 和 --lfdaot-render-video 时, 渲染完成后自动退出. (前置参数: --lfdaot 和 --lfdaot-render-video)
   --nocleartemp: 不清理临时文件
+  --disengage-webview: 脱离 WebView
   
 <关键字参数>
   --combotips <字符串>: 设置连击提示文本
