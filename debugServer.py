@@ -8,9 +8,10 @@ def start_server(host='192.168.1.28', port=7878):
 
     client_socket, addr = server_socket.accept()
     print(f"Connection Received: {addr}")
-    while True:
-        msg = client_socket.recv(1024)
-        print(f"Message Received: {msg.decode('utf-8')}")
+    msg = client_socket.recv(1024)
+    if msg:
+        print("Message Received:")
+        print(msg.decode('utf-8'))
 
 if __name__ == "__main__":
     start_server()
