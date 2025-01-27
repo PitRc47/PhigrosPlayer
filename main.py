@@ -2,8 +2,6 @@ def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         client_socket.connect((server_ip, server_port))
-        msg = client_socket.recv(1024)
-        print(msg.decode('utf-8'))
     except Exception as e:
         print(f"Error: {e}")
     finally:
