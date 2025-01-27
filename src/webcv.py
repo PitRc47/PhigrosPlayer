@@ -288,20 +288,21 @@ class WebCanvas:
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
         
-        self.web.resize(width, height)
-        self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
         
-        title = self.web.title
-        temp_title = self.web.title + " " * randint(0, 4096)
-        self.web.set_title(temp_title)
-        
-        self.web_hwnd = None
-        if checksys.main == "Windows":
-            while not self.web_hwnd:
-                self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
-                time.sleep(0.01)
-        self.web.set_title(title)
+        if checksys.main != 'Android':
+            self.web.resize(width, height)
+            self.web.move(x, y)
+            title = self.web.title
+            temp_title = self.web.title + " " * randint(0, 4096)
+            self.web.set_title(temp_title)
+            
+            self.web_hwnd = None
+            if checksys.main == "Windows":
+                while not self.web_hwnd:
+                    self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
+                    time.sleep(0.01)
+            self.web.set_title(title)
         
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
@@ -316,7 +317,7 @@ class WebCanvas:
     def title(self, title: str) -> str: self.web.set_title(title)
     def winfo_screenwidth(self) -> int: return screen_width
     def winfo_screenheight(self) -> int: return screen_height
-    def winfo_hwnd(self) -> int: return self.web_hwnd
+    def winfo_hwnd(self) -> int: return self.web_hwnd if checksys.main != 'Android' else None
     def winfo_legacywindowwidth(self) -> int: return self.run_js_code("window.innerWidth;")
     def winfo_legacywindowheight(self) -> int: return self.run_js_code("window.innerHeight;")
 
