@@ -290,11 +290,10 @@ void main() {
     }
 
     async function uploadFrame(url) {
-        const buffer = new Uint8Array(ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data.buffer);
         try {
             const resp = await fetch(url, {
                 method: "POST",
-                body: buffer
+                body: ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data
             });
         }
         catch (e) {
