@@ -304,6 +304,8 @@ class WebCanvas:
                     time.sleep(0.01)
             self.web.set_title(title)
         
+        if checksys.main == "Android":
+            time.sleep(10)
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)
