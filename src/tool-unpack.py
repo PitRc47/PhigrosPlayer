@@ -1,10 +1,12 @@
 import fix_workpath as _
 
+import zipfile
 import json
 import struct
 import base64
+
 from os import mkdir, popen, listdir
-from os.path import exists, isfile
+from os.path import exists, isfile, basename
 from shutil import rmtree
 from threading import Thread
 from time import sleep
@@ -15,10 +17,6 @@ import UnityPy.files
 import UnityPy.classes
 from UnityPy.enums import ClassIDType
 from fsb5 import FSB5
-
-if not exists("./7z.exe") or not exists("./7z.dll"):
-    print("7z.exe or 7z.dll Not Found")
-    raise SystemExit
     
 class ByteReaderA:
     def __init__(self, data: bytes):
@@ -76,8 +74,9 @@ class ByteReaderB:
 
 def getZipItem(path: str) -> str:
     while path[0] in ("/", "\\"): path = path[1:]
-    popen(f".\\7z.exe x \"{pgrapk}\" \"{path}\" -o.\\unpack-temp -y >> nul").read()
-    return f".\\unpack-temp\\{path}"
+    with zipfile.ZipFile(pgrapk, 'r') as zip_ref:
+        zip_ref.extract(path, './unpack-temp')
+    return f"./unpack-temp/{path}"
 
 def run(rpe: bool):
     try: rmtree("unpack-temp")
@@ -380,14 +379,13 @@ def pack_charts(infos: list[dict], rpe: bool):
             
             try:
                 rid = uuid4()
-                mkdir(f"./unpack-temp/pack-{rid}")
+                
                 with open(f"./unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
                     f.write(item[5])
-                command_1 = '.\\7z.exe a .\\unpack-result\\packed\\{}_{}{}.zip {} -y >> nul'.format(
-                    item[0], item[1], '_RPE' if p2r else '',
-                    ' '.join(f'"{x}"' for x in (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv"))
-                )
-                popen(command_1).read()
+                
+                with zipfile.ZipFile('./unpack-result/packed/{}_{}{}.zip'.format(item[0], item[1], '_RPE' if p2r else ''), 'w', zipfile.ZIP_DEFLATED) as zip_ref:
+                    for file_path in (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv"):
+                        zip_ref.write(file_path, arcname = basename(file_path))
                 packed_num += 1
             except Exception:
                 pass
