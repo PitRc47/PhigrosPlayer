@@ -5,7 +5,7 @@ import json
 import struct
 import base64
 
-from os import mkdir, popen, listdir
+from os import mkdir, popen, listdir, add_dll_directory
 from os.path import exists, isfile, basename
 from shutil import rmtree
 from threading import Thread
@@ -447,6 +447,8 @@ def pack_charts(infos: list[dict], rpe: bool):
 
 if __name__ == "__main__":
     from sys import argv
+
+    add_dll_directory('../dll')
     if len(argv) < 2:
         print("Usage: tool-unpack <apk>")
         raise SystemExit

@@ -11,7 +11,7 @@ import time
 import logging
 import typing
 from threading import Thread
-from os import popen
+from os import popen, add_dll_directory
 from os.path import exists
 from ntpath import basename
 from kivy.utils import platform as kivy_platform
@@ -48,6 +48,8 @@ from dxsmixer import mixer
 from graplib_webview import *
 
 import load_extended as _
+
+add_dll_directory('../dll')
 
 if len(sys.argv) == 1:
     print(ppr_help.HELP_ZH)
