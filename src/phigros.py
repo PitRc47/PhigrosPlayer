@@ -3,6 +3,7 @@ import init_logging as _
 import fix_workpath as _
 import check_edgechromium as _
 
+import sys
 import webbrowser
 import typing
 import random
@@ -13,12 +14,12 @@ import math
 import logging
 from io import BytesIO
 from threading import Thread
-from ctypes import windll
 from os import system
 from os.path import exists
 
 from PIL import Image, ImageFilter, ImageEnhance
 
+import checksys
 import webcv
 import const
 import tool_funcs
@@ -3872,7 +3873,8 @@ w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 root.reg_event("resized", resize)
 root.run_js_code(f"resizeCanvas({w}, {h});")
 
-if "--window-host" in sys.argv:
+if "--window-host" in sys.argv and checksys.main == 'Windows':
+    from ctypes import windll
     windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
 
 Load_Chapters()
@@ -3884,4 +3886,4 @@ applyConfig()
 Thread(target=showStartAnimation, daemon=True).start()
     
 root.wait_for_close()
-windll.kernel32.ExitProcess(0)
+sys.exit(0)
