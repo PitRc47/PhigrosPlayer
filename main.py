@@ -12,7 +12,7 @@ def main():
         width = 1, height = 1,
         x = 0, y = 0,
         title = "PhigrosPlayer - Simulator",
-        debug = True,
+        debug = False,
         resizable = False,
         frameless = False,
         renderdemand = False,
@@ -33,7 +33,7 @@ try:
 
     import webcv
     main()
-    
+
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     print(error_message)
