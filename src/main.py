@@ -14,10 +14,6 @@ from threading import Thread
 from os import popen, add_dll_directory
 from os.path import exists
 from ntpath import basename
-from kivy.utils import platform as kivy_platform
-
-if kivy_platform != 'android':
-    from ctypes import windll
 
 import cv2
 import requests
@@ -44,6 +40,11 @@ import tempdir
 import socket_webviewbridge
 import wcv2matlike
 import needrelease
+import checksys
+
+if checksys.main == 'Windows':
+    from ctypes import windll
+
 from dxsmixer import mixer
 from graplib_webview import *
 

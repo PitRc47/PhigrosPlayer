@@ -4,7 +4,7 @@ import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
 
-import platform
+import checksys
 import threading
 import typing
 import http.server
@@ -16,7 +16,7 @@ import logging
 
 from os.path import abspath
 from random import randint
-from kivy.utils import platform as kivy_platform
+
 
 
 import webview
@@ -28,11 +28,11 @@ current_thread = threading.current_thread
 
 screen_width = None
 screen_height = None
-if platform.system() == "Windows":
+if checksys.main == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
-elif kivy_platform == 'android':
+elif checksys.main == 'Android':
     from jnius import autoclass
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()

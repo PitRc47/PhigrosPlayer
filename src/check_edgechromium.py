@@ -3,10 +3,10 @@ import init_logging as _
 
 
 import logging
+import checksys
 from os import system
 
-from kivy.utils import platform as kivy_platform
-if kivy_platform != 'android':
+if checksys.main != 'Android':
     import tkinter.messagebox
     from os import system
     import webview.platforms.winforms
