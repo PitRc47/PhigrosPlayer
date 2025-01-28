@@ -16,7 +16,7 @@ source.dir = .
 #source.include_exts = py,html,js,properties
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = src/*, src/resources/**/*, lib/pywebview-android.jar
+source.include_patterns = src/*, src/resources/**/*
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
