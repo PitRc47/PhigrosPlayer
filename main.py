@@ -53,8 +53,8 @@ try:
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
     
     sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
-    from main import pprMain
-    pprMain()
+    import main
+    main.pprMain()
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     captured_stdout = stdout_buffer.getvalue()
