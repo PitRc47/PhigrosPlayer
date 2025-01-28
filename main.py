@@ -49,7 +49,7 @@ root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(handler)
 
 current_directory = os.getcwd()
-logging.info(f'Current Path: {current_directory}')
+print(f'Current Path: {current_directory}')
 for item in os.listdir(current_directory):
     full_path = os.path.join(current_directory, item)
     
