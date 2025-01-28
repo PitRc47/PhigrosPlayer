@@ -242,7 +242,8 @@ def ban_threadtest_current_thread():
     obj.name = "MainThread"
     return obj
 
-webview.threading.current_thread = ban_threadtest_current_thread
+if checksys.main != 'Android':
+    webview.threading.current_thread = ban_threadtest_current_thread
 
 class WebCanvas:
     def __init__(
@@ -281,7 +282,7 @@ class WebCanvas:
         if checksys.main != 'Android':
             html_path = abspath(html_path)
         else:
-            html_path = 'file:///android_asset/web_canvas.html'
+            html_path = 'file:///web_canvas.html'
         self.web = webview.create_window(
             title = title,
             url = html_path,
@@ -291,7 +292,7 @@ class WebCanvas:
             hidden = hidden
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        webview.start()
+        webview.start(debug = debug)
         threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
         
         self.web.events.closed += self._destroyed.set
@@ -311,7 +312,12 @@ class WebCanvas:
             self.web.set_title(title)
         
         if checksys.main == "Android":
-            time.sleep(10)
+            while True:
+                try:
+                    self.web._server.address
+                except:
+                    continue
+                break
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)

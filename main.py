@@ -10,8 +10,9 @@ def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect_ex((server_ip, server_port))
     return client_socket
-def main():
+def webcv_start():
     import webcv
+    
     root = webcv.WebCanvas(
         width = 1, height = 1,
         x = 0, y = 0,
@@ -24,16 +25,6 @@ def main():
         jslog = True,
         jslog_path = "./ppr-jslog-nofmt.js"
     )
-    while True:
-        root.run_js_code("console.log('Hello, World!');")
-
-    '''
-    import webview
-    from webcv import JsApi
-    api = JsApi()
-    webview.create_window('Todos magnificos', 'web_canvas.html', js_api=api, min_size=(600, 450))
-    webview.start()
-    '''
 
 client_socket = start_client()
 
@@ -50,7 +41,7 @@ class BufferingHandler(logging.StreamHandler):
         super().__init__(buffer)
 
 handler = BufferingHandler(log_buffer)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S")
 handler.setFormatter(formatter)
 root_logger = logging.getLogger()
 root_logger.handlers = []
@@ -58,7 +49,7 @@ root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(handler)
 
 current_directory = os.getcwd()
-print(f'Current Path: {current_directory}')
+logging.info(f'Current Path: {current_directory}')
 for item in os.listdir(current_directory):
     full_path = os.path.join(current_directory, item)
     
@@ -66,6 +57,12 @@ for item in os.listdir(current_directory):
         print(f"Folder: {item}")
     else:
         print(f"File: {item}")
+
+def main():
+    from multiprocessing import Process, Queue
+    cvClient = Process(target=webcv_start)
+    cvClient.start()
+    cvClient.join()
 
 try:
     import webview
@@ -75,7 +72,6 @@ try:
     sys.path.append(src_dir)
 
     main()
-
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     print(error_message)
