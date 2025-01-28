@@ -1026,7 +1026,7 @@ else:
     Thread(target=Show_Start, daemon=True).start()
     root.wait_for_close()
     tempdir.clearTempDir()
-    windll.kernel32.ExitProcess(0)
+    sys.exit(0)
 
 Thread(target=root.init, args=(init, ), daemon=True).start()
 root.start()
