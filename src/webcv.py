@@ -35,6 +35,7 @@ if checksys.main == "Windows":
 elif checksys.main == 'Android':
     from jnius import autoclass
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
+    autoclass('org.kivy.android.PythonService')
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
     screen_height = metrics.heightPixels
