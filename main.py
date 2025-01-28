@@ -98,29 +98,8 @@ except Exception as e:
     captured_logs = log_buffer.getvalue()
     try:
         import time 
-        client_socket.send("Logging Message:".encode('utf-8'))
-        try:
-            client_socket.send(captured_logs.encode('utf-8'))
-        except:
-            pass
-        client_socket.send("\n".encode('utf-8'))
-        client_socket.send("Error Message:".encode('utf-8'))
-        try:
-            client_socket.send(error_message.encode('utf-8'))
-        except:
-            pass
-        client_socket.send("\n".encode('utf-8'))
-        client_socket.send("Stdout Message:".encode('utf-8'))
-        try:
-            client_socket.send(captured_stdout.encode('utf-8'))
-        except:
-            pass
-        client_socket.send("\n".encode('utf-8'))
-        client_socket.send("Stderr Message:".encode('utf-8'))
-        try:
-            client_socket.send(captured_stderr.encode('utf-8'))
-        except:
-            pass
+        message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
+        client_socket.send(message.encode('utf-8'))
         time.sleep(1)
     except:
         pass
