@@ -3,7 +3,6 @@ import os
 import socket
 import traceback
 import logging
-import subprocess
 
 from android.permissions import request_permissions, Permission # type: ignore
 from io import StringIO
@@ -52,7 +51,9 @@ try:
     src_dir = os.path.join(current_dir, 'src')
     sys.path.append(src_dir)
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
-    subprocess.run([f"{sys.executable}", "main.py", 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez'])
+    
+    sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
+    import main
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     captured_stdout = stdout_buffer.getvalue()
