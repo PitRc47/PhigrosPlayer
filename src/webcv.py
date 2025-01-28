@@ -291,6 +291,7 @@ class WebCanvas:
             hidden = hidden
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
+        webview.start()
         threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
         
         self.web.events.closed += self._destroyed.set
