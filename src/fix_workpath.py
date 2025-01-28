@@ -1,7 +1,10 @@
-import sys
-from os import chdir
-from os.path import abspath, dirname
+import checksys
 
-selfdir = dirname(sys.argv[0])
-if selfdir == "": selfdir = abspath(".")
-chdir(selfdir)
+if checksys.main != 'Android':
+    import sys
+    from os import chdir
+    from os.path import abspath, dirname
+
+    selfdir = dirname(sys.argv[0])
+    if selfdir == "": selfdir = abspath(".")
+    chdir(selfdir)
