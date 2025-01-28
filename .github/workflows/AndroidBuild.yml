@@ -15,7 +15,10 @@ jobs:
         id: cache
         uses: actions/cache@v4
         with:
-          path: .buildozer
+          path: |
+            $HOME/.buildozer
+            $HOME/.local
+            ${{ github.workspace }}/venv
           key: ${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
             ${{ runner.os }}
