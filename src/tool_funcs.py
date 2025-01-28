@@ -1,8 +1,8 @@
 import typing
-import base64
 import random
 import logging
 import time
+import re
 from sys import argv
 from os import environ
 from dataclasses import dataclass
@@ -300,8 +300,23 @@ def getShaderDefault(shader: str):
                 logging.error(f"shader default parse error: {e}")
     return result
 
+def replaceForLoops(shader: str):
+    return shader # emm, TODO: fix this
+
+    def replace(match: re.Match[str]):
+        init_part = match.group(2)
+        condition = match.group(3)
+        increment = match.group(4)
+        body = match.group(5)
+        print(init_part, condition, increment, body)
+        new = f"{{{init_part}; for (int _i = 0; _i < 64; _i++) {{{replaceForLoops(body)}\n{increment}; if (!({condition})) break;}}}}"
+        return new
+    return re.sub(r"(for\s*\((.*?);(.*?);(.*?)\)\s*{([^}]*?)})", replace, shader, flags=re.DOTALL)
+
 def fixShader(shader: str):
     shader = "\n".join(line for line in shader.split("\n") if not line.strip().startswith("#version"))
+    shader = replaceForLoops(shader)
+    
     return shader
 
 class PhigrosPlayManager:

@@ -479,7 +479,7 @@ PhigrosPlayer 是一个项目，使用MIT协议进行开源。
 
 项目的开发贡献者
 qaqFei (Owner)
-星空孤雁 (Introduction 谱面贡献者)
+星空孤雁 (Introduction 谱面谱师)
 """
 
 PHIGROS_SETTING_BAR_WIDTH_MAP = {

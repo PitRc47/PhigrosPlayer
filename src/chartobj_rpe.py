@@ -597,12 +597,15 @@ class Rpe_Chart:
             else: r = m
         return l
     
-    def sec2beat(self, t: float, bpmfactor: float):
+    def sec2beat(self, t: float, bpmfactor: float, BPMList: typing.Optional[list[BPMEvent]] = None):
+        if BPMList is None:
+            BPMList = self.BPMList
+            
         beat = 0.0
-        for i, e in enumerate(self.BPMList):
+        for i, e in enumerate(BPMList):
             bpmv = e.bpm * bpmfactor
-            if i != len(self.BPMList) - 1:
-                et_beat = self.BPMList[i + 1].startTime.value - e.startTime.value
+            if i != len(BPMList) - 1:
+                et_beat = BPMList[i + 1].startTime.value - e.startTime.value
                 et_sec = et_beat * (60 / bpmv)
                 
                 if t >= et_sec:
@@ -615,12 +618,15 @@ class Rpe_Chart:
                 beat += t / (60 / bpmv)
         return beat
     
-    def beat2sec(self, t: float, bpmfactor: float):
+    def beat2sec(self, t: float, bpmfactor: float, BPMList: typing.Optional[list[BPMEvent]] = None):
+        if BPMList is None:
+            BPMList = self.BPMList
+            
         sec = 0.0
-        for i, e in enumerate(self.BPMList):
+        for i, e in enumerate(BPMList):
             bpmv = e.bpm * bpmfactor
-            if i != len(self.BPMList) - 1:
-                et_beat = self.BPMList[i + 1].startTime.value - e.startTime.value
+            if i != len(BPMList) - 1:
+                et_beat = BPMList[i + 1].startTime.value - e.startTime.value
                 
                 if t >= et_beat:
                     sec += et_beat * (60 / bpmv)
@@ -680,21 +686,7 @@ class Extra:
     effects: list[ExtraEffect]
     
     def getValues(self, t: float, isglobal: bool):
-        beat = 0.0
-        for i, e in enumerate(self.bpm):
-            if i != len(self.bpm) - 1:
-                et_beat = self.bpm[i + 1].startTime.value - e.startTime.value
-                et_sec = et_beat * (60 / e.bpm)
-                
-                if t >= et_sec:
-                    beat += et_beat
-                    t -= et_sec
-                else:
-                    beat += t / (60 / e.bpm)
-                    break
-            else:
-                beat += t / (60 / e.bpm)
-        
+        beat = Rpe_Chart.sec2beat(None, t, 1.0, self.bpm)
         result = []
         
         for e in self.effects:

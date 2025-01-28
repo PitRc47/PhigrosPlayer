@@ -477,7 +477,7 @@ def Load_Resource():
             shadernames = list(set(effect.shader for effect in chart_obj.extra.effects))
 
             for name, glsl in shaders.items():
-                # if name not in shadernames: continue
+                if name not in shadernames: continue
                 root.run_js_code(f"mainShaderLoader.load({repr(name)}, {repr(glsl)});")
                 if (glerr := root.run_js_code("GLERR;")) is not None:
                     logging.warning(f"Cannot compile shader {name} due to {glerr}")
