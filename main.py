@@ -26,6 +26,10 @@ def webcv_start():
         jslog_path = "./ppr-jslog-nofmt.js"
     )
 
+    while True:
+        root.run_js_code("console.log('Hello, World!');")
+
+
 client_socket = start_client()
 
 stdout_buffer = StringIO()
