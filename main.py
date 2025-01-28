@@ -58,9 +58,6 @@ for item in os.listdir(current_directory):
     else:
         print(f"File: {item}")
 
-def main():
-    webcv_start()
-
 try:
     import webview
     
@@ -68,7 +65,7 @@ try:
     src_dir = os.path.join(current_dir, 'src')
     sys.path.append(src_dir)
 
-    main()
+    webcv_start()
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     captured_stdout = stdout_buffer.getvalue()
