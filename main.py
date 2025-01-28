@@ -29,23 +29,8 @@ def main():
         root.run_js_code("console.log('Hello, World!');")
     '''
     import webview
-    #from webcv import JsApi
-    class Api:
-        def addItem(self, title):
-            print('Added item %s' % title)
-
-        def removeItem(self, item):
-            print('Removed item %s' % item)
-
-        def editItem(self, item):
-            print('Edited item %s' % item)
-
-        def toggleItem(self, item):
-            print('Toggled item %s' % item)
-
-        def toggleFullscreen(self):
-            webview.windows[0].toggle_fullscreen()
-    api = Api()
+    from webcv import JsApi
+    api = JsApi()
     webview.create_window('Todos magnificos', 'web_canvas.html', js_api=api, min_size=(600, 450))
     webview.start()
 
