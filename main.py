@@ -41,8 +41,7 @@ class BufferingHandler(logging.StreamHandler):
         super().__init__(buffer)
 
 handler = BufferingHandler(log_buffer)
-formatter = logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S")
-handler.setFormatter(formatter)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 root_logger = logging.getLogger()
 root_logger.handlers = []
 root_logger.setLevel(logging.DEBUG)
@@ -71,7 +70,6 @@ try:
     main()
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
-    print(error_message)
     captured_stdout = stdout_buffer.getvalue()
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
