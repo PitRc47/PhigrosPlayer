@@ -29,7 +29,7 @@ def main():
         root.run_js_code("console.log('Hello, World!');")
     '''
     import webview
-    from webcv import JsApi
+    #from webcv import JsApi
     class Api:
         def addItem(self, title):
             print('Added item %s' % title)
