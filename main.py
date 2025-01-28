@@ -45,7 +45,7 @@ class BufferingHandler(logging.StreamHandler):
         super().__init__(buffer)
 
 handler = BufferingHandler(log_buffer)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S")
 handler.setFormatter(formatter)
 root_logger = logging.getLogger()
 root_logger.handlers = []
@@ -53,7 +53,7 @@ root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(handler)
 
 current_directory = os.getcwd()
-print(f'Current Path: {current_directory}')
+logging.info(f'Current Path: {current_directory}')
 for item in os.listdir(current_directory):
     full_path = os.path.join(current_directory, item)
     
