@@ -242,8 +242,7 @@ def ban_threadtest_current_thread():
     obj.name = "MainThread"
     return obj
 
-if checksys.main != 'Android':
-    webview.threading.current_thread = ban_threadtest_current_thread
+webview.threading.current_thread = ban_threadtest_current_thread
 
 class WebCanvas:
     def __init__(
