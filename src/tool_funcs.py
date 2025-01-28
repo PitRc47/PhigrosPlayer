@@ -309,7 +309,7 @@ def replaceForLoops(shader: str):
         increment = match.group(4)
         body = match.group(5)
         print(init_part, condition, increment, body)
-        new = f"{{{init_part}; for (int _i = 0; _i < 64; _i++) {{{replaceForLoops(body)}\n{increment}; if (!({condition})) break;}}}}"
+        new = f"""{{{init_part}; for (int _i = 0; _i < 64; _i++) {{{replaceForLoops(body)}\n{increment}; if (!({condition})) break;}}}}"""
         return new
     return re.sub(r"(for\s*\((.*?);(.*?);(.*?)\)\s*{([^}]*?)})", replace, shader, flags=re.DOTALL)
 
