@@ -10,3 +10,4 @@ record.bin
 ppr-jslog-nofmt.js
 default-argvs.json
 venv/
+.buildozer/
