@@ -164,6 +164,16 @@ class Note:
             return cachedata
         
         return callback
+
+    def dump(self):
+        return {
+            "type": self.type,
+            "time": self.time,
+            "holdTime": self.holdTime,
+            "positionX": self.positionX,
+            "speed": self.speed,
+            "floorPosition": self.floorPosition
+        }
     
 @dataclass
 class speedEvent:
@@ -171,6 +181,14 @@ class speedEvent:
     endTime: float
     value: float
     floorPosition: float|None = None
+    
+    def dump(self):
+        return {
+            "startTime": self.startTime,
+            "endTime": self.endTime,
+            "value": self.value,
+            "floorPosition": self.floorPosition
+        }
 
 @dataclass
 class judgeLineMoveEvent:
@@ -180,6 +198,16 @@ class judgeLineMoveEvent:
     end: float
     start2: float
     end2: float
+    
+    def dump(self):
+        return {
+            "startTime": self.startTime,
+            "endTime": self.endTime,
+            "start": self.start,
+            "end": self.end,
+            "start2": self.start2,
+            "end2": self.end2
+        }
 
 @dataclass
 class judgeLineRotateEvent:
@@ -187,6 +215,14 @@ class judgeLineRotateEvent:
     endTime: float
     start: float
     end: float
+    
+    def dump(self):
+        return {
+            "startTime": self.startTime,
+            "endTime": self.endTime,
+            "start": self.start,
+            "end": self.end
+        }
 
 @dataclass
 class judgeLineDisappearEvent:
@@ -194,6 +230,14 @@ class judgeLineDisappearEvent:
     endTime: float
     start: float
     end: float
+    
+    def dump(self):
+        return {
+            "startTime": self.startTime,
+            "endTime": self.endTime,
+            "start": self.start,
+            "end": self.end
+        }
 
 @dataclass
 class judgeLine:
@@ -271,6 +315,17 @@ class judgeLine:
     def getMove(self, now_time, w, h):
         raw = self._getMoveRaw(now_time)
         return (raw[0] * w, (1.0 - raw[1]) * h)
+    
+    def dump(self):
+        return {
+            "bpm": self.bpm,
+            "notesAbove": [n.dump() for n in self.notesAbove],
+            "notesBelow": [n.dump() for n in self.notesBelow],
+            "speedEvents": [e.dump() for e in self.speedEvents],
+            "judgeLineMoveEvents": [e.dump() for e in self.judgeLineMoveEvents],
+            "judgeLineRotateEvents": [e.dump() for e in self.judgeLineRotateEvents],
+            "judgeLineDisappearEvents": [e.dump() for e in self.judgeLineDisappearEvents]
+        }
 
 @dataclass
 class Phigros_Chart:
@@ -352,6 +407,13 @@ class Phigros_Chart:
             if self.combotimes[m] < t: l = m + 1
             else: r = m
         return l
+
+    def dump(self):
+        return {
+            "formatVersion": 3,
+            "offset": 0.0,
+            "judgeLineList": [line.dump() for line in self.judgeLineList]
+        }
     
 class PPLMPHI_Proxy(tool_funcs.PPLM_ProxyBase):
     def __init__(self, cobj: Phigros_Chart): self.cobj = cobj
