@@ -533,9 +533,10 @@ def checkOffset(now_t: float):
         updateCoreConfig()
 
 def getLfdaotFuncs():
+    _getfuncs = lambda obj: {fn: getattr(obj, fn) for fn in dir(obj) if not fn.startswith("_")}
     maps = [
-        {fn: getattr(root, fn) for fn in dir(root)},
-        {fn: getattr(phicore, fn) for fn in dir(phicore)},
+        _getfuncs(root),
+        _getfuncs(phicore)
     ]
     result = {k: v for i in maps for k, v in i.items()}
     
