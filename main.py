@@ -48,6 +48,16 @@ root_logger.handlers = []
 root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(handler)
 
+current_directory = os.getcwd()
+print(f'Current Path: {current_directory}')
+for item in os.listdir(current_directory):
+    full_path = os.path.join(current_directory, item)
+    
+    if os.path.isdir(full_path):
+        print(f"Folder: {item}")
+    else:
+        print(f"File: {item}")
+
 try:
     import webview
 
