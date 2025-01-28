@@ -744,6 +744,7 @@ def PlayerStart():
             with open(fp,"r",encoding="utf-8") as f:
                 data = json.load(f)
             frame_speed = data["meta"]["frame_speed"]
+            frame_time = 1 / frame_speed
             allframe_num = data["meta"]["frame_num"]
             
             funcmap = getLfdaotFuncs()
@@ -762,7 +763,7 @@ def PlayerStart():
                         ExTask = tuple(Task_data["ex"])
                     )
                 })
-            if data["meta"]["size"] != [w,h]:
+            if data["meta"]["size"] != [w, h]:
                 logging.warning("The size of the lfdaot file is not the same as the size of the window")
         
         if not lfdaot_render_video:
