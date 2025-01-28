@@ -3,6 +3,7 @@ import os
 import socket
 import traceback
 import logging
+import subprocess
 
 from io import StringIO
 
@@ -10,25 +11,6 @@ def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect_ex((server_ip, server_port))
     return client_socket
-def webcv_start():
-    import webcv
-    
-    root = webcv.WebCanvas(
-        width = 1, height = 1,
-        x = 0, y = 0,
-        title = "PhigrosPlayer - Simulator",
-        debug = False,
-        resizable = False,
-        frameless = False,
-        renderdemand = False,
-        renderasync = False,
-        jslog = True,
-        jslog_path = "./ppr-jslog-nofmt.js"
-    )
-
-    while True:
-        root.run_js_code("console.log('Hello, World!');")
-
 
 client_socket = start_client()
 
@@ -69,7 +51,7 @@ try:
     src_dir = os.path.join(current_dir, 'src')
     sys.path.append(src_dir)
 
-    webcv_start()
+    subprocess.run([f"{sys.executable}", "main.py", 'file:///Adastraperaspera.RabbitHouse.0-IN.pez'])
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     captured_stdout = stdout_buffer.getvalue()
