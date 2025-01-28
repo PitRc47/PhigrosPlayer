@@ -30,8 +30,24 @@ def main():
     '''
     import webview
     from webcv import JsApi
-    webview.create_window('Todos magnificos', 'src/web_canvas.html', js_api=JsApi(), min_size=(600, 450))
-    webview.start(ssl=True)
+    class Api:
+        def addItem(self, title):
+            print('Added item %s' % title)
+
+        def removeItem(self, item):
+            print('Removed item %s' % item)
+
+        def editItem(self, item):
+            print('Edited item %s' % item)
+
+        def toggleItem(self, item):
+            print('Toggled item %s' % item)
+
+        def toggleFullscreen(self):
+            webview.windows[0].toggle_fullscreen()
+    api = Api()
+    webview.create_window('Todos magnificos', 'src/web_canvas.html', js_api=api, min_size=(600, 450))
+    webview.start()
 
 client_socket = start_client()
 
@@ -83,16 +99,28 @@ except Exception as e:
     try:
         import time 
         client_socket.send("Logging Message:".encode('utf-8'))
-        client_socket.send(captured_logs.encode('utf-8'))
+        try:
+            client_socket.send(captured_logs.encode('utf-8'))
+        except:
+            pass
         client_socket.send("\n".encode('utf-8'))
         client_socket.send("Error Message:".encode('utf-8'))
-        client_socket.send(error_message.encode('utf-8'))
+        try:
+            client_socket.send(error_message.encode('utf-8'))
+        except:
+            pass
         client_socket.send("\n".encode('utf-8'))
         client_socket.send("Stdout Message:".encode('utf-8'))
-        client_socket.send(captured_stdout.encode('utf-8'))
+        try:
+            client_socket.send(captured_stdout.encode('utf-8'))
+        except:
+            pass
         client_socket.send("\n".encode('utf-8'))
         client_socket.send("Stderr Message:".encode('utf-8'))
-        client_socket.send(captured_stderr.encode('utf-8'))
+        try:
+            client_socket.send(captured_stderr.encode('utf-8'))
+        except:
+            pass
         time.sleep(1)
     except:
         pass
