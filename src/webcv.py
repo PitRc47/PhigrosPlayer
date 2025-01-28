@@ -304,7 +304,7 @@ class WebCanvas:
                     time.sleep(0.01)
             self.web.set_title(title)
         
-        if checksys.main == "Android":
+        else:
             while True:
                 try:
                     self.web._server.address
