@@ -11,7 +11,6 @@ def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket.connect_ex((server_ip, server_port))
     return client_socket
 def main():
-    '''
     import webcv
     root = webcv.WebCanvas(
         width = 1, height = 1,
@@ -27,12 +26,14 @@ def main():
     )
     while True:
         root.run_js_code("console.log('Hello, World!');")
+
     '''
     import webview
     from webcv import JsApi
     api = JsApi()
     webview.create_window('Todos magnificos', 'web_canvas.html', js_api=api, min_size=(600, 450))
     webview.start()
+    '''
 
 client_socket = start_client()
 

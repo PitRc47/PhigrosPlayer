@@ -278,9 +278,11 @@ class WebCanvas:
         self.jslog_path = jslog_path
         self.jslog_f = open(jslog_path, "w", encoding="utf-8") if self.jslog else None
         
+        if checksys.main != 'Android':
+            html_path = abspath(html_path)
         self.web = webview.create_window(
             title = title,
-            url = abspath(html_path),
+            url = html_path,
             resizable = resizable,
             js_api = self.jsapi,
             frameless = frameless,
