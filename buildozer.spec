@@ -13,10 +13,10 @@ package.domain = org.qaqFei.PhigrosPlayer
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,html,js,properties
+#source.include_exts = py,html,js,properties
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = src/*, src/resources/**/*
+source.include_patterns = src/*, src/resources/**/*, lib/pywebview-android.jar
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
