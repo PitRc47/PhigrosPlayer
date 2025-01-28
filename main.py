@@ -42,6 +42,7 @@ class BufferingHandler(logging.StreamHandler):
 
 handler = BufferingHandler(log_buffer)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 root_logger = logging.getLogger()
 root_logger.handlers = []
 root_logger.setLevel(logging.DEBUG)
