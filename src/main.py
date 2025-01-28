@@ -1,56 +1,55 @@
-import err_processer as _
-import init_logging as _
-import fix_workpath as _
-import import_argvs as _
-import check_edgechromium as _
-
-import zipfile
-import json
-import sys
-import time
-import logging
-import typing
-from threading import Thread
-from os import popen, add_dll_directory
-from os.path import exists
-from ntpath import basename
-
-import cv2
-import requests
-from PIL import Image, ImageFilter, ImageEnhance
-from pydub import AudioSegment
-
-import webcv
-import dxsound
-import chartobj_phi
-import chartobj_rpe
-import chartfuncs_phi
-import chartfuncs_rpe
-import const
-import console_window
-import tool_funcs
-import dialog
-import info_loader
-import ppr_help
-import binfile
-import file_loader
-import phira_resource_pack
-import phicore
-import tempdir
-import socket_webviewbridge
-import wcv2matlike
-import needrelease
-import checksys
-
-if checksys.main == 'Windows':
-    from ctypes import windll
-
-from dxsmixer import mixer
-from graplib_webview import *
-
-import load_extended as _
-
 def pprMain():
+    import err_processer as _
+    import init_logging as _
+    import fix_workpath as _
+    import import_argvs as _
+    import check_edgechromium as _
+
+    import zipfile
+    import json
+    import sys
+    import time
+    import logging
+    import typing
+    from threading import Thread
+    from os import popen, add_dll_directory
+    from os.path import exists
+    from ntpath import basename
+
+    import cv2
+    import requests
+    from PIL import Image, ImageFilter, ImageEnhance
+    from pydub import AudioSegment
+
+    import webcv
+    import dxsound
+    import chartobj_phi
+    import chartobj_rpe
+    import chartfuncs_phi
+    import chartfuncs_rpe
+    import const
+    import console_window
+    import tool_funcs
+    import dialog
+    import info_loader
+    import ppr_help
+    import binfile
+    import file_loader
+    import phira_resource_pack
+    import phicore
+    import tempdir
+    import socket_webviewbridge
+    import wcv2matlike
+    import needrelease
+    import checksys
+
+    if checksys.main == 'Windows':
+        from ctypes import windll
+
+    from dxsmixer import mixer
+    from graplib_webview import *
+
+    import load_extended as _
     add_dll_directory('../lib')
 
     if len(sys.argv) == 1:
@@ -1032,4 +1031,5 @@ def pprMain():
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
 
-pprMain()
+if __name__ == "__main__":
+    pprMain()
