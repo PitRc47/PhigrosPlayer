@@ -9,3 +9,4 @@ record.bin
 .vscode
 ppr-jslog-nofmt.js
 default-argvs.json
+venv/
