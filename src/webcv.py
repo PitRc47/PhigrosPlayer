@@ -24,8 +24,6 @@ from PIL import Image
 
 import graplib_webview
 
-current_thread = threading.current_thread
-
 screen_width = None
 screen_height = None
 if checksys.main == "Windows":
