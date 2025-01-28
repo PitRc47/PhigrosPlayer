@@ -59,10 +59,7 @@ for item in os.listdir(current_directory):
         print(f"File: {item}")
 
 def main():
-    from multiprocessing import Process, Queue
-    cvClient = Process(target=webcv_start)
-    cvClient.start()
-    cvClient.join()
+    webcv_start()
 
 try:
     import webview
