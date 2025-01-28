@@ -271,7 +271,7 @@ class WebCanvas:
         if checksys.main != 'Android':
             html_path = abspath(html_path)
         else:
-            html_path = 'file:///web_canvas.html'
+            html_path = './web_canvas.html'
         self.web = webview.create_window(
             title = title,
             url = html_path,
@@ -282,7 +282,7 @@ class WebCanvas:
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug)
+        self.start = lambda: webview.start()
         # threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
     
     def _init(self, width: int, height: int, x: int, y: int):
