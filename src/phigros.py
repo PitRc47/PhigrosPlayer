@@ -3843,48 +3843,58 @@ root = webcv.WebCanvas(
     resizable = "--resizeable" in sys.argv,
     frameless = "--frameless" in sys.argv
 )
-webdpr = root.run_js_code("window.devicePixelRatio;")
-root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
 
-if "--fullscreen" in sys.argv:
-    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-    root.resize(w, h)
-    root.web.toggle_fullscreen()
-    dw_legacy, dh_legacy = 0, 0
-else:
-    if "--size" not in sys.argv:
-        w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
-    else:
-        w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
-    winw, winh = (
-        w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
-        h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
-    )
-    root.resize(winw, winh)
-    w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-    dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
-    dw_legacy *= webdpr; dh_legacy *= webdpr
-    dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
-    del w_legacy, h_legacy
-    root.resize(winw + dw_legacy, winh + dh_legacy)
-    root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
-
-w *= webdpr; h *= webdpr; w = int(w); h = int(h)
-
-root.reg_event("resized", resize)
-root.run_js_code(f"resizeCanvas({w}, {h});")
-
-if "--window-host" in sys.argv and checksys.main == 'Windows':
-    from ctypes import windll
-    windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
-
-Load_Chapters()
-Resource = Load_Resource()
-eventManager = phigame_obj.EventManager()
-bindEvents()
-updateFontSizes()
-applyConfig()
-Thread(target=showStartAnimation, daemon=True).start()
+def init():
+    global webdpr
+    global dw_legacy, dh_legacy
+    global w, h
+    global Resource, eventManager
     
-root.wait_for_close()
-sys.exit(0)
+    webdpr = root.run_js_code("window.devicePixelRatio;")
+    root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
+
+    if "--fullscreen" in sys.argv:
+        w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+        root.resize(w, h)
+        root.web.toggle_fullscreen()
+        dw_legacy, dh_legacy = 0, 0
+    else:
+        if "--size" not in sys.argv:
+            w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+        else:
+            w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
+        winw, winh = (
+            w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
+            h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
+        )
+        root.resize(winw, winh)
+        w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+        dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
+        dw_legacy *= webdpr; dh_legacy *= webdpr
+        dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
+        del w_legacy, h_legacy
+        root.resize(winw + dw_legacy, winh + dh_legacy)
+        root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
+
+    w *= webdpr; h *= webdpr; w = int(w); h = int(h)
+
+    root.reg_event("resized", resize)
+    root.run_js_code(f"resizeCanvas({w}, {h});")
+
+    if "--window-host" in sys.argv and checksys.main == 'Windows':
+        import windll
+        windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
+
+    Load_Chapters()
+    Resource = Load_Resource()
+    eventManager = phigame_obj.EventManager()
+    bindEvents()
+    updateFontSizes()
+    applyConfig()
+    Thread(target=showStartAnimation, daemon=True).start()
+        
+    root.wait_for_close()
+    sys.exit(0)
+
+Thread(target=root.init, args=(init, ), daemon=True).start()
+root.start()

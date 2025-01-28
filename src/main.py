@@ -956,16 +956,23 @@ root = webcv.WebCanvas(
     jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "./ppr-jslog-nofmt.js"
 )
 
-if disengage_webview:
-    socket_webviewbridge.hook(root)
+def init():
+    global disengage_webview
+    global webdpr
+    global lowquality, lowquality_scale
+    global w, h
+    global Resource
+    
+    if disengage_webview:
+        socket_webviewbridge.hook(root)
 
-webdpr = root.run_js_code("window.devicePixelRatio;")
-if webdpr != 1.0:
-    lowquality = True
-    lowquality_scale *= 1.0 / webdpr # ...?
+    webdpr = root.run_js_code("window.devicePixelRatio;")
+    if webdpr != 1.0:
+        lowquality = True
+        lowquality_scale *= 1.0 / webdpr # ...?
 
-if lowquality:
-    root.run_js_code(f"lowquality_scale = {lowquality_scale};")
+    if lowquality:
+        root.run_js_code(f"lowquality_scale = {lowquality_scale};")
 
 if disengage_webview:
     w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
@@ -975,42 +982,51 @@ else:
     if "--fullscreen" in sys.argv:
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.web.toggle_fullscreen()
+    if disengage_webview:
+        w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
     else:
-        if "--size" not in sys.argv:
-            w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+        if "--window-host" in sys.argv:
+            windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
+        if "--fullscreen" in sys.argv:
+            w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+            root.web.toggle_fullscreen()
         else:
-            w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
-            
-        winw, winh = (
-            w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
-            h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
-        )
-        root.resize(winw, winh)
-        w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-        dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
-        dw_legacy *= webdpr; dh_legacy *= webdpr
-        dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
-        del w_legacy, h_legacy
-        root.resize(winw + dw_legacy, winh + dh_legacy)
-        root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
+            if "--size" not in sys.argv:
+                w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+            else:
+                w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
+                
+            winw, winh = (
+                w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
+                h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
+            )
+            root.resize(winw, winh)
+            w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+            dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
+            dw_legacy *= webdpr; dh_legacy *= webdpr
+            dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
+            del w_legacy, h_legacy
+            root.resize(winw + dw_legacy, winh + dh_legacy)
+            root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
 
-w *= webdpr; h *= webdpr; w = int(w); h = int(h)
+    w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 
-root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
-root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
-root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
-root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
-root.run_js_code(f"resizeCanvas({w}, {h});")
-Resource = Load_Resource()
+    root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
+    root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
+    root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
+    root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
+    root.run_js_code(f"resizeCanvas({w}, {h});")
+    Resource = Load_Resource()
 
-if wl_more_chinese:
-    root.run_js_code("setWlMoreChinese();")
+    if wl_more_chinese:
+        root.run_js_code("setWlMoreChinese();")
 
-updateCoreConfig()
+    updateCoreConfig()
 
-Thread(target=Show_Start, daemon=True).start()
-root.wait_for_close()
+    Thread(target=Show_Start, daemon=True).start()
+    root.wait_for_close()
+    tempdir.clearTempDir()
+    windll.kernel32.ExitProcess(0)
 
-tempdir.clearTempDir()
-
-sys.exit(0)
+Thread(target=root.init, args=(init, ), daemon=True).start()
+root.start()

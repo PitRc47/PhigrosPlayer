@@ -237,14 +237,6 @@ class PILResourcePacker:
             
         self.cv.run_js_code(f"""{";".join(map(lambda x: f"delete {self.cv.get_img_jsvarname(x)}", names))};""")
 
-def ban_threadtest_current_thread():
-    obj = current_thread()
-    obj.name = "MainThread"
-    return obj
-
-if checksys.main != 'Android':
-    webview.threading.current_thread = ban_threadtest_current_thread
-
 class WebCanvas:
     def __init__(
         self,
@@ -292,9 +284,13 @@ class WebCanvas:
             hidden = hidden
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        webview.start(debug = debug)
-        threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
-        
+        self.init = lambda func: (self._init(width, height, x, y), func())
+        self.start = lambda: webview.start(debug)
+        # threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
+    
+    def _init(self, width: int, height: int, x: int, y: int):
+        self.web.resize(width, height)
+        self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
         
         if checksys.main != 'Android':
