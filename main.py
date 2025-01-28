@@ -65,6 +65,9 @@ except Exception as e:
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
     try:
+        client_socket.send("Logging Message:".encode('utf-8'))
+        client_socket.send(captured_logs.encode('utf-8'))
+        client_socket.send("\n".encode('utf-8'))
         client_socket.send("Error Message:".encode('utf-8'))
         client_socket.send(error_message.encode('utf-8'))
         client_socket.send("\n".encode('utf-8'))
@@ -73,8 +76,5 @@ except Exception as e:
         client_socket.send("\n".encode('utf-8'))
         client_socket.send("Stderr Message:".encode('utf-8'))
         client_socket.send(captured_stderr.encode('utf-8'))
-        client_socket.send("\n".encode('utf-8'))
-        client_socket.send("Logging Message:".encode('utf-8'))
-        client_socket.send(captured_logs.encode('utf-8'))
     except:
         pass
