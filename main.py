@@ -45,7 +45,7 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 root_logger = logging.getLogger()
 root_logger.handlers = []
-root_logger.setLevel(logging.DEBUG)  # 设置最低日志级别为DEBUG
+root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(handler)
 
 try:
