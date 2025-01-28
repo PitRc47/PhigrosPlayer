@@ -448,7 +448,7 @@ def pack_charts(infos: list[dict], rpe: bool):
 if __name__ == "__main__":
     from sys import argv
 
-    add_dll_directory('../dll')
+    add_dll_directory('../lib')
     if len(argv) < 2:
         print("Usage: tool-unpack <apk>")
         raise SystemExit

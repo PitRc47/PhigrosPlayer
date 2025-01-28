@@ -50,7 +50,7 @@ from graplib_webview import *
 
 import load_extended as _
 
-add_dll_directory('../dll')
+add_dll_directory('../lib')
 
 if len(sys.argv) == 1:
     print(ppr_help.HELP_ZH)

@@ -26,7 +26,7 @@ source.exclude_dirs = src/__pycache__
 
 # (list) List of exclusions using pattern matching
 # Do not prefix with './'
-source.exclude_patterns = dll/*, bin/*, src/gui_launcher.py
+source.exclude_patterns = lib/*, bin/*, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
 version = 0.3
@@ -174,7 +174,7 @@ android.service_class_name = org.kivy.android.PythonService
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
-android.add_jars = ./pywebview-android.jar
+android.add_jars = lib/pywebview-android.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)

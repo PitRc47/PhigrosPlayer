@@ -16,7 +16,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev
           sudo apt-get install -y zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          curl -LJO https://github.com/r0x0r/pywebview/raw/master/webview/lib/pywebview-android.jar
       - name: Set Up JDK 17
         uses: actions/setup-java@v4.6.0
         with:
@@ -31,15 +30,12 @@ jobs:
           pip3 install --upgrade pip
           pip3 install --user --upgrade virtualenv 
           export PATH=$PATH:~/.local/bin/
-      
       - name: Build Android
         run: |
           python3 -m virtualenv venv
           source venv/bin/activate
           pip3 install Cython==0.29.33 buildozer wheel setuptools
           buildozer android debug
-        env:
-         GRADLE_USER_HOME: ~/.gradle/
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.0
         with:
