@@ -46,7 +46,7 @@ def main():
         def toggleFullscreen(self):
             webview.windows[0].toggle_fullscreen()
     api = Api()
-    webview.create_window('Todos magnificos', 'src/web_canvas.html', js_api=api, min_size=(600, 450))
+    webview.create_window('Todos magnificos', 'web_canvas.html', js_api=api, min_size=(600, 450))
     webview.start()
 
 client_socket = start_client()
@@ -88,7 +88,6 @@ try:
     src_dir = os.path.join(current_dir, 'src')
     sys.path.append(src_dir)
 
-    import webcv
     main()
 
 except Exception as e:
