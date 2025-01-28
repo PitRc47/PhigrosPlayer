@@ -11,6 +11,8 @@ def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket.connect_ex((server_ip, server_port))
     return client_socket
 def main():
+    '''
+    import webcv
     root = webcv.WebCanvas(
         width = 1, height = 1,
         x = 0, y = 0,
@@ -25,6 +27,11 @@ def main():
     )
     while True:
         root.run_js_code("console.log('Hello, World!');")
+    '''
+    import webview
+    from webcv import JsApi
+    webview.create_window('Todos magnificos', 'src/web_canvas.html', js_api=JsApi(), min_size=(600, 450))
+    webview.start(ssl=True)
 
 client_socket = start_client()
 
@@ -65,7 +72,6 @@ try:
     src_dir = os.path.join(current_dir, 'src')
     sys.path.append(src_dir)
 
-    import webcv
     main()
 
 except Exception as e:
