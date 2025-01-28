@@ -2,6 +2,9 @@ import sys
 import os
 import socket
 import traceback
+import logging
+
+from io import StringIO
 
 def start_client(server_ip='192.168.1.28', server_port=7878):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,6 +27,27 @@ def main():
         root.run_js_code("console.log('Hello, World!');")
 
 client_socket = start_client()
+
+stdout_buffer = StringIO()
+stderr_buffer = StringIO()
+
+sys.stdout = stdout_buffer
+sys.stderr = stderr_buffer
+
+log_buffer = StringIO()
+
+class BufferingHandler(logging.StreamHandler):
+    def __init__(self, buffer):
+        super().__init__(buffer)
+
+handler = BufferingHandler(log_buffer)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root_logger = logging.getLogger()
+root_logger.handlers = []
+root_logger.setLevel(logging.DEBUG)  # 设置最低日志级别为DEBUG
+root_logger.addHandler(handler)
+
 try:
     import webview
 
@@ -37,7 +61,20 @@ try:
 except Exception as e:
     error_message = f"Error occurred: {traceback.format_exc()}"
     print(error_message)
+    captured_stdout = stdout_buffer.getvalue()
+    captured_stderr = stderr_buffer.getvalue()
+    captured_logs = log_buffer.getvalue()
     try:
+        client_socket.send("Error Message:".encode('utf-8'))
         client_socket.send(error_message.encode('utf-8'))
+        client_socket.send("\n".encode('utf-8'))
+        client_socket.send("Stdout Message:".encode('utf-8'))
+        client_socket.send(captured_stdout.encode('utf-8'))
+        client_socket.send("\n".encode('utf-8'))
+        client_socket.send("Stderr Message:".encode('utf-8'))
+        client_socket.send(captured_stderr.encode('utf-8'))
+        client_socket.send("\n".encode('utf-8'))
+        client_socket.send("Logging Message:".encode('utf-8'))
+        client_socket.send(captured_logs.encode('utf-8'))
     except:
         pass
