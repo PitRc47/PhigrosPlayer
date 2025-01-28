@@ -985,7 +985,7 @@ else:
     if disengage_webview:
         w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
     else:
-        if "--window-host" in sys.argv:
+        if "--window-host" in sys.argv and checksys.main == 'Windows':
             windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
         if "--fullscreen" in sys.argv:
             w, h = root.winfo_screenwidth(), root.winfo_screenheight()
