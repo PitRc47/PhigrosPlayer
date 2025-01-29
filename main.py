@@ -53,7 +53,7 @@ try:
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
     
     sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
-    from main import pprMain
+    from orig import pprMain
 
     pprMain()
 except Exception as e:
