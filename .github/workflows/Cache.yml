@@ -1,13 +1,10 @@
-name: 1
+name: Cache Download
 
 on:
-  push:
-    branches:
-      - Dev-Android
   workflow_dispatch:
 
 jobs:
-  build:
+  download:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +17,7 @@ jobs:
           key: ${{ runner.os }}
           restore-keys: |
             ${{ runner.os }}
-      - name: Upload APK
+      - name: Upload Cache Artifact
         uses: actions/upload-artifact@v4.6.0
         with:
           path: .buildozer/
