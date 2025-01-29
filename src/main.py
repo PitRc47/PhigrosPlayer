@@ -47,7 +47,7 @@ def pprMain():
         from ctypes import windll
 
     from dxsmixer import mixer
-    from graplib_webview import *
+    from graplib_webview import setCtx, getCtx, setOrder, getOrder, clearCanvas, drawLine, drawText, drawPolygon, drawImage, drawAlphaImage, drawRotateImage
 
     import load_extended as _
     add_dll_directory('../lib')
