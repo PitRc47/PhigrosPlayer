@@ -16,7 +16,7 @@ source.dir = src
 #source.include_exts = py,html,js,properties
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = src/*, src/resources/**/*, lib/opencv-library/**/*
+source.include_patterns = src/*, src/resources/**/*
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -37,7 +37,7 @@ version = 0.5
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pywebview==5.4,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv-python-headless,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets
+requirements = python3,kivy,pywebview==5.4,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv,opencv-python-headless,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
