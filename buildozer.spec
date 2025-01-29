@@ -29,7 +29,7 @@ source.exclude_dirs = src/__pycache__
 source.exclude_patterns = lib/*, bin/*, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
-version = 0.4
+version = 0.5
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]

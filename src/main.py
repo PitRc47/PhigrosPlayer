@@ -15,8 +15,7 @@ import socket
 import traceback
 from threading import Thread
 from os import popen
-from os.path import exists
-from ntpath import basename
+from os.path import exists, basename
 
 import cv2
 import requests
