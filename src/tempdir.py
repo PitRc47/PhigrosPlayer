@@ -30,7 +30,7 @@ def clearTempDir():
         return
     
     for item in [
-        f"{gettempdir()}\\{item}"
+        f"{gettempdir()}/{item}"
         for item in listdir(gettempdir())
         if item.startswith("qfppr_cctemp_") and THIS_ID not in item
     ]:
