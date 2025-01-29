@@ -282,8 +282,7 @@ class WebCanvas:
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug)
-        # threading.Thread(target=webview.start, kwargs={"debug": debug}, daemon=True).start()
+        self.start = lambda: webview.start(debug=debug)
     
     def _init(self, width: int, height: int, x: int, y: int):
         self.web.resize(width, height)

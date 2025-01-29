@@ -413,7 +413,7 @@ class JudgeLine:
         lineText = self.getEventValue(t, self.extended.textEvents, None) if lineAlpha > 0.0 and self.extended else None
         lineColor = (
             (255, 255, 255)
-            if (self.extended and self.extended.textEvents) or self.attachUI else
+            if self.Texture != "line.png" or self.attachUI or (self.extended and self.extended.textEvents) else
             defaultColor
         )
         linePos = self.GetPos(t)

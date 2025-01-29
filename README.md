@@ -40,7 +40,7 @@
     - [x] isCover
     - [x] isGif
     - [x] eventLayers
-      - [ ] gifEvents
+      - [ ] gifEvents (???)
       - [x] alphaEvents
       - [x] moveXEvents
       - [x] moveYEvents
@@ -69,7 +69,7 @@
     - [x] alphaControl (可能有bug)
     - [x] posControl (可能有bug)
     - [x] sizeControl (可能有bug)
-    - [ ] skewControl
+    - [ ] skewControl (???)
     - [x] yControl (可能有bug)
     - [x] zOrder
 - [x] pec
