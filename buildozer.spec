@@ -16,7 +16,7 @@ source.dir = src
 #source.include_exts = py,html,js,properties
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = src/*, src/resources/**/*, lib/opencv-library/**
+source.include_patterns = src/*, src/resources/**/*, lib/opencv-library/*
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
