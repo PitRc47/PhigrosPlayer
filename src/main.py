@@ -24,47 +24,19 @@ from pydub import AudioSegment
 from io import StringIO
 
 import checksys
-import webcv
-import dxsound
-import chartobj_phi
-import chartobj_rpe
-import chartfuncs_phi
-import chartfuncs_rpe
-import const
-import console_window
-import tool_funcs
-import dialog
-import info_loader
-import ppr_help
-import binfile
-import file_loader
-import phira_resource_pack
-import phicore
-import tempdir
-import socket_webviewbridge
-import wcv2matlike
-import needrelease
 
 if checksys.main == 'Windows':
     from ctypes import windll
+
 if checksys.main == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
     time.sleep(0.5)
 
-from dxsmixer import mixer
-from graplib_webview import *
-import load_extended as _
-
-
-def start_client(server_ip='192.168.1.28', server_port=7878):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect_ex((server_ip, server_port))
-    return client_socket
-
 if checksys.main == 'Android':
     if True:
-        client_socket = start_client()
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect_ex(('192.168.1.28', 7878))
 
         stdout_buffer = StringIO()
         stderr_buffer = StringIO()
@@ -96,7 +68,34 @@ if checksys.main == 'Android':
                 logging.info(f"File: {item}")
         sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
 
+from graplib_webview import *
+import load_extended as _
+
+
 def main():
+    import webcv
+    import dxsound
+    import chartobj_phi
+    import chartobj_rpe
+    import chartfuncs_phi
+    import chartfuncs_rpe
+    import const
+    import console_window
+    import tool_funcs
+    import dialog
+    import info_loader
+    import ppr_help
+    import binfile
+    import file_loader
+    import phira_resource_pack
+    import phicore
+    import tempdir
+    import socket_webviewbridge
+    import wcv2matlike
+    import needrelease
+
+    from dxsmixer import mixer
+
     if checksys.main == 'Windows':
         from os import add_dll_directory
         add_dll_directory('../lib')
