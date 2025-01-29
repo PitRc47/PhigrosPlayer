@@ -16,7 +16,7 @@ source.dir = src
 #source.include_exts = py,html,js,properties
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = src/*, src/resources/**/*, .buildozer/android/platform/build-armeabi-v7a_arm64-v8a/dists/PhigrosPlayer/_python_bundle__arm64-v8a/_python_bundle/site-packages/cv2
+source.include_patterns = src/*, src/resources/**/*
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
