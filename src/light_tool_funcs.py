@@ -252,11 +252,11 @@ def getCenterPointByRect(rect: tuple[float, float, float, float]):
     return (rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2
     
 def getAllFiles(path: str) -> list[str]:
+    files = []
     if checksys.main != 'Android':
         if path[-1] == "/" or path[:-1] == "\\":
             path = path[:-1]
         path = path.replace("/", "\\")
-        files = []
     for item in listdir(path):
         if isfile(f"{path}/{item}"):
             files.append(f"{path}/{item}")
