@@ -74,11 +74,11 @@ for mod in modlist:
             
             chart = json.load(open(mod["content_path"], "r", encoding="utf-8"))
             if "META" in chart:
-                rpe2phi = input("rpe2phi runner: ").replace("/", "\\")
+                rpe2phi = input("rpe2phi runner: ")
                 print(f'Mod {mod["name"]} is rpe format, converting...')
                 tdir = tempdir.createTempDir()
-                popen(f'{rpe2phi} \"{mod["content_path"]}\" \"{tdir}\\chart.json\"').read()
-                chart = json.load(open(f"{tdir}\\chart.json", "r", encoding="utf-8"))
+                popen(f'{rpe2phi} \"{mod["content_path"]}\" \"{tdir}/chart.json\"').read()
+                chart = json.load(open(f"{tdir}/chart.json", "r", encoding="utf-8"))
             content = json.dumps(chart, ensure_ascii=False).encode("utf-8")
             
             bundle = loadbundle(exiitem["fn"])
