@@ -441,10 +441,10 @@ def main():
                 if line.Texture == "line.png": continue
                 if not line.isGif:
                     paths = [
-                        f"{temp_dir}\\{line.Texture}",
-                        f"{temp_dir}\\{line.Texture}.png",
-                        f"{temp_dir}\\{line.Texture}.jpg",
-                        f"{temp_dir}\\{line.Texture}.jpeg"
+                        f"{temp_dir}/{line.Texture}",
+                        f"{temp_dir}/{line.Texture}.png",
+                        f"{temp_dir}/{line.Texture}.jpg",
+                        f"{temp_dir}/{line.Texture}.jpeg"
                     ]
                     
                     for p in paths:

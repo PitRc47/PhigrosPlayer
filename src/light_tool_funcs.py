@@ -254,8 +254,6 @@ def getCenterPointByRect(rect: tuple[float, float, float, float]):
 def getAllFiles(path: str) -> list[str]:
     if path[-1] == "/" or path[:-1] == "\\":
         path = path[:-1]
-    if checksys.main == 'Windows':
-        path = path.replace("/", "\\")
     
     files = []
     for item in listdir(path):
