@@ -271,7 +271,7 @@ class WebCanvas:
         if checksys.main != 'Android':
             html_path = abspath(html_path)
         else:
-            html_path = 'file:///web_canvas.html'
+            html_path = 'web_canvas.html'
         self.web = webview.create_window(
             title = title,
             url = html_path,
