@@ -259,10 +259,10 @@ def getAllFiles(path: str) -> list[str]:
         path = path.replace("\\\\", "/")
     files = []
     for item in listdir(path):
-        if isfile(f"{path}\\{item}"):
-            files.append(f"{path}\\{item}")
+        if isfile(f"{path}/{item}"):
+            files.append(f"{path}/{item}")
         else:
-            files.extend(getAllFiles(f"{path}\\{item}"))
+            files.extend(getAllFiles(f"{path}/{item}"))
     return files
 
 def getLineLength(x0: float, y0: float, x1: float, y1: float):
