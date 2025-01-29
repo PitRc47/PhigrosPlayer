@@ -14,7 +14,7 @@ import os
 import socket
 import traceback
 from threading import Thread
-from os import popen, add_dll_directory
+from os import popen
 from os.path import exists
 from ntpath import basename
 
@@ -98,7 +98,9 @@ if checksys.main == 'Android':
         sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
 
 def main():
-    add_dll_directory('../lib')
+    if checksys.main == 'Windows':
+        from os import add_dll_directory
+        add_dll_directory('../lib')
 
     if len(sys.argv) == 1:
         print(ppr_help.HELP_ZH)
