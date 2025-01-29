@@ -20,4 +20,4 @@ jobs:
       - name: Upload Cache Artifact
         uses: actions/upload-artifact@v4.6.0
         with:
-          path: .buildozer/
+          path: .buildozer/android/platform/build-armeabi-v7a_arm64-v8a
