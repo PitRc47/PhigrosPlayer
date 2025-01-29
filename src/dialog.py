@@ -33,9 +33,9 @@ if checksys.main != 'Android':
 else:
     import os
     import sys
-    from jnius import autoclass
-    from android import activity
-    from android.permissions import request_permissions, Permission
+    from jnius import autoclass # type: ignore
+    from android import activity # type: ignore
+    from android.permissions import request_permissions, Permission # type: ignore
 
     def _base_dialog(
         bFileOpen: bool,

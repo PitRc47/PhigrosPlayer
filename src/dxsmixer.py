@@ -4,6 +4,7 @@ import typing
 import time
 from sys import argv
 
+import checksys
 import dxsound
 import tool_funcs
 
@@ -131,29 +132,30 @@ class mixerCls:
 def toDowngradeAPI():
     global mixer
     
-    from os import environ; environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
-    from pygame import mixer as _mixer
-    _mixer.Sound
-    
-    _mixer.init()
-    mixer = _mixer
-    
-    length = -1
-    _load = mixer.music.load
-    _get_pos = mixer.music.get_pos
-    
-    def _loadhook(fn: str):
-        nonlocal length
+    if checksys.main != 'Android':
+        from os import environ; environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
+        from pygame import mixer as _mixer
+        _mixer.Sound
         
-        length = _mixer.Sound(fn).get_length()
-        _load(fn)
+        _mixer.init()
+        mixer = _mixer
         
-    mixer.music.load = _loadhook
-    mixer.music.get_length = lambda: length
-    mixer.music.get_pos = lambda: _get_pos() / 1000
+        length = -1
+        _load = mixer.music.load
+        _get_pos = mixer.music.get_pos
+        
+        def _loadhook(fn: str):
+            nonlocal length
+            
+            length = _mixer.Sound(fn).get_length()
+            _load(fn)
+            
+        mixer.music.load = _loadhook
+        mixer.music.get_length = lambda: length
+        mixer.music.get_pos = lambda: _get_pos() / 1000
     
 mixer = mixerCls()
 
-if "--soundapi-downgrade" in argv:
+if "--soundapi-downgrade" in argv and checksys.main != 'Android':
     toDowngradeAPI()
     
