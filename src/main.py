@@ -461,7 +461,7 @@ def main():
                         
                     respacker.reg_img(chart_res[line.Texture][0], f"lineTexture_{chart_obj.judgeLineList.index(line)}")
                 else:
-                    mp4data, size = tool_funcs.gif2mp4(f"{temp_dir}\\{line.Texture}")
+                    mp4data, size = tool_funcs.gif2mp4(f"{temp_dir}/{line.Texture}")
                     chart_res[line.Texture] = (None, size)
                     name = f"lineTexture_{chart_obj.judgeLineList.index(line)}"
                     root.reg_res(mp4data, f"{name}.mp4")
@@ -507,7 +507,7 @@ def main():
                 for note in line.notes:
                     if note.hitsound_reskey not in Resource["Note_Click_Audio"]:
                         try:
-                            Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}\\{note.hitsound}")
+                            Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}/{note.hitsound}")
                             logging.info(f"Loaded note hitsound {note.hitsound}")
                         except Exception as e:
                             logging.warning(f"Cannot load note hitsound {note.hitsound} for note due to {e}")
@@ -516,7 +516,7 @@ def main():
                 for effect in chart_obj.extra.effects:
                     if effect.shader not in shaders.keys():
                         try:
-                            shaders[effect.shader] = tool_funcs.fixShader(open(f"{temp_dir}\\{effect.shader}", "r", encoding="utf-8").read())
+                            shaders[effect.shader] = tool_funcs.fixShader(open(f"{temp_dir}/{effect.shader}", "r", encoding="utf-8").read())
                             const.EXTRA_DEFAULTS[effect.shader] = tool_funcs.getShaderDefault(shaders[effect.shader])
                         except Exception as e:
                             logging.warning(f"Cannot load shader {effect.shader} due to {e}")
