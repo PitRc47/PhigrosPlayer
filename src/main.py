@@ -214,7 +214,7 @@ def main():
         "audio": [],
     }
     chartimages = {}
-    cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}\\", "")
+    cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}/", "")
 
     for item in tool_funcs.getAllFiles(temp_dir):
         if item.endswith("info.txt") or item.endswith("info.csv") or item.endswith("info.yml") or item.endswith("extra.json"):
@@ -269,10 +269,10 @@ def main():
         logging.fatal("This is what format chart ???")
         raise SystemExit
 
-    if exists(f"{temp_dir}\\extra.json"):
+    if exists(f"{temp_dir}/extra.json"):
         try:
             logging.info("found extra.json, loading...")
-            extra = chartfuncs_rpe.loadextra(json.load(open(f"{temp_dir}\\extra.json", "r", encoding="utf-8")))
+            extra = chartfuncs_rpe.loadextra(json.load(open(f"{temp_dir}/extra.json", "r", encoding="utf-8")))
             logging.info("loading extra.json successfully")
         except SystemExit as e:
             logging.error("loading extra.json failed")
@@ -331,7 +331,7 @@ def main():
     all_inforamtion = {}
     logging.info("Loading Chart Information...")
 
-    ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}\\info.csv", f"{temp_dir}\\info.txt", f"{temp_dir}\\info.yml"])
+    ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}/info.csv", f"{temp_dir}/info.txt", f"{temp_dir}/info.yml"])
     chart_information = ChartInfoLoader.get(basename(chart_fp), basename(raw_audio_fp), basename(cimg_fp))
 
     if CHART_TYPE == const.CHART_TYPE.RPE and chart_information is ChartInfoLoader.default_info:
@@ -441,10 +441,10 @@ def main():
                 if line.Texture == "line.png": continue
                 if not line.isGif:
                     paths = [
-                        f"{temp_dir}\\{line.Texture}",
-                        f"{temp_dir}\\{line.Texture}.png",
-                        f"{temp_dir}\\{line.Texture}.jpg",
-                        f"{temp_dir}\\{line.Texture}.jpeg"
+                        f"{temp_dir}/{line.Texture}",
+                        f"{temp_dir}/{line.Texture}.png",
+                        f"{temp_dir}/{line.Texture}.jpg",
+                        f"{temp_dir}/{line.Texture}.jpeg"
                     ]
                     
                     for p in paths:
@@ -461,7 +461,7 @@ def main():
                         
                     respacker.reg_img(chart_res[line.Texture][0], f"lineTexture_{chart_obj.judgeLineList.index(line)}")
                 else:
-                    mp4data, size = tool_funcs.gif2mp4(f"{temp_dir}\\{line.Texture}")
+                    mp4data, size = tool_funcs.gif2mp4(f"{temp_dir}/{line.Texture}")
                     chart_res[line.Texture] = (None, size)
                     name = f"lineTexture_{chart_obj.judgeLineList.index(line)}"
                     root.reg_res(mp4data, f"{name}.mp4")
@@ -507,7 +507,7 @@ def main():
                 for note in line.notes:
                     if note.hitsound_reskey not in Resource["Note_Click_Audio"]:
                         try:
-                            Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}\\{note.hitsound}")
+                            Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}/{note.hitsound}")
                             logging.info(f"Loaded note hitsound {note.hitsound}")
                         except Exception as e:
                             logging.warning(f"Cannot load note hitsound {note.hitsound} for note due to {e}")
@@ -516,7 +516,7 @@ def main():
                 for effect in chart_obj.extra.effects:
                     if effect.shader not in shaders.keys():
                         try:
-                            shaders[effect.shader] = tool_funcs.fixShader(open(f"{temp_dir}\\{effect.shader}", "r", encoding="utf-8").read())
+                            shaders[effect.shader] = tool_funcs.fixShader(open(f"{temp_dir}/{effect.shader}", "r", encoding="utf-8").read())
                             const.EXTRA_DEFAULTS[effect.shader] = tool_funcs.getShaderDefault(shaders[effect.shader])
                         except Exception as e:
                             logging.warning(f"Cannot load shader {effect.shader} due to {e}")
