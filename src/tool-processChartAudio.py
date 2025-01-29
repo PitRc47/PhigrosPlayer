@@ -49,16 +49,6 @@ for line in Chart["judgeLineList"]:
 ChartAudio: AudioSegment = AudioSegment.from_file(argv[2])
 ChartAudio_Length = ChartAudio.duration_seconds
 
-for line in Chart["judgeLineList"]:
-    T = 1.875 / line["bpm"]
-    for note in line["notesAbove"].copy():
-        if not (0.0 <= note["time"] * T <= ChartAudio_Length):
-            line["notesAbove"].remove(note)
-    
-    for note in line["notesBelow"].copy():
-        if not (0.0 <= note["time"] * T <= ChartAudio_Length):
-            line["notesBelow"].remove(note)
-
 ChartAudio_Split_Audio_Block_Length = ChartAudio.duration_seconds * 1000 / 85 #ms
 ChartAudio_Split_Length = int(ChartAudio_Length / (ChartAudio_Split_Audio_Block_Length / 1000)) + 1
 ChartAudio_Split_Audio_List = [AudioSegment.silent(ChartAudio_Split_Audio_Block_Length + 500) for _ in [None] * ChartAudio_Split_Length]
@@ -67,12 +57,15 @@ JudgeLine_cut = 0
 for JudgeLine in Chart["judgeLineList"]:
     t_dw = 1.875 / JudgeLine["bpm"]
     Note_cut = 0
-    for note in JudgeLine["notesBelow"] + JudgeLine["notesAbove"]:
+    notes = (JudgeLine["notesAbove"] + JudgeLine["notesBelow"]) if (JudgeLine["notesAbove"] and JudgeLine["notesBelow"]) else (
+        JudgeLine["notesAbove"] if JudgeLine["notesAbove"] else JudgeLine["notesBelow"]
+    )
+    for note in notes:
         try:
             t = note["time"] * t_dw
             t_index = int(t / (ChartAudio_Split_Audio_Block_Length / 1000))
-            t %= ChartAudio_Split_Audio_Block_Length / 1000
             seg: AudioSegment = ChartAudio_Split_Audio_List[t_index]
+            t %= ChartAudio_Split_Audio_Block_Length / 1000
             ChartAudio_Split_Audio_List[t_index] = seg.overlay(NoteClickAudios[note["type"]], t * 1000)
             print(f"Process Note: {JudgeLine_cut}+{Note_cut}")
             Note_cut += 1
