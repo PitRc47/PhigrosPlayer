@@ -37,7 +37,7 @@ version = 0.4
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub==0.25.1,numba==0.61.0,opencv-python-headless==4.10.0.84,numpy==2.0.2,rjsmin==1.2.3,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5==1.0,mido==1.3.3,PyYAML==6.0.2,websockets==14.2
+requirements = python3==3.11.5,kivy==1.9.1,pywebview==5.4,pyjnius==1.6.1,bottle==0.13.2,proxy-tools==0.1.0,typing_extensions==4.12.2,cryptography==44.0.0,requests==2.32.2,Pillow==11.1.0,pydub==0.25.1,numba==0.61.0,opencv-python-headless==4.10.0.84,numpy==2.0.2,rjsmin==1.2.3,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5==1.0,mido==1.3.3,PyYAML==6.0.2,websockets==14.2
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
