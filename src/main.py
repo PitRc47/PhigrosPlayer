@@ -272,7 +272,7 @@ def main():
     if exists(f"{temp_dir}/extra.json"):
         try:
             logging.info("found extra.json, loading...")
-            extra = chartfuncs_rpe.loadextra(json.load(open(f"{temp_dir}\\extra.json", "r", encoding="utf-8")))
+            extra = chartfuncs_rpe.loadextra(json.load(open(f"{temp_dir}/extra.json", "r", encoding="utf-8")))
             logging.info("loading extra.json successfully")
         except SystemExit as e:
             logging.error("loading extra.json failed")
@@ -331,7 +331,7 @@ def main():
     all_inforamtion = {}
     logging.info("Loading Chart Information...")
 
-    ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}\\info.csv", f"{temp_dir}\\info.txt", f"{temp_dir}\\info.yml"])
+    ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}/info.csv", f"{temp_dir}/info.txt", f"{temp_dir}/info.yml"])
     chart_information = ChartInfoLoader.get(basename(chart_fp), basename(raw_audio_fp), basename(cimg_fp))
 
     if CHART_TYPE == const.CHART_TYPE.RPE and chart_information is ChartInfoLoader.default_info:
