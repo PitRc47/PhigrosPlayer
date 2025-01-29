@@ -8,10 +8,16 @@ import struct
 import logging
 from io import BytesIO
 
-import win32comext.directsound.directsound as ds
-import win32event as w32e
-from pywintypes import WAVEFORMATEX
-from pydub import AudioSegment
+import checksys
+
+if checksys.main == 'Android':
+    from jnius import autoclass # type: ignore
+    MediaPlayer = autoclass('android.media.MediaPlayer')
+else:
+    import win32comext.directsound.directsound as ds
+    import win32event as w32e
+    from pywintypes import WAVEFORMATEX
+    from pydub import AudioSegment
 
 CACHE_BUFFER_MAXSIZE = 32
 PRE_CACHE_SIZE = CACHE_BUFFER_MAXSIZE
@@ -20,8 +26,9 @@ RING_BUFFER = True
 _WAV_HEADER = "<4sl4s4slhhllhh4sl"
 _WAV_HEADER_LENGTH = struct.calcsize(_WAV_HEADER)
 
-dxs = ds.DirectSoundCreate(None, None)
-dxs.SetCooperativeLevel(None, ds.DSSCL_NORMAL)
+if checksys.main == 'Windows':
+    dxs = ds.DirectSoundCreate(None, None)
+    dxs.SetCooperativeLevel(None, ds.DSSCL_NORMAL)
 
 def _wav2wfx(data: bytes):
     (
@@ -55,11 +62,6 @@ def _seg2wfx(seg: AudioSegment):
 def _loadDirectSound(data: bytes):
     sdesc = ds.DSBUFFERDESC()
     
-    # if data.startswith(b"RIFF"):
-    #     hdr = data[0:_WAV_HEADER_LENGTH]
-    #     bufdata = data[_WAV_HEADER_LENGTH:]
-    #     sdesc.lpwfxFormat = _wav2wfx(hdr)
-    
     seg: AudioSegment = AudioSegment.from_file(BytesIO(data))
     bufdata = seg.raw_data
     sdesc.lpwfxFormat = _seg2wfx(seg)
@@ -72,23 +74,61 @@ def _loadDirectSound(data: bytes):
     
     return bufdata, sdesc
 
-class directSound:
-    def __init__(self, data: bytes|str, enable_cache: bool = True):
-        if isinstance(data, str): data = open(data, "rb").read()
+class directSoundAndroid:
+    def __init__(self, data: bytes | str, enable_cache: bool = True):
+        if isinstance(data, str):
+            with open(data, "rb") as f: 
+                data = f.read()
         
-        (
-            self._bufdata,
-            self._sdesc
-        ) = _loadDirectSound(data)
-        
-        self._sdesc.dwFlags = ds.DSBCAPS_CTRLVOLUME | ds.DSBCAPS_CTRLPOSITIONNOTIFY | ds.DSBCAPS_GLOBALFOCUS | ds.DSBCAPS_GETCURRENTPOSITION2
-        
+        self._data = data
         self._enable_cache = enable_cache
-        self._volume = 0 # -10000 ~ 0
-        self._buffers = []
-        
-        if self._enable_cache:
-            self._buffers.extend(self._create() for _ in range(PRE_CACHE_SIZE))
+        self._volume = 1.0  # 0.0 to 1.0
+        self._media_player = MediaPlayer()
+        self._media_player.setDataSource(BytesIO(data))
+        self._media_player.prepare()
+    
+    def set_volume(self, v: float):
+        self._volume = v
+        self._media_player.setVolume(v, v)
+    
+    def play(self, wait: bool = False):
+        self._media_player.start()
+        if wait:
+            while self._media_player.isPlaying():
+                pass
+        return self._media_player
+    
+    def stop(self):
+        self._media_player.stop()
+        self._media_player.prepare()
+    
+    def release(self):
+        self._media_player.release()
+
+class directSound:
+    def __new__(cls, data: bytes | str, enable_cache: bool = True):
+        if checksys.main == 'Android':
+            return super(directSoundAndroid, cls).__new__(directSoundAndroid)
+        else:
+            return super(directSound, cls).__new__(directSound)
+    
+    def __init__(self, data: bytes | str, enable_cache: bool = True):
+        if checksys.main == 'Android':
+            directSoundAndroid.__init__(self, data, enable_cache)
+        else:
+            (
+                self._bufdata,
+                self._sdesc
+            ) = _loadDirectSound(data)
+            
+            self._sdesc.dwFlags = ds.DSBCAPS_CTRLVOLUME | ds.DSBCAPS_CTRLPOSITIONNOTIFY | ds.DSBCAPS_GLOBALFOCUS | ds.DSBCAPS_GETCURRENTPOSITION2
+            
+            self._enable_cache = enable_cache
+            self._volume = 0 # -10000 ~ 0
+            self._buffers = []
+            
+            if self._enable_cache:
+                self._buffers.extend(self._create() for _ in range(PRE_CACHE_SIZE))
     
     def _create(self):
         event = w32e.CreateEvent(None, 0, 0, None)
@@ -136,13 +176,26 @@ class directSound:
         return int(2000 * math.log10(v))
     
     def set_volume(self, v: float):
-        self._volume = self.transform_volume(v)
+        if checksys.main == 'Android':
+            directSoundAndroid.set_volume(self, v)
+        else:
+            self._volume = self.transform_volume(v)
     
     def play(self, wait: bool = False, playMethod: typing.Literal[0, 1] = 0):
-        event, buffer = self.create(playMethod)
-        
-        if wait:
-            w32e.WaitForSingleObject(event, -1)
-        
-        return event, buffer
+        if checksys.main == 'Android':
+            return directSoundAndroid.play(self, wait)
+        else:
+            event, buffer = self.create(playMethod)
+            
+            if wait:
+                w32e.WaitForSingleObject(event, -1)
+            
+            return event, buffer
     
+    def stop(self):
+        if checksys.main == 'Android':
+            directSoundAndroid.stop(self)
+    
+    def release(self):
+        if checksys.main == 'Android':
+            directSoundAndroid.release(self)
