@@ -55,7 +55,7 @@ if checksys.main == 'Android':
                 logging.info(f"Folder: {item}")
             else:
                 logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Adastraperaspera.RabbitHouse.0-IN.pez']
+        sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
 
 from graplib_webview import *
 import load_extended as _
