@@ -214,7 +214,7 @@ def main():
         "audio": [],
     }
     chartimages = {}
-    cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}\\", "")
+    cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}/", "")
 
     for item in tool_funcs.getAllFiles(temp_dir):
         if item.endswith("info.txt") or item.endswith("info.csv") or item.endswith("info.yml") or item.endswith("extra.json"):
