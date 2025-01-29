@@ -1009,17 +1009,22 @@ def main():
         global lowquality, lowquality_scale
         global w, h
         global Resource
+        global errFlag
         
-        if disengage_webview:
-            socket_webviewbridge.hook(root)
+        try:
+            if disengage_webview:
+                socket_webviewbridge.hook(root)
 
-        webdpr = root.run_js_code("window.devicePixelRatio;")
-        if webdpr != 1.0:
-            lowquality = True
-            lowquality_scale *= 1.0 / webdpr # ...?
+            webdpr = root.run_js_code("window.devicePixelRatio;")
+            if webdpr != 1.0:
+                lowquality = True
+                lowquality_scale *= 1.0 / webdpr # ...?
 
-        if lowquality:
-            root.run_js_code(f"lowquality_scale = {lowquality_scale};")
+            if lowquality:
+                root.run_js_code(f"lowquality_scale = {lowquality_scale};")
+        except Exception as e:
+            errFlag = "Error while initializing webview."
+            print(f"Caught an exception: {e}")
 
     if disengage_webview:
         w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
@@ -1083,9 +1088,11 @@ if checksys.main != 'Android':
 else:
     error_message = ""
     try:
+        errFlag = ""
         main()
     except Exception as e:
         error_message = f"Error occurred: {traceback.format_exc()}"
+    error_message += errFlag
     captured_stdout = stdout_buffer.getvalue()
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
