@@ -1,5 +1,6 @@
 # this module loads quickly
 
+import checksys
 import math
 import typing
 from threading import Thread
@@ -254,6 +255,8 @@ def getAllFiles(path: str) -> list[str]:
     if path[-1] == "/" or path[:-1] == "\\":
         path = path[:-1]
     path = path.replace("/", "\\")
+    if checksys.main == 'Android':
+        path = path.replace("\\\\", "/")
     files = []
     for item in listdir(path):
         if isfile(f"{path}\\{item}"):
