@@ -269,7 +269,7 @@ def main():
         logging.fatal("This is what format chart ???")
         raise SystemExit
 
-    if exists(f"{temp_dir}\\extra.json"):
+    if exists(f"{temp_dir}/extra.json"):
         try:
             logging.info("found extra.json, loading...")
             extra = chartfuncs_rpe.loadextra(json.load(open(f"{temp_dir}\\extra.json", "r", encoding="utf-8")))
