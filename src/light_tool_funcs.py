@@ -1,5 +1,6 @@
 # this module loads quickly
 
+import checksys
 import math
 import typing
 from threading import Thread
@@ -253,13 +254,15 @@ def getCenterPointByRect(rect: tuple[float, float, float, float]):
 def getAllFiles(path: str) -> list[str]:
     if path[-1] == "/" or path[:-1] == "\\":
         path = path[:-1]
-    path = path.replace("/", "\\")
+    if checksys.main == 'Windows':
+        path = path.replace("/", "\\")
+    
     files = []
     for item in listdir(path):
-        if isfile(f"{path}\\{item}"):
-            files.append(f"{path}\\{item}")
+        if isfile(f"{path}/{item}"):
+            files.append(f"{path}/{item}")
         else:
-            files.extend(getAllFiles(f"{path}\\{item}"))
+            files.extend(getAllFiles(f"{path}/{item}"))
     return files
 
 def getLineLength(x0: float, y0: float, x1: float, y1: float):
