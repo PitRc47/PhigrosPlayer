@@ -1,9 +1,4 @@
-import err_processer as _
-import init_logging as _
-import fix_workpath as _
-import import_argvs as _
-import check_edgechromium as _
-
+import checksys
 import zipfile
 import json
 import sys
@@ -13,17 +8,11 @@ import typing
 import os
 import socket
 import traceback
+
+from io import StringIO
 from threading import Thread
 from os import popen
 from os.path import exists, basename
-
-import cv2
-import requests
-from PIL import Image, ImageFilter, ImageEnhance
-from pydub import AudioSegment
-from io import StringIO
-
-import checksys
 
 if checksys.main == 'Windows':
     from ctypes import windll
@@ -73,6 +62,16 @@ import load_extended as _
 
 
 def main():
+    import err_processer as _
+    import init_logging as _
+    import fix_workpath as _
+    import import_argvs as _
+    import check_edgechromium as _
+
+    import cv2
+    import requests
+    from PIL import Image, ImageFilter, ImageEnhance
+    from pydub import AudioSegment
     import webcv
     import dxsound
     import chartobj_phi
