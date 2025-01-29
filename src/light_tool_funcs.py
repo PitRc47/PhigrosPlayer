@@ -256,7 +256,7 @@ def getAllFiles(path: str) -> list[str]:
         path = path[:-1]
     path = path.replace("/", "\\")
     if checksys.main == 'Android':
-        path = path.replace("\\\\", "/")
+        path = path.replace("\\", "/")
     files = []
     for item in listdir(path):
         if isfile(f"{path}/{item}"):
