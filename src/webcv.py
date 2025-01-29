@@ -31,7 +31,7 @@ if checksys.main == "Windows":
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
 elif checksys.main == 'Android':
-    from jnius import autoclass
+    from jnius import autoclass # type: ignore
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
