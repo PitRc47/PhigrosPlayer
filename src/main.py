@@ -1081,17 +1081,18 @@ def main():
 if checksys.main != 'Android':
     main()
 else:
+    error_message = ""
     try:
         main()
     except Exception as e:
         error_message = f"Error occurred: {traceback.format_exc()}"
-        captured_stdout = stdout_buffer.getvalue()
-        captured_stderr = stderr_buffer.getvalue()
-        captured_logs = log_buffer.getvalue()
-        try:
-            import time 
-            message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
-            client_socket.send(message.encode('utf-8'))
-            time.sleep(1)
-        except:
-            pass
+    captured_stdout = stdout_buffer.getvalue()
+    captured_stderr = stderr_buffer.getvalue()
+    captured_logs = log_buffer.getvalue()
+    try:
+        import time 
+        message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
+        client_socket.send(message.encode('utf-8'))
+        time.sleep(1)
+    except:
+        pass
