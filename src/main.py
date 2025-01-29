@@ -10,6 +10,9 @@ import sys
 import time
 import logging
 import typing
+import os
+import socket
+import traceback
 from threading import Thread
 from os import popen, add_dll_directory
 from os.path import exists
@@ -19,7 +22,9 @@ import cv2
 import requests
 from PIL import Image, ImageFilter, ImageEnhance
 from pydub import AudioSegment
+from io import StringIO
 
+import checksys
 import webcv
 import dxsound
 import chartobj_phi
@@ -40,16 +45,59 @@ import tempdir
 import socket_webviewbridge
 import wcv2matlike
 import needrelease
-import checksys
 
 if checksys.main == 'Windows':
     from ctypes import windll
+if checksys.main == 'Android':
+    from android.permissions import request_permissions, Permission # type: ignore
+    request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
+    time.sleep(0.5)
 
 from dxsmixer import mixer
 from graplib_webview import *
 import load_extended as _
 
-def pprMain():
+
+def start_client(server_ip='192.168.1.28', server_port=7878):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect_ex((server_ip, server_port))
+    return client_socket
+
+if checksys.main == 'Android':
+    if True:
+        client_socket = start_client()
+
+        stdout_buffer = StringIO()
+        stderr_buffer = StringIO()
+
+        sys.stdout = stdout_buffer
+        sys.stderr = stderr_buffer
+
+        log_buffer = StringIO()
+        class BufferingHandler(logging.StreamHandler):
+            def __init__(self, buffer):
+                super().__init__(buffer)
+
+        handler = BufferingHandler(log_buffer)
+        formatter = logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S")
+        handler.setFormatter(formatter)
+        root_logger = logging.getLogger()
+        root_logger.handlers = []
+        root_logger.setLevel(logging.DEBUG)
+        root_logger.addHandler(handler)
+
+        current_directory = os.getcwd()
+        logging.info(f'Current Path: {current_directory}')
+        for item in os.listdir(current_directory):
+            full_path = os.path.join(current_directory, item)
+            
+            if os.path.isdir(full_path):
+                logging.info(f"Folder: {item}")
+            else:
+                logging.info(f"File: {item}")
+        sys.argv = ['main.py', 'file:///src/Adastraperaspera.RabbitHouse.0-IN.pez']
+
+def main():
     add_dll_directory('../lib')
 
     if len(sys.argv) == 1:
@@ -1031,5 +1079,20 @@ def pprMain():
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
 
-if __name__ == "__main__":
-    pprMain()
+if checksys.main != 'Android':
+    main()
+else:
+    try:
+        main()
+    except Exception as e:
+        error_message = f"Error occurred: {traceback.format_exc()}"
+        captured_stdout = stdout_buffer.getvalue()
+        captured_stderr = stderr_buffer.getvalue()
+        captured_logs = log_buffer.getvalue()
+        try:
+            import time 
+            message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
+            client_socket.send(message.encode('utf-8'))
+            time.sleep(1)
+        except:
+            pass
