@@ -908,6 +908,22 @@ void main() {
 
     window.addEventListener("touchstart", connectToSocketBridge);
 
+    const proxyTouchEvent = function (from, to) {
+        window.addEventListener(from, (e) => {
+            let touch = e.changedTouches[0];
+            let mouseEvent = new MouseEvent(to, {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                buttons: 1
+            });
+            window.dispatchEvent(mouseEvent);
+        });
+    }
+    
+    proxyTouchEvent("touchstart", "mousedown");
+    proxyTouchEvent("touchmove", "mousemove");
+    proxyTouchEvent("touchend", "mouseup");
+
     // temp
     // window.addEventListener("touchstart", () => {
     //     pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000);

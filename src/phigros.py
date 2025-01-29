@@ -33,6 +33,7 @@ import chartfuncs_rpe
 import dxsound
 import phira_resource_pack
 import tempdir
+import socket_webviewbridge
 from dxsmixer import mixer
 from graplib_webview import *
 
@@ -3850,6 +3851,9 @@ def init():
     global w, h
     global Resource, eventManager
     
+    if "--disengage-webview" in sys.argv:
+        socket_webviewbridge.hook(root)
+        
     webdpr = root.run_js_code("window.devicePixelRatio;")
     root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
 
