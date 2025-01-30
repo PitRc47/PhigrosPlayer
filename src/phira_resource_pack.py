@@ -10,7 +10,7 @@ from PIL import Image, ImageChops
 import const
 import dxsound
 
-DEFAULT_PATH = "./resources/resource_default"
+DEFAULT_PATH = "resources/resource_default"
 globalPack = None
 
 class LoadResourcePackError(Exception): ...

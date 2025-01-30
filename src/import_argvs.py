@@ -6,7 +6,7 @@ import logging
 import sys
 from os.path import exists, isfile
 
-ARGVFILE = "./default-argvs.json"
+ARGVFILE = "default-argvs.json"
 
 if exists(ARGVFILE) and isfile(ARGVFILE):
     logging.info(f"Loading default argvs from {ARGVFILE}")

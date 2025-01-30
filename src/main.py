@@ -92,7 +92,7 @@ lfdaot_use_recordfile = sys.argv[sys.argv.index("--lfdaot-use-recordfile") + 1] 
 wl_more_chinese = "--wl-more-chinese" in sys.argv
 skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
-respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "./resources/resource_packs/default"
+respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
 disengage_webview = "--disengage-webview" in sys.argv
 
 if lfdaot and noautoplay:
@@ -356,8 +356,8 @@ def main():
         global cksmanager
         
         logging.info("Loading Resource...")
-        WaitLoading = mixer.Sound("./resources/WaitLoading.mp3")
-        LoadSuccess = mixer.Sound("./resources/LoadSuccess.wav")
+        WaitLoading = mixer.Sound("resources/WaitLoading.mp3")
+        LoadSuccess = mixer.Sound("resources/LoadSuccess.wav")
         Thread(target=WaitLoading_FadeIn, daemon = True).start()
         LoadSuccess.set_volume(0.75)
         WaitLoading.play(-1)
@@ -370,22 +370,22 @@ def main():
         
         Resource = {
             "levels":{
-                "AP": Image.open("./resources/levels/AP.png"),
-                "FC": Image.open("./resources/levels/FC.png"),
-                "V": Image.open("./resources/levels/V.png"),
-                "S": Image.open("./resources/levels/S.png"),
-                "A": Image.open("./resources/levels/A.png"),
-                "B": Image.open("./resources/levels/B.png"),
-                "C": Image.open("./resources/levels/C.png"),
-                "F": Image.open("./resources/levels/F.png")
+                "AP": Image.open("resources/levels/AP.png"),
+                "FC": Image.open("resources/levels/FC.png"),
+                "V": Image.open("resources/levels/V.png"),
+                "S": Image.open("resources/levels/S.png"),
+                "A": Image.open("resources/levels/A.png"),
+                "B": Image.open("resources/levels/B.png"),
+                "C": Image.open("resources/levels/C.png"),
+                "F": Image.open("resources/levels/F.png")
             },
-            "le_warn": Image.open("./resources/le_warn.png"),
-            "Retry": Image.open("./resources/Retry.png"),
-            "Arrow_Right": Image.open("./resources/Arrow_Right.png"),
-            "Over": mixer.Sound("./resources/Over.mp3"),
-            "Pause": mixer.Sound("./resources/Pause.wav"),
-            "PauseImg": Image.open("./resources/Pause.png"),
-            "ButtonLeftBlack": Image.open("./resources/Button_Left_Black.png"),
+            "le_warn": Image.open("resources/le_warn.png"),
+            "Retry": Image.open("resources/Retry.png"),
+            "Arrow_Right": Image.open("resources/Arrow_Right.png"),
+            "Over": mixer.Sound("resources/Over.mp3"),
+            "Pause": mixer.Sound("resources/Pause.wav"),
+            "PauseImg": Image.open("resources/Pause.png"),
+            "ButtonLeftBlack": Image.open("resources/Button_Left_Black.png"),
             "ButtonRightBlack": None
         }
         
@@ -467,7 +467,7 @@ def main():
                     root.reg_res(mp4data, f"{name}.mp4")
                     root.wait_jspromise(f"""loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');""")
         
-        with open("./resources/font.ttf", "rb") as f:
+        with open("resources/font.ttf", "rb") as f:
             root.reg_res(f.read(),"PhigrosFont.ttf")
         respacker.load(*respacker.pack())
         
@@ -490,16 +490,16 @@ def main():
         note_max_size_half = ((note_max_width ** 2 + note_max_height ** 2) ** 0.5) / 2
                     
         shaders = {
-            "chromatic": open("./shaders/chromatic.glsl", "r", encoding="utf-8").read(),
-            "circleBlur": open("./shaders/circle_blur.glsl", "r", encoding="utf-8").read(),
-            "fisheye": open("./shaders/fisheye.glsl", "r", encoding="utf-8").read(),
-            "glitch": open("./shaders/glitch.glsl", "r", encoding="utf-8").read(),
-            "grayscale": open("./shaders/grayscale.glsl", "r", encoding="utf-8").read(),
-            "noise": open("./shaders/noise.glsl", "r", encoding="utf-8").read(),
-            "pixel": open("./shaders/pixel.glsl", "r", encoding="utf-8").read(),
-            "radialBlur": open("./shaders/radial_blur.glsl", "r", encoding="utf-8").read(),
-            "shockwave": open("./shaders/shockwave.glsl", "r", encoding="utf-8").read(),
-            "vignette": open("./shaders/vignette.glsl", "r", encoding="utf-8").read()
+            "chromatic": open("shaders/chromatic.glsl", "r", encoding="utf-8").read(),
+            "circleBlur": open("shaders/circle_blur.glsl", "r", encoding="utf-8").read(),
+            "fisheye": open("shaders/fisheye.glsl", "r", encoding="utf-8").read(),
+            "glitch": open("shaders/glitch.glsl", "r", encoding="utf-8").read(),
+            "grayscale": open("shaders/grayscale.glsl", "r", encoding="utf-8").read(),
+            "noise": open("shaders/noise.glsl", "r", encoding="utf-8").read(),
+            "pixel": open("shaders/pixel.glsl", "r", encoding="utf-8").read(),
+            "radialBlur": open("shaders/radial_blur.glsl", "r", encoding="utf-8").read(),
+            "shockwave": open("shaders/shockwave.glsl", "r", encoding="utf-8").read(),
+            "vignette": open("shaders/vignette.glsl", "r", encoding="utf-8").read()
         }
         
         if CHART_TYPE == const.CHART_TYPE.RPE:
@@ -1000,7 +1000,7 @@ def main():
         renderdemand = "--renderdemand" in sys.argv,
         renderasync = "--renderasync" in sys.argv,
         jslog = "--enable-jslog" in sys.argv,
-        jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "./ppr-jslog-nofmt.js"
+        jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "ppr-jslog-nofmt.js"
     )
 
     def init():

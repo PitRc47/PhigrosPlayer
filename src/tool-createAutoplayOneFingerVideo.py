@@ -120,7 +120,7 @@ w, h = int(videoCap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(videoCap.get(cv2.CAP_PRO
 fps = videoCap.get(cv2.CAP_PROP_FPS)
 optWriter = cv2.VideoWriter(outputVideoFilePath, cv2.VideoWriter.fourcc(*'mp4v'), fps, (w, h), True)
 
-finger = Image.open("./resources/finger.png")
+finger = Image.open("resources/finger.png")
 finger = finger.resize((int(w * 0.4), int(w * 0.4 / finger.width * finger.height)))
 
 try:

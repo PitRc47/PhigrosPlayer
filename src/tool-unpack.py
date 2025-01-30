@@ -75,8 +75,8 @@ class ByteReaderB:
 def getZipItem(path: str) -> str:
     while path[0] in ("/", "\\"): path = path[1:]
     with zipfile.ZipFile(pgrapk, 'r') as zip_ref:
-        zip_ref.extract(path, './unpack-temp')
-    return f"./unpack-temp/{path}"
+        zip_ref.extract(path, 'unpack-temp')
+    return f"unpack-temp/{path}"
 
 def run(rpe: bool):
     try: rmtree("unpack-temp")
@@ -178,7 +178,7 @@ def generate_info():
         except Exception as e:
             print(e)
     
-    with open("./unpack-result/info.json", "w", encoding="utf-8") as f:
+    with open("unpack-result/info.json", "w", encoding="utf-8") as f:
         json.dump(chartItems, f, ensure_ascii=False, indent=4)
     
     return chartItems
@@ -191,9 +191,9 @@ def generate_resources():
         "Chart_EZ", "Chart_HD", "Chart_IN", "Chart_AT", "Chart_Legacy",
         "IllustrationBlur", "IllustrationLowRes", "Illustration", "music"
     ]:
-        try: rmtree(f"./unpack-result/{i}")
+        try: rmtree(f"unpack-result/{i}")
         except Exception: pass
-        try: mkdir(f"./unpack-result/{i}")
+        try: mkdir(f"unpack-result/{i}")
         except FileExistsError: pass
     
     key = base64.b64decode(catalog["m_KeyDataString"])
@@ -294,14 +294,14 @@ def generate_resources():
                             save(ikey, ientry, item[2])
                         keunpack_count += 1
                     case "save-string":
-                        with open(f"./unpack-result/{item[1]}", "wb") as f:
+                        with open(f"unpack-result/{item[1]}", "wb") as f:
                             f.write(item[2].tobytes())
                         save_string_count += 1
                     case "save-pilimg":
-                        item[2].save(f"./unpack-result/{item[1]}", "png")
+                        item[2].save(f"unpack-result/{item[1]}", "png")
                         save_pilimg_count += 1
                     case "save-music":
-                        with open(f"./unpack-result/{item[1]}", "wb") as f:
+                        with open(f"unpack-result/{item[1]}", "wb") as f:
                             f.write(item[2])
                         save_music_count += 1
             except Exception as e:
@@ -329,24 +329,24 @@ def generate_resources():
         print(f"\r{keunpack_count} | {save_string_count} | {save_pilimg_count} | {save_music_count}", end="")
         sleep(0.1)
     
-    with open(f"./unpack-result/extended_info.json", "w", encoding="utf-8") as f:
+    with open(f"unpack-result/extended_info.json", "w", encoding="utf-8") as f:
         json.dump(extended_info, f, indent=4, ensure_ascii=False)
     
     print()
 
 def pack_charts(infos: list[dict], rpe: bool):
-    try: rmtree(f"./unpack-result/packed")
+    try: rmtree(f"unpack-result/packed")
     except Exception: pass
-    try: mkdir(f"./unpack-result/packed")
+    try: mkdir(f"unpack-result/packed")
     except FileExistsError: pass
         
     charts = []
     allcount = 0
     for info in infos:
         for li, l in enumerate(info["levels"]):
-            chartFile = f'./unpack-result/Chart_{l}/{info["soundIdBak"]}.json'
-            audioFile = f'./unpack-result/music/{info["soundIdBak"]}.ogg'
-            imageFile = f'./unpack-result/Illustration/{info["soundIdBak"]}.png'
+            chartFile = f'unpack-result/Chart_{l}/{info["soundIdBak"]}.json'
+            audioFile = f'unpack-result/music/{info["soundIdBak"]}.ogg'
+            imageFile = f'unpack-result/Illustration/{info["soundIdBak"]}.png'
             csvData = "\n".join([
                 "Chart,Music,Image,Name,Artist,Level,Illustrator,Charter,AspectRatio,NoteScale,GlobalAlpha",
                 ",".join(map(lambda x: f'"{x}"' if " " in x else x, [
@@ -380,11 +380,11 @@ def pack_charts(infos: list[dict], rpe: bool):
             try:
                 rid = uuid4()
                 
-                with open(f"./unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
+                with open(f"unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
                     f.write(item[5])
                 
-                with zipfile.ZipFile('./unpack-result/packed/{}_{}{}.zip'.format(item[0], item[1], '_RPE' if p2r else ''), 'w', zipfile.ZIP_DEFLATED) as zip_ref:
-                    for file_path in (item[2], item[3], item[4], f"./unpack-temp/pack-{rid}/info.csv"):
+                with zipfile.ZipFile('unpack-result/packed/{}_{}{}.zip'.format(item[0], item[1], '_RPE' if p2r else ''), 'w', zipfile.ZIP_DEFLATED) as zip_ref:
+                    for file_path in (item[2], item[3], item[4], f"unpack-temp/pack-{rid}/info.csv"):
                         zip_ref.write(file_path, arcname = basename(file_path))
                 packed_num += 1
             except Exception:
@@ -403,7 +403,7 @@ def pack_charts(infos: list[dict], rpe: bool):
     if not rpe: return
     
     p2r = "tool-phi2rpe.py" if exists("tool-phi2rpe.py") and isfile("tool-phi2rpe.py") else "tool-phi2rpe.exe"
-    phicharts = [f"./unpack-result/Chart_{l}/{i}" for l in ["EZ", "HD", "IN", "AT", "Legacy"] for i in listdir(f"./unpack-result/Chart_{l}")]
+    phicharts = [f"unpack-result/Chart_{l}/{i}" for l in ["EZ", "HD", "IN", "AT", "Legacy"] for i in listdir(f"unpack-result/Chart_{l}")]
     p2rthread_num = 4
     p2red_num = 0
     stopthread_count = 0

@@ -38,7 +38,7 @@ from dxsmixer import mixer
 from graplib_webview import *
 
     
-if not exists("./phigros_assets") or not all([
+if not exists("phigros_assets") or not all([
     exists(tool_funcs.gtpresp(i)) for i in [
         "config.json",
         "chapters.json"
@@ -75,7 +75,7 @@ userData_default = {
 
 def saveUserData(data: dict):
     try:
-        with open("./phigros_userdata.json", "w", encoding="utf-8") as f:
+        with open("phigros_userdata.json", "w", encoding="utf-8") as f:
             f.write(json.dumps(data, indent=4, ensure_ascii=False))
     except Exception as e:
         logging.error(f"phigros_userdata.json save failed: {e}")
@@ -84,7 +84,7 @@ def loadUserData():
     global userData
     userData = userData_default.copy()
     try:
-        userData.update(json.loads(open("./phigros_userdata.json", "r", encoding="utf-8").read()))
+        userData.update(json.loads(open("phigros_userdata.json", "r", encoding="utf-8").read()))
     except Exception as e:
         logging.error(f"phigros_userdata.json load failed, using default data, {e}")
 
@@ -94,7 +94,7 @@ def getUserData(key: str):
 def setUserData(key: str, value: typing.Any):
     userData[key] = value
 
-if not exists("./phigros_userdata.json"):
+if not exists("phigros_userdata.json"):
     saveUserData(userData_default)
     loadUserData()
 
@@ -188,57 +188,57 @@ def Load_Resource():
     global LoadSuccess
     
     logging.info("Loading Resource...")
-    LoadSuccess = mixer.Sound(("./resources/LoadSuccess.wav"))
+    LoadSuccess = mixer.Sound(("resources/LoadSuccess.wav"))
     
-    phi_rpack = phira_resource_pack.PhiraResourcePack("./resources/resource_packs/default")
+    phi_rpack = phira_resource_pack.PhiraResourcePack("resources/resource_packs/default")
     phi_rpack.setToGlobal()
     ClickEffectFrameCount = phi_rpack.effectFrameCount
     
     Resource = {
         "levels":{
-            "AP": Image.open("./resources/levels/AP.png"),
-            "FC": Image.open("./resources/levels/FC.png"),
-            "V": Image.open("./resources/levels/V.png"),
-            "S": Image.open("./resources/levels/S.png"),
-            "A": Image.open("./resources/levels/A.png"),
-            "B": Image.open("./resources/levels/B.png"),
-            "C": Image.open("./resources/levels/C.png"),
-            "F": Image.open("./resources/levels/F.png")
+            "AP": Image.open("resources/levels/AP.png"),
+            "FC": Image.open("resources/levels/FC.png"),
+            "V": Image.open("resources/levels/V.png"),
+            "S": Image.open("resources/levels/S.png"),
+            "A": Image.open("resources/levels/A.png"),
+            "B": Image.open("resources/levels/B.png"),
+            "C": Image.open("resources/levels/C.png"),
+            "F": Image.open("resources/levels/F.png")
         },
-        "logoipt": Image.open("./resources/logoipt.png"),
-        "warning": Image.open("./resources/le_warn.png"),
-        "phigros": Image.open("./resources/phigros.png"),
-        "AllSongBlur": Image.open("./resources/AllSongBlur.png"),
-        "facula": Image.open("./resources/facula.png"),
-        "collectibles": Image.open("./resources/collectibles.png"),
-        "setting": Image.open("./resources/setting.png"),
-        "ButtonLeftBlack": Image.open("./resources/Button_Left_Black.png"),
+        "logoipt": Image.open("resources/logoipt.png"),
+        "warning": Image.open("resources/le_warn.png"),
+        "phigros": Image.open("resources/phigros.png"),
+        "AllSongBlur": Image.open("resources/AllSongBlur.png"),
+        "facula": Image.open("resources/facula.png"),
+        "collectibles": Image.open("resources/collectibles.png"),
+        "setting": Image.open("resources/setting.png"),
+        "ButtonLeftBlack": Image.open("resources/Button_Left_Black.png"),
         "ButtonRightBlack": None,
-        "message": Image.open("./resources/message.png"),
-        "JoinQQGuildBanner": Image.open("./resources/JoinQQGuildBanner.png"),
-        "UISound_1": mixer.Sound("./resources/UISound_1.wav"),
-        "UISound_2": mixer.Sound("./resources/UISound_2.wav"),
-        "UISound_3": mixer.Sound("./resources/UISound_3.wav"),
-        "UISound_4": mixer.Sound("./resources/UISound_4.wav"),
-        "JoinQQGuildPromo": Image.open("./resources/JoinQQGuildPromo.png"),
-        "Arrow_Left": Image.open("./resources/Arrow_Left.png"),
-        "Arrow_Right": Image.open("./resources/Arrow_Right.png"),
-        "Arrow_Right_Black": Image.open("./resources/Arrow_Right_Black.png"),
-        "twitter": Image.open("./resources/twitter.png"),
-        "qq": Image.open("./resources/qq.png"),
-        "bilibili": Image.open("./resources/bilibili.png"),
-        "taptap": Image.open("./resources/taptap.png"),
-        "checked": Image.open("./resources/checked.png"),
-        "CalibrationHit": dxsound.directSound("./resources/CalibrationHit.wav"),
-        "Retry": Image.open("./resources/Retry.png"),
-        "Pause": mixer.Sound("./resources/Pause.wav"),
-        "PauseImg": Image.open("./resources/Pause.png"),
-        "PUIBack": Image.open("./resources/PUIBack.png"),
-        "PUIRetry": Image.open("./resources/PUIRetry.png"),
-        "PUIResume": Image.open("./resources/PUIResume.png"),
-        "edit": Image.open("./resources/edit.png"),
-        "close": Image.open("./resources/close.png"),
-        "sort": Image.open("./resources/sort.png"),
+        "message": Image.open("resources/message.png"),
+        "JoinQQGuildBanner": Image.open("resources/JoinQQGuildBanner.png"),
+        "UISound_1": mixer.Sound("resources/UISound_1.wav"),
+        "UISound_2": mixer.Sound("resources/UISound_2.wav"),
+        "UISound_3": mixer.Sound("resources/UISound_3.wav"),
+        "UISound_4": mixer.Sound("resources/UISound_4.wav"),
+        "JoinQQGuildPromo": Image.open("resources/JoinQQGuildPromo.png"),
+        "Arrow_Left": Image.open("resources/Arrow_Left.png"),
+        "Arrow_Right": Image.open("resources/Arrow_Right.png"),
+        "Arrow_Right_Black": Image.open("resources/Arrow_Right_Black.png"),
+        "twitter": Image.open("resources/twitter.png"),
+        "qq": Image.open("resources/qq.png"),
+        "bilibili": Image.open("resources/bilibili.png"),
+        "taptap": Image.open("resources/taptap.png"),
+        "checked": Image.open("resources/checked.png"),
+        "CalibrationHit": dxsound.directSound("resources/CalibrationHit.wav"),
+        "Retry": Image.open("resources/Retry.png"),
+        "Pause": mixer.Sound("resources/Pause.wav"),
+        "PauseImg": Image.open("resources/Pause.png"),
+        "PUIBack": Image.open("resources/PUIBack.png"),
+        "PUIRetry": Image.open("resources/PUIRetry.png"),
+        "PUIResume": Image.open("resources/PUIResume.png"),
+        "edit": Image.open("resources/edit.png"),
+        "close": Image.open("resources/close.png"),
+        "sort": Image.open("resources/sort.png"),
     }
     
     Resource.update(phi_rpack.createResourceDict())
@@ -329,7 +329,7 @@ def Load_Resource():
     for index, avatar in enumerate(assetConfig["avatars"]):
         respacker.reg_img(open(tool_funcs.gtpresp(avatar), "rb").read(), f"avatar_{index}")
     
-    with open("./resources/font.ttf", "rb") as f:
+    with open("resources/font.ttf", "rb") as f:
         root.reg_res(f.read(), "PhigrosFont.ttf")
     respacker.load(*respacker.pack())
     
@@ -789,7 +789,7 @@ def showStartAnimation():
     
     a1_t = 5.0
     a1_st = time.time()
-    mixer.music.load("./resources/NewSplashSceneBGM.mp3")
+    mixer.music.load("resources/NewSplashSceneBGM.mp3")
     played_NewSplashSceneBGM = False
     while True:
         p = (time.time() - a1_st) / a1_t
@@ -1049,7 +1049,7 @@ def mainRender():
     
     faManager.faculas.clear()
     mainRenderSt = time.time()
-    mixer.music.load("./resources/ChapterSelect.mp3")
+    mixer.music.load("resources/ChapterSelect.mp3")
     mixer.music.play(-1)
     
     messageRect = (w * 0.015, h * 0.985 - MessageButtonSize, MessageButtonSize, MessageButtonSize)
@@ -1596,7 +1596,7 @@ def settingRender():
         );"""
     ) + h * (143 / 1080) * 2 - h
     
-    mixer.music.load("./resources/Calibration.wav")
+    mixer.music.load("resources/Calibration.wav")
     mixer.music.play(-1)
     
     def updatebg():
@@ -1748,9 +1748,9 @@ def settingRender():
         if settingState.atis_o and tool_funcs.inrect(x, y, otherSettingButtonRects[1]) and inSettingUI:
             unregEvents()
             nextUI, tonextUI, tonextUISt = lambda: chartPlayerRender(
-                chartAudio = "./resources/introduction_chart/audio.mp3",
-                chartImage = "./resources/introduction_chart/image.png",
-                chartFile = "./resources/introduction_chart/chart.json",
+                chartAudio = "resources/introduction_chart/audio.mp3",
+                chartImage = "resources/introduction_chart/image.png",
+                chartFile = "resources/introduction_chart/chart.json",
                 startAnimation = False,
                 chart_information = {
                     "Name": "Introduction",
@@ -2997,7 +2997,7 @@ def audioQARender():
             text = "播放音频",
             fontsize = (w + h) / 75,
             width = w * 0.19375,
-            command = lambda: (mixer.music.load("./resources/TouchToStart.mp3"), mixer.music.play())
+            command = lambda: (mixer.music.load("resources/TouchToStart.mp3"), mixer.music.play())
         )
     })
     
@@ -3144,7 +3144,7 @@ def aboutUsRender():
         
         if clickedStart:
             if not mixer.music.get_busy():
-                mixer.music.load("./resources/AboutUs.mp3")
+                mixer.music.load("resources/AboutUs.mp3")
                 mixer.music.play(-1)
             dy = h - h * ((time.time() - clickedStartButtonTime) / 12.5)
             fontsize = (w + h) / 102.5
@@ -3518,7 +3518,7 @@ def chartPlayerRender(
                         rendingAnimation((time.time() - rendingAnimationSt) / 0.75, pplm.ppps.getCombo() if phicore.noautoplay else phicore.chart_obj.note_num, False)
                     else:
                         rendingAnimation, rendingAnimationSt = phicore.settlementAnimationFrame, time.time()
-                        mixer.music.load("./resources/Over.mp3")
+                        mixer.music.load("resources/Over.mp3")
                         Thread(target=lambda: (time.sleep(0.25), mixer.music.play(-1)), daemon=True).start()
                 
                 if rendingAnimation is phicore.settlementAnimationFrame: # 不能用elif, 不然会少渲染一个帧
