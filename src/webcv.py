@@ -335,6 +335,7 @@ class WebCanvas:
                     self.web._server.address
                 except:
                     continue
+                logging.info('Get web._server.address successful')
                 break
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
