@@ -143,20 +143,44 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
-    
+        self._configure_android_webview()
+
+    def _configure_android_webview(self):
+        if checksys.main != 'Android':
+            return
+
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        Context = autoclass('android.content.Context')
+        WebView = autoclass('android.webkit.WebView')
+        WebSettings = autoclass('android.webkit.WebSettings')
+        WebViewClient = autoclass('android.webkit.WebViewClient')
+
+        activity = PythonActivity.mActivity
+        webview = WebView(activity)
+
+        settings = webview.getSettings()
+        settings.setMixedContentMode(0)  # MIXED_CONTENT_ALWAYS_ALLOW
+        settings.setAllowUniversalAccessFromFileURLs(True)
+        settings.setAllowFileAccess(True)
+        settings.setDomStorageEnabled(True)
+
+        webview.setWebViewClient(WebViewClient())
+
+        self.things['_android_webview'] = webview
+
     def get_thing(self, name: str):
         return self.things[name]
     
     def set_thing(self, name: str, value: typing.Any):
         self.things[name] = value
     
-    def get_attr(self,name: str):
+    def get_attr(self, name: str):
         return getattr(self, name)
     
     def set_attr(self, name: str, value: typing.Any):
         setattr(self, name, value)
     
-    def call_attr(self,name: str, *args, **kwargs):
+    def call_attr(self, name: str, *args, **kwargs):
         return getattr(self, name)(*args, **kwargs)
 
 class PILResourcePacker:
