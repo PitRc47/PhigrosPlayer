@@ -141,7 +141,6 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
     def log_request(self, *args, **kwargs) -> None: ...
 
 class JsApi:
-    class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
         if checksys.main == 'Android':
