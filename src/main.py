@@ -1096,6 +1096,5 @@ else:
         import time 
         message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
         client_socket.sendall(message.encode('utf-8'))
-        time.sleep(1)
     except:
         pass
