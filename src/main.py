@@ -1085,13 +1085,10 @@ def main():
 if checksys.main != 'Android':
     main()
 else:
-    error_message = ""
     try:
-        errFlag = ""
         main()
     except Exception as e:
-        error_message = f"Error occurred: {traceback.format_exc()}"
-    error_message += errFlag
+        pass
     captured_stdout = stdout_buffer.getvalue()
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
