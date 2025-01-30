@@ -61,6 +61,83 @@ from graplib_webview import *
 import load_extended as _
 
 
+enable_clicksound = "--noclicksound" not in sys.argv
+debug = "--debug" in sys.argv
+debug_noshow_transparent_judgeline = "--debug-noshow-transparent-judgeline" in sys.argv
+clickeffect_randomblock = "--noclickeffect-randomblock" not in sys.argv
+loop = "--loop" in sys.argv
+lfdaot = "--lfdaot" in sys.argv
+lfdoat_file = "--lfdaot-file" in sys.argv
+render_range_more = "--render-range-more" in sys.argv
+render_range_more_scale = 2.0 if "--render-range-more-scale" not in sys.argv else eval(sys.argv[sys.argv.index("--render-range-more-scale") + 1])
+lfdaot_render_video = "--lfdaot-render-video" in sys.argv
+noautoplay = "--noautoplay" in sys.argv
+rtacc = "--rtacc" in sys.argv
+lowquality = "--lowquality" in sys.argv
+lowquality_scale = float(sys.argv[sys.argv.index("--lowquality-scale") + 1]) ** 0.5 if "--lowquality-scale" in sys.argv else 2.0 ** 0.5
+showfps = "--showfps" in sys.argv
+lfdaot_start_frame_num = int(eval(sys.argv[sys.argv.index("--lfdaot-start-frame-num") + 1])) if "--lfdaot-start-frame-num" in sys.argv else 0
+lfdaot_run_frame_num = int(eval(sys.argv[sys.argv.index("--lfdaot-run-frame-num") + 1])) if "--lfdaot-run-frame-num" in sys.argv else float("inf")
+speed = float(sys.argv[sys.argv.index("--speed") + 1]) if "--speed" in sys.argv else 1.0
+clickeffect_randomblock_roundn = eval(sys.argv[sys.argv.index("--clickeffect-randomblock-roundn") + 1]) if "--clickeffect-randomblock-roundn" in sys.argv else 0.0
+noplaychart = "--noplaychart" in sys.argv
+clicksound_volume = float(sys.argv[sys.argv.index("--clicksound-volume") + 1]) if "--clicksound-volume" in sys.argv else 1.0
+musicsound_volume = float(sys.argv[sys.argv.index("--musicsound-volume") + 1]) if "--musicsound-volume" in sys.argv else 1.0
+lowquality_imjscvscale_x = float(sys.argv[sys.argv.index("--lowquality-imjscvscale-x") + 1]) if "--lowquality-imjscvscale-x" in sys.argv else 1.0
+lowquality_imjs_maxsize = float(sys.argv[sys.argv.index("--lowquality-imjs-maxsize") + 1]) if "--lowquality-imjs-maxsize" in sys.argv else 256
+enable_controls = "--enable-controls" in sys.argv
+lfdaot_video_fourcc = sys.argv[sys.argv.index("--lfdaot-video-fourcc") + 1] if "--lfdaot-video-fourcc" in sys.argv else "mp4v"
+record_play = "--record-play" in sys.argv
+lfdaot_use_recordfile = sys.argv[sys.argv.index("--lfdaot-use-recordfile") + 1] if "--lfdaot-use-recordfile" in sys.argv else None
+wl_more_chinese = "--wl-more-chinese" in sys.argv
+skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
+enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
+respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "./resources/resource_packs/default"
+disengage_webview = "--disengage-webview" in sys.argv
+
+if lfdaot and noautoplay:
+    noautoplay = False
+    logging.warning("if use --lfdaot, you cannot use --noautoplay")
+
+if showfps and lfdaot and lfdaot_render_video:
+    showfps = False
+    logging.warning("if use --lfdaot-render-video, you cannot use --showfps")
+
+if lfdaot and speed != 1.0:
+    speed = 1.0
+    logging.warning("if use --lfdaot, you cannot use --speed")
+
+if record_play and not noautoplay:
+    noautoplay = True
+    logging.warning("if use --record-play, you must use --noautoplay")
+
+if record_play and lfdaot:
+    record_play = False
+    logging.warning("if use --lfdaot, you cannot use --record-play")
+
+if lfdaot_use_recordfile and not lfdaot:
+    lfdaot_use_recordfile = None
+    logging.warning("if use --lfdaot-use-recordfile, you must use --lfdaot")
+
+if lfdaot_use_recordfile and lfdoat_file:
+    lfdaot_use_recordfile = None
+    logging.warning("if use --lfdoat-file, you cannot use --lfdaot-use-recordfile")
+
+if lfdaot and skip_time != 0.0:
+    skip_time = 0.0
+    logging.warning("if use --lfdaot, you cannot use --skip-time")
+    
+if lfdaot_render_video and disengage_webview:
+    disengage_webview = False
+    logging.warning("if use --lfdaot-render-video, you cannot use --disengage-webview")
+
+if "--clickeffect-easing" in sys.argv:
+    phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
+
+combotips = ("RECORD" if lfdaot_use_recordfile is not None else (
+    "AUTOPLAY" if not noautoplay else "COMBO"
+)) if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
+
 def main():
     import err_processer as _
     import init_logging as _
@@ -107,83 +184,6 @@ def main():
 
     tempdir.clearTempDir()
     temp_dir = tempdir.createTempDir()
-
-    enable_clicksound = "--noclicksound" not in sys.argv
-    debug = "--debug" in sys.argv
-    debug_noshow_transparent_judgeline = "--debug-noshow-transparent-judgeline" in sys.argv
-    clickeffect_randomblock = "--noclickeffect-randomblock" not in sys.argv
-    loop = "--loop" in sys.argv
-    lfdaot = "--lfdaot" in sys.argv
-    lfdoat_file = "--lfdaot-file" in sys.argv
-    render_range_more = "--render-range-more" in sys.argv
-    render_range_more_scale = 2.0 if "--render-range-more-scale" not in sys.argv else eval(sys.argv[sys.argv.index("--render-range-more-scale") + 1])
-    lfdaot_render_video = "--lfdaot-render-video" in sys.argv
-    noautoplay = "--noautoplay" in sys.argv
-    rtacc = "--rtacc" in sys.argv
-    lowquality = "--lowquality" in sys.argv
-    lowquality_scale = float(sys.argv[sys.argv.index("--lowquality-scale") + 1]) ** 0.5 if "--lowquality-scale" in sys.argv else 2.0 ** 0.5
-    showfps = "--showfps" in sys.argv
-    lfdaot_start_frame_num = int(eval(sys.argv[sys.argv.index("--lfdaot-start-frame-num") + 1])) if "--lfdaot-start-frame-num" in sys.argv else 0
-    lfdaot_run_frame_num = int(eval(sys.argv[sys.argv.index("--lfdaot-run-frame-num") + 1])) if "--lfdaot-run-frame-num" in sys.argv else float("inf")
-    speed = float(sys.argv[sys.argv.index("--speed") + 1]) if "--speed" in sys.argv else 1.0
-    clickeffect_randomblock_roundn = eval(sys.argv[sys.argv.index("--clickeffect-randomblock-roundn") + 1]) if "--clickeffect-randomblock-roundn" in sys.argv else 0.0
-    noplaychart = "--noplaychart" in sys.argv
-    clicksound_volume = float(sys.argv[sys.argv.index("--clicksound-volume") + 1]) if "--clicksound-volume" in sys.argv else 1.0
-    musicsound_volume = float(sys.argv[sys.argv.index("--musicsound-volume") + 1]) if "--musicsound-volume" in sys.argv else 1.0
-    lowquality_imjscvscale_x = float(sys.argv[sys.argv.index("--lowquality-imjscvscale-x") + 1]) if "--lowquality-imjscvscale-x" in sys.argv else 1.0
-    lowquality_imjs_maxsize = float(sys.argv[sys.argv.index("--lowquality-imjs-maxsize") + 1]) if "--lowquality-imjs-maxsize" in sys.argv else 256
-    enable_controls = "--enable-controls" in sys.argv
-    lfdaot_video_fourcc = sys.argv[sys.argv.index("--lfdaot-video-fourcc") + 1] if "--lfdaot-video-fourcc" in sys.argv else "mp4v"
-    record_play = "--record-play" in sys.argv
-    lfdaot_use_recordfile = sys.argv[sys.argv.index("--lfdaot-use-recordfile") + 1] if "--lfdaot-use-recordfile" in sys.argv else None
-    wl_more_chinese = "--wl-more-chinese" in sys.argv
-    skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
-    enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
-    respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "./resources/resource_packs/default"
-    disengage_webview = "--disengage-webview" in sys.argv
-
-    if lfdaot and noautoplay:
-        noautoplay = False
-        logging.warning("if use --lfdaot, you cannot use --noautoplay")
-
-    if showfps and lfdaot and lfdaot_render_video:
-        showfps = False
-        logging.warning("if use --lfdaot-render-video, you cannot use --showfps")
-
-    if lfdaot and speed != 1.0:
-        speed = 1.0
-        logging.warning("if use --lfdaot, you cannot use --speed")
-
-    if record_play and not noautoplay:
-        noautoplay = True
-        logging.warning("if use --record-play, you must use --noautoplay")
-
-    if record_play and lfdaot:
-        record_play = False
-        logging.warning("if use --lfdaot, you cannot use --record-play")
-
-    if lfdaot_use_recordfile and not lfdaot:
-        lfdaot_use_recordfile = None
-        logging.warning("if use --lfdaot-use-recordfile, you must use --lfdaot")
-
-    if lfdaot_use_recordfile and lfdoat_file:
-        lfdaot_use_recordfile = None
-        logging.warning("if use --lfdoat-file, you cannot use --lfdaot-use-recordfile")
-
-    if lfdaot and skip_time != 0.0:
-        skip_time = 0.0
-        logging.warning("if use --lfdaot, you cannot use --skip-time")
-        
-    if lfdaot_render_video and disengage_webview:
-        disengage_webview = False
-        logging.warning("if use --lfdaot-render-video, you cannot use --disengage-webview")
-
-    if "--clickeffect-easing" in sys.argv:
-        phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
-
-    combotips = ("RECORD" if lfdaot_use_recordfile is not None else (
-        "AUTOPLAY" if not noautoplay else "COMBO"
-    )) if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
 
     mixer.init()
 
