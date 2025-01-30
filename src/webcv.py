@@ -248,7 +248,7 @@ class WebCanvas:
         renderasync: bool = False,
         hidden: bool = False,
         jslog: bool = False,
-        jslog_path: str = "./web_canvas.jslog.txt"
+        jslog_path: str = "web_canvas.jslog.txt"
     ):
         self.jsapi = JsApi()
         self._destroyed = threading.Event()
