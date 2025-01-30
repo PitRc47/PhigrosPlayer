@@ -143,12 +143,11 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
-        self._configure_android_webview()
+        if checksys.main == 'Android':
+            from kivy.clock import Clock
+            Clock.schedule_once(self._configure_android_webview, 0)
 
     def _configure_android_webview(self):
-        if checksys.main != 'Android':
-            return
-
         PythonActivity = autoclass('org.kivy.android.PythonActivity')
         WebView = autoclass('android.webkit.WebView')
         WebSettings = autoclass('android.webkit.WebSettings')
