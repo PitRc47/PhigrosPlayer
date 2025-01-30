@@ -12,7 +12,7 @@ import traceback
 from io import StringIO
 from threading import Thread
 from os import popen
-from os.path import exists, basename
+from os.path import exists, basename, abspath
 
 if checksys.main == 'Windows':
     from ctypes import windll
@@ -55,7 +55,7 @@ if checksys.main == 'Android':
                 logging.info(f"Folder: {item}")
             else:
                 logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Adastraperaspera.RabbitHouse.0-IN.pez']
+        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez']
 
 from graplib_webview import *
 import load_extended as _
@@ -97,7 +97,7 @@ def main():
 
     if checksys.main == 'Windows':
         from os import add_dll_directory
-        add_dll_directory('../lib')
+        add_dll_directory(abspath('../lib'))
 
     if len(sys.argv) == 1:
         print(ppr_help.HELP_ZH)
@@ -1026,14 +1026,6 @@ def main():
             errFlag = "Error while initializing webview."
             print(f"Caught an exception: {e}")
 
-    if disengage_webview:
-        w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
-    else:
-        if "--window-host" in sys.argv and checksys.main == 'Windows':
-            windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
-        if "--fullscreen" in sys.argv:
-            w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-            root.web.toggle_fullscreen()
         if disengage_webview:
             w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
         else:
@@ -1042,42 +1034,50 @@ def main():
             if "--fullscreen" in sys.argv:
                 w, h = root.winfo_screenwidth(), root.winfo_screenheight()
                 root.web.toggle_fullscreen()
+            if disengage_webview:
+                w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
             else:
-                if "--size" not in sys.argv:
-                    w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+                if "--window-host" in sys.argv and checksys.main == 'Windows':
+                    windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
+                if "--fullscreen" in sys.argv:
+                    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+                    root.web.toggle_fullscreen()
                 else:
-                    w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
-                    
-                winw, winh = (
-                    w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
-                    h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
-                )
-                root.resize(winw, winh)
-                w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-                dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
-                dw_legacy *= webdpr; dh_legacy *= webdpr
-                dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
-                del w_legacy, h_legacy
-                root.resize(winw + dw_legacy, winh + dh_legacy)
-                root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
+                    if "--size" not in sys.argv:
+                        w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+                    else:
+                        w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
+                        
+                    winw, winh = (
+                        w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
+                        h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
+                    )
+                    root.resize(winw, winh)
+                    w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+                    dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
+                    dw_legacy *= webdpr; dh_legacy *= webdpr
+                    dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
+                    del w_legacy, h_legacy
+                    root.resize(winw + dw_legacy, winh + dh_legacy)
+                    root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
 
-        w *= webdpr; h *= webdpr; w = int(w); h = int(h)
+            w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 
-        root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
-        root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
-        root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
-        root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
-        root.run_js_code(f"resizeCanvas({w}, {h});")
-        Resource = Load_Resource()
+            root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
+            root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
+            root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
+            root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
+            root.run_js_code(f"resizeCanvas({w}, {h});")
+            Resource = Load_Resource()
 
-        if wl_more_chinese:
-            root.run_js_code("setWlMoreChinese();")
+            if wl_more_chinese:
+                root.run_js_code("setWlMoreChinese();")
 
-        updateCoreConfig()
+            updateCoreConfig()
 
-        Thread(target=Show_Start, daemon=True).start()
-        root.wait_for_close()
-        tempdir.clearTempDir()
+            Thread(target=Show_Start, daemon=True).start()
+            root.wait_for_close()
+            tempdir.clearTempDir()
 
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
@@ -1087,8 +1087,8 @@ if checksys.main != 'Android':
 else:
     try:
         main()
-    except Exception as e:
-        pass
+    except BaseException as e:
+        error_message = str(e)
     captured_stdout = stdout_buffer.getvalue()
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()

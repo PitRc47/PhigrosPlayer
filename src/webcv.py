@@ -301,6 +301,7 @@ class WebCanvas:
                 while not self.web_hwnd:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
                     time.sleep(0.01)
+                logging.info('Webview start')
             self.web.set_title(title)
         
         else:
