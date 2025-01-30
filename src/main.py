@@ -1080,6 +1080,7 @@ def main():
             tempdir.clearTempDir()
 
     Thread(target=root.init, args=(init, ), daemon=True).start()
+    logging.info("Starting root.start()")
     root.start()
 
 if checksys.main != 'Android':
@@ -1088,7 +1089,7 @@ else:
     try:
         main()
     except BaseException as e:
-        error_message = str(e)
+        error_message = traceback.format_exc()
     captured_stdout = stdout_buffer.getvalue()
     captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
