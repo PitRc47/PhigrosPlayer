@@ -243,7 +243,7 @@ class WebCanvas:
         title: str = "WebCanvas",
         resizable: bool = True,
         frameless: bool = False,
-        html_path: str = "./web_canvas.html",
+        html_path: str = "web_canvas.html",
         renderdemand: bool = False,
         renderasync: bool = False,
         hidden: bool = False,
