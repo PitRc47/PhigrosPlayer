@@ -98,6 +98,7 @@ class directSoundAndroid:
         self._enable_cache = enable_cache
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = MediaPlayer()
+        self._sdesc = None
         
         try:
             # 创建文件输入流并获取文件描述符
