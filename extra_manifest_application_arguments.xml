@@ -1,0 +1,4 @@
+<!-- 允许 HTTP 明文流量 -->
+<application
+    android:usesCleartextTraffic="true"
+    android:networkSecurityConfig="@xml/network_security_config" />

@@ -147,11 +147,11 @@ android.accept_sdk_license = True
 
 # (str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML code
-android.extra_manifest_xml = src/extra_manifest.xml
+#android.extra_manifest_xml = src/extra_manifest.xml
 
 # (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:
-#android.extra_manifest_application_arguments = ./src/android/extra_manifest_application_arguments.xml
+android.extra_manifest_application_arguments = extra_manifest_application_arguments.xml
 
 # (str) Full name including package path of the Java class that implements Python Service
 # use that parameter to set custom Java class which extends PythonService
@@ -177,7 +177,7 @@ android.add_jars = lib/pywebview-android.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+android.add_src = network_security_config.xml
 
 # (list) Android AAR archives to add
 #android.add_aars =
@@ -198,7 +198,7 @@ android.add_jars = lib/pywebview-android.jar
 # 3) A directory, here 'legal_resources' must contain one or more directories, 
 # each of a resource kind:  drawable, xml, etc...
 # android.add_resources = legal_resources
-#android.add_resources =
+android.add_resources = network_security_config.xml
 
 # (list) Gradle dependencies to add
 #android.gradle_dependencies = 
@@ -299,7 +299,7 @@ android.allow_backup = True
 # you can do so with the manifestPlaceholders property.
 # This property takes a map of key-value pairs. (via a string)
 # Usage example : android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]
-# android.manifest_placeholders = [:]
+android.manifest_placeholders = usesCleartextTraffic=true
 
 # (bool) Skip byte compile for .py files
 # android.no-byte-compile-python = False
