@@ -1023,7 +1023,7 @@ def main():
             if lowquality:
                 root.run_js_code(f"lowquality_scale = {lowquality_scale};")
         except Exception as e:
-            errFlag = "Error while initializing webview."
+            errFlag = "Error while main init webview."
             print(f"Caught an exception: {e}")
 
         if disengage_webview:

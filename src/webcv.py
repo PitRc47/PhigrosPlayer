@@ -310,6 +310,7 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug)
     
     def _init(self, width: int, height: int, x: int, y: int):
+        logging.info('Webview init in webcv')
         self.web.resize(width, height)
         self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
@@ -340,8 +341,8 @@ class WebCanvas:
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)
+        logging.info('Starting file server')
         threading.Thread(target=self.file_server.serve_forever, daemon=True).start()
-        
         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
         self._raevent.set()
         
