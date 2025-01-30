@@ -29,7 +29,7 @@ source.exclude_dirs = src/__pycache__
 source.exclude_patterns = lib/*, bin/*, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
-version = 0.5
+version = 0.6
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -151,7 +151,7 @@ android.accept_sdk_license = True
 
 # (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:
-android.extra_manifest_application_arguments = extra_manifest_application_arguments.xml
+# android.extra_manifest_application_arguments = extra_manifest_application_arguments.xml
 
 # (str) Full name including package path of the Java class that implements Python Service
 # use that parameter to set custom Java class which extends PythonService
@@ -177,7 +177,7 @@ android.add_jars = lib/pywebview-android.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-android.add_src = network_security_config.xml
+#android.add_src = network_security_config.xml
 
 # (list) Android AAR archives to add
 #android.add_aars =
@@ -198,7 +198,7 @@ android.add_src = network_security_config.xml
 # 3) A directory, here 'legal_resources' must contain one or more directories, 
 # each of a resource kind:  drawable, xml, etc...
 # android.add_resources = legal_resources
-android.add_resources = network_security_config.xml
+# android.add_resources = network_security_config.xml
 
 # (list) Gradle dependencies to add
 #android.gradle_dependencies = 
