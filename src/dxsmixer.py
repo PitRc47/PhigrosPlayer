@@ -26,13 +26,29 @@ class musicCls:
      
     def _getBufferPosition(self) -> int:
         if self.buffer is None: return 0
-        return self.buffer.GetCurrentPosition()[1]
+        if checksys.main == 'Android':
+            # 返回当前播放位置（毫秒转换为字节位置）
+            current_time_ms = self.dxs._media_player.getCurrentPosition()
+            byte_position = int(current_time_ms / 1000 * 
+                               self.dxs._media_player.getSampleRate() *
+                               self.dxs._media_player.getAudioChannels() *
+                               self.dxs._media_player.getAudioFormat() // 8)
+            return byte_position
+        else:
+            return self.buffer.GetCurrentPosition()[1]
     
     def _setBufferPosition(self, v: int):
         if self.buffer is None: return
-        minv = 0
-        maxv = self.dxs._sdesc.dwBufferBytes - 1
-        self.buffer.SetCurrentPosition(min(max(minv, v), maxv))
+        if checksys.main == 'Android':
+            # Android使用时间（秒）定位，需将字节位置转换为时间
+            pos_seconds = v / (self.dxs._media_player.getSampleRate() * 
+                              self.dxs._media_player.getAudioChannels() *
+                              self.dxs._media_player.getAudioFormat() // 8)
+            self.dxs._media_player.seekTo(int(pos_seconds * 1000))
+        else:
+            minv = 0
+            maxv = self.dxs._sdesc.dwBufferBytes - 1
+            self.buffer.SetCurrentPosition(min(max(minv, v), maxv))
     
     def load(self, fp: str):
         self.unload()
@@ -110,13 +126,23 @@ class musicCls:
         return self.buffer is not None and (self.buffer.GetStatus() != 0 and not self._paused)
     
     def set_pos(self, pos: float):
-        self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
-        
+        if checksys.main == 'Android':
+            # 直接使用秒单位定位
+            self.dxs._media_player.seekTo(int(pos * 1000))
+        else:
+            self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
+    
     def get_pos(self) -> float:
-        return self._getBufferPosition() / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
+        if checksys.main == 'Android':
+            return self.dxs._media_player.getCurrentPosition() / 1000.0
+        else:
+            return self._getBufferPosition() / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
     def get_length(self) -> float:
-        return self.dxs._sdesc.dwBufferBytes / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
+        if checksys.main == 'Android':
+            return self.dxs._media_player.getDuration() / 1000.0  # 毫秒转秒
+        else:
+            return self.dxs._sdesc.dwBufferBytes / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
 class mixerCls:
     def __init__(self):

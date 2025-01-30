@@ -94,7 +94,9 @@ class directSoundAndroid:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
                 f.write(data)
                 self._file_path = f.name
-        
+        self._sample_rate = 44100
+        self._channels = 2
+        self._audio_format = 16
         self._enable_cache = enable_cache
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = MediaPlayer()
@@ -110,7 +112,14 @@ class directSoundAndroid:
             fis.close()
             if not isinstance(data, str):
                 os.remove(self._file_path)
-    
+    def getSampleRate(self):
+        return self._sample_rate
+
+    def getAudioChannels(self):
+        return self._channels
+
+    def getAudioFormat(self):
+        return self._audio_format
     def set_volume(self, v: float):
         self._volume = max(0.0, min(1.0, v))
         self._media_player.setVolume(self._volume, self._volume)

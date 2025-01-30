@@ -131,9 +131,6 @@ if lfdaot_render_video and disengage_webview:
     disengage_webview = False
     logging.warning("if use --lfdaot-render-video, you cannot use --disengage-webview")
 
-if "--clickeffect-easing" in sys.argv:
-    phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
-
 combotips = ("RECORD" if lfdaot_use_recordfile is not None else (
     "AUTOPLAY" if not noautoplay else "COMBO"
 )) if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
@@ -179,7 +176,10 @@ def main():
     if len(sys.argv) == 1:
         print(ppr_help.HELP_ZH)
         raise SystemExit
-        
+    
+    if "--clickeffect-easing" in sys.argv:
+    phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
+
     console_window.Hide() if "--hideconsole" in sys.argv else None
 
     tempdir.clearTempDir()
