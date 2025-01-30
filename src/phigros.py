@@ -3898,7 +3898,6 @@ def init():
     Thread(target=showStartAnimation, daemon=True).start()
         
     root.wait_for_close()
-    sys.exit(0)
 
 Thread(target=root.init, args=(init, ), daemon=True).start()
 root.start()
