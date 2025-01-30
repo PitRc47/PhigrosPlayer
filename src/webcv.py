@@ -150,21 +150,17 @@ class JsApi:
             return
 
         PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        Context = autoclass('android.content.Context')
         WebView = autoclass('android.webkit.WebView')
         WebSettings = autoclass('android.webkit.WebSettings')
-        WebViewClient = autoclass('android.webkit.WebViewClient')
 
         activity = PythonActivity.mActivity
         webview = WebView(activity)
-
         settings = webview.getSettings()
-        settings.setMixedContentMode(0)  # MIXED_CONTENT_ALWAYS_ALLOW
-        settings.setAllowUniversalAccessFromFileURLs(True)
-        settings.setAllowFileAccess(True)
-        settings.setDomStorageEnabled(True)
 
-        webview.setWebViewClient(WebViewClient())
+        settings.setAllowFileAccess(True)
+        settings.setAllowFileAccessFromFileURLs(True)
+        settings.setAllowUniversalAccessFromFileURLs(True)
+        settings.setMixedContentMode(0)
 
         self.things['_android_webview'] = webview
 
