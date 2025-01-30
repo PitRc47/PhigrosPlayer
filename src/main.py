@@ -178,7 +178,7 @@ def main():
         raise SystemExit
     
     if "--clickeffect-easing" in sys.argv:
-    phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
+        phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
 
     console_window.Hide() if "--hideconsole" in sys.argv else None
 
