@@ -1113,8 +1113,8 @@ else:
         error_message = traceback.format_exc()
     try:
         import time 
-        message = f"{error_message}\n"
-        sender.send(message)
-        time.sleep(5)
+        error_message = f"{error_message}\n"
+        sender.send(error_message)
     except:
         pass
+    time.sleep(5)

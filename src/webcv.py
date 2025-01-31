@@ -292,6 +292,7 @@ class WebCanvas:
                     continue
                 break
             logging.info('Android Webview inited')
+            '''
             from jnius import autoclass, cast # type: ignore
             WebView = autoclass('android.webkit.WebView')
             webview = cast(WebView, self.web.native.webview)
@@ -303,6 +304,7 @@ class WebCanvas:
             settings.setAllowFileAccessFromFileURLs(True)
             settings.setAllowUniversalAccessFromFileURLs(True)
             settings.setMixedContentMode(settings.MIXED_CONTENT_ALWAYS_ALLOW)
+            '''
         
         self.web.events.closed += self._destroyed.set
         
