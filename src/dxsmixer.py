@@ -143,7 +143,6 @@ class musicCls:
     
     def set_pos(self, pos: float):
         if checksys.main == 'Android':
-            # 直接使用秒单位定位
             self.dxs._media_player.seekTo(int(pos * 1000))
         else:
             self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
