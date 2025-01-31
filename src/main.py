@@ -49,18 +49,23 @@ if checksys.main == 'Android':
 
         sys.stdout = StreamToSocket(sender)
         sys.stderr = StreamToSocket(sender)
-        log_buffer = StringIO()
-        class BufferingHandler(logging.StreamHandler):
-            def __init__(self, buffer):
-                super().__init__(buffer)
+        class SocketLogHandler(logging.Handler):
+            def __init__(self, sender):
+                super().__init__()
+                self.sender = sender
 
-        handler = BufferingHandler(log_buffer)
-        formatter = logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S")
-        handler.setFormatter(formatter)
-        root_logger = logging.getLogger()
-        root_logger.handlers = []
-        root_logger.setLevel(logging.DEBUG)
-        root_logger.addHandler(handler)
+            def emit(self, record):
+                log_entry = self.format(record)
+                self.sender.send(log_entry)
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+
+        socket_handler = SocketLogHandler(sender)
+        socket_handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S"))
+        logger.addHandler(socket_handler)
 
         current_directory = os.getcwd()
         logging.info(f'Current Path: {current_directory}')
@@ -1106,10 +1111,9 @@ else:
         main()
     except BaseException as e:
         error_message = traceback.format_exc()
-    captured_logs = log_buffer.getvalue()
     try:
         import time 
-        message = f"{error_message}\n{captured_logs}"
+        message = f"{error_message}\n"
         sender.send(message)
         time.sleep(5)
     except:
