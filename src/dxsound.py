@@ -95,16 +95,7 @@ class directSoundAndroid:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
                 f.write(data)
                 self._file_path = f.name
-        mmsr = MediaMetadataRetriever()
-        fis = FileInputStream(self._file_path)
-        fd = cast('java.io.FileDescriptor', fis.getFD())
-        mmsr.setDataSource(fd)
-        self._sample_rate = int(mmsr.extractMetadata(
-            MediaMetadataRetriever.METADATA_KEY_SAMPLERATE))
-        self._channels = int(mmsr.extractMetadata(
-            MediaMetadataRetriever.METADATA_KEY_CHANNEL_COUNT))
-        mmsr.release()
-        fis.close()
+        self._channels = 2
         self._sample_rate = 44100
         self._audio_format = 16
         self._enable_cache = enable_cache
