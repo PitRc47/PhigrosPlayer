@@ -303,11 +303,11 @@ class WebCanvas:
             settings.setAllowUniversalAccessFromFileURLs(True)
             settings.setMixedContentMode(settings.MIXED_CONTENT_ALWAYS_ALLOW)
         '''
-        self.web.resize(width, height)
-        self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
         
         if checksys.main != 'Android':
+            self.web.resize(width, height)
+            self.web.move(x, y)
             self.web.resize(width, height)
             self.web.move(x, y)
             title = self.web.title
