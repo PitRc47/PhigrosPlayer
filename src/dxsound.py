@@ -130,7 +130,9 @@ class directSoundAndroid:
             while self._media_player.isPlaying():
                 pass
         return self._media_player
-    
+    def create(self, playMethod: typing.Literal[0, 1] = 0):
+        self.play()
+        return (None, self._media_player)
     def stop(self):
         self._media_player.stop()
         self._media_player.prepare()

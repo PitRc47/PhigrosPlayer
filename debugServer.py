@@ -1,4 +1,10 @@
 import socket
+import os
+import sys
+
+sys.path.append('src')
+
+#import main
 
 def start_server(host='192.168.1.28', port=7878):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -8,10 +14,13 @@ def start_server(host='192.168.1.28', port=7878):
 
     client_socket, addr = server_socket.accept()
     print(f"Connection Received: {addr}")
-    while True:
-        msg = client_socket.recv(81920)
-        if msg:
-            print(msg.decode('utf-8'))
+    try:
+        while True:
+            msg = client_socket.recv(81920)
+            if msg:
+                print(msg.decode('utf-8'))
+    except:
+        pass
 
 if __name__ == "__main__":
     start_server()
