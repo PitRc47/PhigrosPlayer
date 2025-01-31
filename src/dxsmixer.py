@@ -22,7 +22,7 @@ class musicCls:
     
     def _setBufferVolume(self, v: float):
         if self.buffer is None: return
-        self.buffer.SetVolume(self.dxs.transform_volume(v))
+        self.buffer.set_volume(self.dxs.transform_volume(v))
      
     def _getBufferPosition(self) -> int:
         if self.buffer is None: return 0
