@@ -166,6 +166,7 @@ class PILResourcePacker:
         self._imgopted: dict[str, threading.Event] = {}
     
     def reg_img(self, img: Image.Image|bytes, name: str):
+        logging.info(f'register image: {name}')
         self.imgs.append((name, img))
         
     def pack(self):
