@@ -77,7 +77,11 @@ class musicCls:
                 self.buffer.Play(self.lflag)
         
     def stop(self):
-        self.buffer = None
+        if checksys.main == 'Android' and self.buffer is not None:
+            self.buffer.release()
+            self.buffer = None
+        else:
+            self.buffer = None
         
     def pause(self):
         if self._paused: return
