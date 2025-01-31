@@ -283,7 +283,6 @@ class WebCanvas:
     
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview init in webcv')
-        time.sleep(0.1)
         self.web.resize(width, height)
         self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
