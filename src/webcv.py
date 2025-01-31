@@ -292,7 +292,7 @@ class WebCanvas:
                     continue
                 break
             logging.info('Android Webview inited')
-            from jnius import autoclass, cast# type: ignore
+            from jnius import autoclass, cast # type: ignore
             WebView = autoclass('android.webkit.WebView')
             webview = cast(WebView, self.web.native.webview)
             settings = webview.getSettings()
