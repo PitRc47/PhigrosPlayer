@@ -91,7 +91,10 @@ class musicCls:
         if not self._paused: return
         self._paused = False
         
-        self.buffer.Play(self.lflag)
+        if checksys.main == 'Android':
+            self.buffer.start()
+        else:
+            self.buffer.Play(self.lflag) 
         self._setBufferVolume(self._pause_volume)            
         self._setBufferPosition(self._pause_pos)
     
