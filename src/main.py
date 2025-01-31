@@ -79,7 +79,7 @@ if checksys.main == 'Android':
                 logging.info(f"Folder: {item}")
             else:
                 logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez']
+        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen"]
 
 from graplib_webview import *
 import load_extended as _
@@ -118,11 +118,6 @@ skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" 
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
 disengage_webview = "--disengage-webview" in sys.argv
-
-'''
-if checksys.main == 'Android':
-    disengage_webview = True
-'''
 
 if lfdaot and noautoplay:
     noautoplay = False
@@ -1060,7 +1055,7 @@ def main():
         else:
             if "--window-host" in sys.argv and checksys.main == 'Windows':
                 windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
-            if "--fullscreen" in sys.argv or checksys.main == 'Android':
+            if "--fullscreen" in sys.argv:
                 w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
                 root.web.toggle_fullscreen()
             if disengage_webview:
@@ -1069,7 +1064,7 @@ def main():
                 if "--window-host" in sys.argv and checksys.main == 'Windows':
                     windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
                 if "--fullscreen" in sys.argv:
-                    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+                    w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
                     root.web.toggle_fullscreen()
                 else:
                     if checksys.main != 'Android':
