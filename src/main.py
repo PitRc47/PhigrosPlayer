@@ -492,6 +492,7 @@ def main():
                     root.reg_res(mp4data, f"{name}.mp4")
                     root.wait_jspromise(f"""loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');""")
         
+        logging.info('Loading font...')
         with open("resources/font.ttf", "rb") as f:
             root.reg_res(f.read(),"PhigrosFont.ttf")
         respacker.load(*respacker.pack())
