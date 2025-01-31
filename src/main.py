@@ -1039,7 +1039,7 @@ def main():
             if disengage_webview:
                 socket_webviewbridge.hook(root)
 
-            webdpr = root.run_js_code("window.devicePixelRatio;")
+            webdpr = float(root.run_js_code("window.devicePixelRatio;"))
             if webdpr != 1.0:
                 lowquality = True
                 lowquality_scale *= 1.0 / webdpr # ...?
