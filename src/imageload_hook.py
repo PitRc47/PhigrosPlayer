@@ -1,4 +1,5 @@
 import io
+import os
 import typing
 
 from PIL import Image
@@ -16,6 +17,8 @@ def open_hook(*args, **kwargs):
         args[0] = io.BytesIO(byteData)
         
     elif isinstance(args[0], str):
+        if os.path.isabs(args[0]):
+            args[0] = os.path.abspath(args[0])
         with open(args[0], "rb") as f:
             byteData = f.read()
             args[0] = io.BytesIO(byteData)
