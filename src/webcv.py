@@ -282,7 +282,25 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug)
     
     def _init(self, width: int, height: int, x: int, y: int):
-        logging.info('Webview init in webcv')
+        logging.info('Webview starting init in webcv')
+        if checksys.main == 'Android':
+            while True:
+                try:
+                    self.web.native.webview
+                except:
+                    continue
+                break
+            from jnius import autoclass, cast, PythonJavaClass, java_method # type: ignore
+            WebView = autoclass('android.webkit.WebView')
+            webview = cast(WebView, self.web.native.webview)
+            settings = webview.getSettings()
+            settings.setJavaScriptEnabled(True)
+            settings.setDomStorageEnabled(True)
+            settings.setDatabaseEnabled(True)
+            settings.setAllowFileAccess(True)
+            settings.setAllowFileAccessFromFileURLs(True)
+            settings.setAllowUniversalAccessFromFileURLs(True)
+            settings.setMixedContentMode(settings.MIXED_CONTENT_ALWAYS_ALLOW)
         self.web.resize(width, height)
         self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
