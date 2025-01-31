@@ -283,6 +283,7 @@ class WebCanvas:
     
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview starting init in webcv')
+        '''
         if checksys.main == 'Android':
             while True:
                 try:
@@ -290,7 +291,7 @@ class WebCanvas:
                 except:
                     continue
                 break
-            from jnius import autoclass, cast, PythonJavaClass, java_method # type: ignore
+            from jnius import autoclass, cast# type: ignore
             WebView = autoclass('android.webkit.WebView')
             webview = cast(WebView, self.web.native.webview)
             settings = webview.getSettings()
@@ -301,6 +302,7 @@ class WebCanvas:
             settings.setAllowFileAccessFromFileURLs(True)
             settings.setAllowUniversalAccessFromFileURLs(True)
             settings.setMixedContentMode(settings.MIXED_CONTENT_ALWAYS_ALLOW)
+        '''
         self.web.resize(width, height)
         self.web.move(x, y)
         self.web.events.closed += self._destroyed.set
