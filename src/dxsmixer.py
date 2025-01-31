@@ -71,7 +71,10 @@ class musicCls:
             
         else:
             self.set_pos(0.0)
-            self.buffer.Play(self.lflag)
+            if checksys.main == 'Android':
+                self.buffer.start()
+            else:
+                self.buffer.Play(self.lflag)
         
     def stop(self):
         self.buffer = None
