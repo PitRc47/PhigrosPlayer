@@ -24,7 +24,7 @@ from graplib_webview import *
 
 drawUI_Default_Kwargs = {
     f"{k}_{k2}": v
-    for k in ("combonumber", "combo", "score", "name", "level", "pause") for k2, v in (("dx", 0.0), ("dy", 0.0), ("scaleX", 1.0), ("scaleY", 1.0), ("color", "rgba(255, 255, 255, 1.0)"))
+    for k in ("combonumber", "combo", "score", "name", "level", "pause", "bar") for k2, v in (("dx", 0.0), ("dy", 0.0), ("scaleX", 1.0), ("scaleY", 1.0), ("color", "rgba(255, 255, 255, 1.0)"))
 }
 mainFramerateCalculator = tool_funcs.FramerateCalculator()
 clickEffectEasingType = 16
@@ -380,7 +380,14 @@ def draw_ui(
     pauseUI_scaleX: float = 1.0,
     pauseUI_scaleY: float = 1.0,
     pauseUI_color: str = "rgba(255, 255, 255, 1.0)",
-    pauseUI_rotate: float = 0.0
+    pauseUI_rotate: float = 0.0,
+    
+    barUI_dx: float = 0.0,
+    barUI_dy: float = 0.0,
+    barUI_scaleX: float = 1.0,
+    barUI_scaleY: float = 1.0,
+    barUI_color: str = "rgba(255, 255, 255, 1.0)",
+    barUI_rotate: float = 0.0
 ):
     if clear: clearCanvas(wait_execute = True)
     if background: drawBg()
@@ -401,19 +408,12 @@ def draw_ui(
             "name": "translate", "args": [0, - h / 7  + dy]
         } if animationing else None,
         {
-            "type": "call",
-            "name": "fillRectEx", "args": [
-                0, 0, w * process, h / 95,
-                "rgba(145, 145, 145, 0.85)"
-            ]
-        },
-        {
-            "type": "call",
-            "name": "fillRectEx", "args": [
-                w * process - w * 0.00175, 0,
-                w * 0.00175, h / 95,
-                "rgba(255, 255, 255, 0.9)"
-            ]
+            "type": "pbar",
+            "w": w, "pw": h / 95,
+            "process": process,
+            "dx": barUI_dx, "dy": barUI_dy,
+            "sx": barUI_scaleX, "sy": barUI_scaleY,
+            "color": barUI_color, "rotate": barUI_rotate
         },
         {
             "type": "text",
@@ -912,7 +912,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
         lineWidth = h * const.LINEWIDTH.RPE * lineScaleY
         
         if line.attachUI is not None: # has a "bar" key is not supported, but you cannot merge the 2 if !!!!!!!!
-            if line.attachUI in ("combonumber", "combo", "score", "name", "level", "pause"):
+            if line.attachUI in ("combonumber", "combo", "score", "name", "level", "pause", "bar"):
                 attachUIData.update({
                     f"{line.attachUI}UI_dx": linePos[0] - w / 2,
                     f"{line.attachUI}UI_dy": linePos[1] - h / 2,
