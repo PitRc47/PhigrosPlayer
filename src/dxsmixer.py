@@ -22,7 +22,10 @@ class musicCls:
     
     def _setBufferVolume(self, v: float):
         if self.buffer is None: return
-        self.buffer.set_volume(self.dxs.transform_volume(v))
+        if checksys.main == 'Android':
+            self.dxs.set_volume(v)
+        else:
+            self.buffer.SetVolume(self.dxs.transform_volume(v))
      
     def _getBufferPosition(self) -> int:
         if self.buffer is None: return 0
@@ -131,7 +134,7 @@ class musicCls:
             self.dxs._media_player.seekTo(int(pos * 1000))
         else:
             self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
-    
+        
     def get_pos(self) -> float:
         if checksys.main == 'Android':
             return self.dxs._media_player.getCurrentPosition() / 1000.0
