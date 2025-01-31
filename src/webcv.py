@@ -143,34 +143,6 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
-        if checksys.main == 'Android':
-            from kivy.clock import Clock
-            Clock.schedule_once(self._configure_android_webview, 0.5)
-
-    def _configure_android_webview(self, dt=None):
-        PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        WebView = autoclass('android.webkit.WebView')
-        WebSettings = autoclass('android.webkit.WebSettings')
-        Context = autoclass('android.content.Context')
-
-        activity = PythonActivity.mActivity
-        webview = WebView(activity)
-        
-        settings = webview.getSettings()
-        settings.setJavaScriptEnabled(True)
-        settings.setDomStorageEnabled(True)
-        settings.setDatabaseEnabled(True)
-        settings.setAllowFileAccess(True)
-        settings.setAllowFileAccessFromFileURLs(True)
-        settings.setAllowUniversalAccessFromFileURLs(True)
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)
-        
-        settings.setAppCacheEnabled(True)
-        settings.setAppCachePath(activity.getCacheDir().getAbsolutePath())
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT)
-
-        self.things['_android_webview'] = webview
-        logging.info("Android WebView initialized on main thread")
 
     def get_thing(self, name: str):
         return self.things[name]
