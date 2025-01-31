@@ -30,7 +30,10 @@ if checksys.main == 'Android':
                 self.sock.connect_ex((host, port))
             
             def send(self, data):
-                self.sock.sendall(data.encode() + b'\n')
+                try:
+                    self.sock.sendall(data.encode() + b'\n')
+                except:
+                    pass
             
             def close(self):
                 self.sock.close()
@@ -116,8 +119,10 @@ enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
 disengage_webview = "--disengage-webview" in sys.argv
 
+'''
 if checksys.main == 'Android':
     disengage_webview = True
+'''
 
 if lfdaot and noautoplay:
     noautoplay = False
@@ -1078,6 +1083,14 @@ def main():
                     )
                     root.resize(winw, winh)
                     w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+                    logging.info(f'Type of w_legacy {type(w_legacy)}, Type of h_legacy {type(h_legacy)}')
+                    logging.info(f'Type of winw {type(winw)}, Type of winh {type(winh)}')
+                    logging.info(f'w_legacy {w_legacy}, h_legacy {h_legacy}')
+                    logging.info(f'winw {winw},  winh {winh}')
+                    winw = int(winw)
+                    winh = int(winh)
+                    w_legacy = int(w_legacy)
+                    h_legacy = int(h_legacy)
                     dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
                     dw_legacy *= webdpr; dh_legacy *= webdpr
                     dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)

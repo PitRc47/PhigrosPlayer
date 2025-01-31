@@ -65,7 +65,7 @@ def start_server(window: webcv.WebCanvas, addr: str, port: int):
             asyncio.get_event_loop().run_until_complete(server)
             threading.Thread(target=asyncio.get_event_loop().run_forever, daemon=True).start()
         except Exception as e:
-            logging.error(f"start server on port {port} failed: {repr(e)}")
+            logging.error(f"start server({addr}) on port {port} failed: {repr(e)}")
             if port > 65535:
                 raise Exception("port out of range")
             port += 1
