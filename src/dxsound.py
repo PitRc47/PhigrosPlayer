@@ -15,7 +15,6 @@ import checksys
 if checksys.main == 'Android':
     from jnius import autoclass  # type: ignore
     from jnius import cast  # type: ignore
-    MediaMetadataRetriever = autoclass('android.media.MediaMetadataRetriever')
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     MediaPlayer = autoclass('android.media.MediaPlayer')
     File = autoclass('java.io.File')
@@ -38,7 +37,6 @@ if checksys.main == 'Windows':
     dxs = ds.DirectSoundCreate(None, None)
     dxs.SetCooperativeLevel(None, ds.DSSCL_NORMAL)
 
-# region Windows Audio Processing
 if checksys.main == 'Windows':
     def _wav2wfx(data: bytes):
         (
@@ -88,10 +86,8 @@ if checksys.main == 'Windows':
 class directSoundAndroid:
     def __init__(self, data: bytes | str, enable_cache: bool = True):
         if isinstance(data, str):
-            # 直接使用文件路径
             self._file_path = data
         else:
-            # 将字节数据写入临时文件
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
                 f.write(data)
                 self._file_path = f.name
@@ -102,9 +98,7 @@ class directSoundAndroid:
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = MediaPlayer()
         self._sdesc = None
-        
         try:
-            # 创建文件输入流并获取文件描述符
             fis = FileInputStream(self._file_path)
             fd = cast('java.io.FileDescriptor', fis.getFD())
             self._media_player.setDataSource(fd)
