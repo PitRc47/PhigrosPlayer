@@ -83,20 +83,23 @@ class musicCls:
         if self._paused: return
         self._paused = True
         
-        self._pause_pos = self._getBufferPosition()
-        self._pause_volume = self.get_volume()
-        self._setBufferVolume(0.0)
+        if checksys.main == 'Android':
+            self.dxs._media_player.pause()
+        else:
+            self._pause_pos = self._getBufferPosition()
+            self._pause_volume = self.get_volume()
+            self.buffer.Stop()
         
     def unpause(self):
         if not self._paused: return
         self._paused = False
         
         if checksys.main == 'Android':
-            self.buffer.start()
+            self.dxs._media_player.start()
         else:
-            self.buffer.Play(self.lflag) 
-        self._setBufferVolume(self._pause_volume)            
-        self._setBufferPosition(self._pause_pos)
+            self.buffer.Play(self.lflag)
+            self._setBufferVolume(self._pause_volume)
+            self._setBufferPosition(self._pause_pos)
     
     @tool_funcs.NoJoinThreadFunc
     def fadeout(self, t: int):
