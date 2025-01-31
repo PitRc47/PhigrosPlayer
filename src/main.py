@@ -116,6 +116,9 @@ enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
 disengage_webview = "--disengage-webview" in sys.argv
 
+if checksys.main == 'Android':
+    disengage_webview = True
+
 if lfdaot and noautoplay:
     noautoplay = False
     logging.warning("if use --lfdaot, you cannot use --noautoplay")
