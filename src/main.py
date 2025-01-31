@@ -24,15 +24,31 @@ if checksys.main == 'Android':
 
 if checksys.main == 'Android':
     if True:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect_ex(('192.168.1.28', 7878))
+        class SocketSender:
+            def __init__(self, host='192.168.1.28', port=7878):
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.connect_ex((host, port))
+            
+            def send(self, data):
+                self.sock.sendall(data.encode() + b'\n')
+            
+            def close(self):
+                self.sock.close()
+        class StreamToSocket:
+            def __init__(self, sender):
+                self.sender = sender
+            
+            def write(self, message):
+                if message:
+                    self.sender.send(message)
+            
+            def flush(self):
+                pass
 
-        stdout_buffer = StringIO()
-        stderr_buffer = StringIO()
+        sender = SocketSender()
 
-        sys.stdout = stdout_buffer
-        sys.stderr = stderr_buffer
-
+        sys.stdout = StreamToSocket(sender)
+        sys.stderr = StreamToSocket(sender)
         log_buffer = StringIO()
         class BufferingHandler(logging.StreamHandler):
             def __init__(self, buffer):
@@ -1090,13 +1106,11 @@ else:
         main()
     except BaseException as e:
         error_message = traceback.format_exc()
-    captured_stdout = stdout_buffer.getvalue()
-    captured_stderr = stderr_buffer.getvalue()
     captured_logs = log_buffer.getvalue()
     try:
         import time 
-        message = f"{error_message}\nCaptured stdout:\n{captured_stdout}\nCaptured stderr:\n{captured_stderr}\nCaptured logs:\n{captured_logs}"
-        client_socket.sendall(message.encode('utf-8'))
+        message = f"{error_message}\n{captured_logs}"
+        sender.send(message)
         time.sleep(5)
     except:
         pass
