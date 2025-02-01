@@ -288,7 +288,7 @@ class WebCanvas:
             frameless = frameless,
             hidden = hidden
         )
-        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
+        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(f"({x.rstrip(";")})")
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug)
     
