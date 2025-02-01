@@ -4,7 +4,7 @@ import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
 import checksys
-
+import json
 import threading
 import typing
 import http.server
@@ -200,21 +200,18 @@ class PILResourcePacker:
 
     def load(self, data: bytes, indexs: list[list[str, list[int, int]]]):
         logging.info('webcv loading images...')
-        rid = "pilrespacker_{}".format(randint(0, 2 << 31))
+        rid = f"pilrespacker_{randint(0, 2 << 31)}"
         self.cv.reg_res(data, rid)
         
         logging.info('loading res package .')
-        js_command = "loadrespackage('{}', {})".format(self.cv.get_resource_path(rid), indexs)
-        imnames = self.cv.run_js_code(js_command)
+        imnames = self.cv.wait_jspromise(f"loadrespackage('{self.cv.get_resource_path(rid)}', {indexs});")
         
         logging.info('get imgcomplete jseval')
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
         self.cv.unreg_res(rid)
         
         logging.info('revoke img urls')
-        img_vars = ",".join(map(self.cv.get_img_jsvarname, imnames))
-        js_revoke = "[{}].forEach(im => URL.revokeObjectURL(im.src));".format(img_vars)
-        self.cv.run_js_code(js_revoke)
+        self.cv.run_js_code(f"""[{",".join(map(self.cv.get_img_jsvarname, imnames))}].forEach(im => URL.revokeObjectURL(im.src));""")
         
         def optimize():
             logging.info('cache image to optimize')
@@ -288,7 +285,7 @@ class WebCanvas:
             frameless = frameless,
             hidden = hidden
         )
-        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(f"({x.rstrip(";")})")
+        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug)
     
