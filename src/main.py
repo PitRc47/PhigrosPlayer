@@ -510,6 +510,7 @@ def main():
         root.unreg_res("PhigrosFont.ttf")
         
         # root.file_server.shutdown()
+        logging.info("Calc note_max_height...")
         note_max_width = globalNoteWidth * const.NOTE_DUB_FIXSCALE
         note_max_height = max((
             note_max_width / Resource["Notes"]["Tap"].width * Resource["Notes"]["Tap"].height,
@@ -523,7 +524,8 @@ def main():
             note_max_width / Resource["Notes"]["Hold_End"].width * Resource["Notes"]["Hold_End"].height
         ))
         note_max_size_half = ((note_max_width ** 2 + note_max_height ** 2) ** 0.5) / 2
-                    
+        
+        logging.info("Open shaders...")
         shaders = {
             "chromatic": open("shaders/chromatic.glsl", "r", encoding="utf-8").read(),
             "circleBlur": open("shaders/circle_blur.glsl", "r", encoding="utf-8").read(),
@@ -566,6 +568,7 @@ def main():
                     else:
                         logging.info(f"Loaded shader {name}")
         
+        logging.info("Loading phicore.ClickSoundManager...")
         cksmanager = phicore.ClickSoundManager(Resource["Note_Click_Audio"])
         logging.info("Load Resource Successfully")
         return Resource
