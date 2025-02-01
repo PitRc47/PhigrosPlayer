@@ -139,7 +139,12 @@ class musicCls:
         return self._volume
     
     def get_busy(self) -> bool:
-        return self.buffer is not None and (self.buffer.GetStatus() != 0 and not self._paused)
+        if self.buffer is None:
+            return False
+        if checksys.main == 'Android':
+            return self.dxs._media_player.isPlaying() and not self._paused
+        else:
+            return self.buffer.GetStatus() != 0 and not self._paused
     
     def set_pos(self, pos: float):
         if checksys.main == 'Android':
