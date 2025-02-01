@@ -290,7 +290,7 @@ class WebCanvas:
         )
         self.preloadarg = (width, height, x, y)
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        self.start = lambda: webview.start(self.preload, self.web, debug=debug)
+        self.start = lambda: webview.start(self.preload, self.web, debug=True)
     
     def preload(self, window):
         self.web = window

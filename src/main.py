@@ -1135,6 +1135,7 @@ def main():
     root.start()
 
 if checksys.main != 'Android':
+    logger = logging.getLogger()
     main()
 else:
     try:
