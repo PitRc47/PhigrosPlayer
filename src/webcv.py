@@ -256,7 +256,7 @@ class WebCanvas:
         renderasync: bool = False,
         hidden: bool = False,
         jslog: bool = False,
-        jslog_path: str = "web_canvas.jslog.txt"
+        jslog_path: str = "web_canvas.jslog.txt",
     ):
         self.jsapi = JsApi()
         self._destroyed = threading.Event()
@@ -285,13 +285,21 @@ class WebCanvas:
             frameless = frameless,
             hidden = hidden
         )
+        self.preloadarg = (width, height, x, y)
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug=debug)
+        self.start = lambda: webview.start(self.preload, self.web, debug=debug)
+    
+    def preload(self, window):
+        self.web = window
+        self._init(*self.preloadarg)
+        self.maininit()
+    
+    def receive(self, func):
+        self.maininit = func
     
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview starting init in webcv')
-        
+        """
         if checksys.main == 'Android':
             while True:
                 try:
@@ -300,6 +308,7 @@ class WebCanvas:
                     continue
                 break
             logging.info('Android Webview inited')
+        """
         
         self.web.events.closed += self._destroyed.set
         
@@ -320,6 +329,7 @@ class WebCanvas:
                 logging.info('Webview start')
             self.web.set_title(title)
         
+        """
         else:
             while True:
                 try:
@@ -328,6 +338,7 @@ class WebCanvas:
                     continue
                 logging.info('Get web._server.address successful')
                 break
+        """
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)

@@ -1129,8 +1129,9 @@ def main():
             root.wait_for_close()
             tempdir.clearTempDir()
 
-    Thread(target=root.init, args=(init, ), daemon=True).start()
+    #Thread(target=, args=(init, ), daemon=True).start()
     logging.info("Starting root.start()")
+    root.receive(init)
     root.start()
 
 if checksys.main != 'Android':
