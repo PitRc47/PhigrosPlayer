@@ -205,7 +205,7 @@ class PILResourcePacker:
         
         logging.info('loading res package .')
         js_command = "loadrespackage('{}', {})".format(self.cv.get_resource_path(rid), indexs)
-        imnames = self.cv.wait_jspromise(js_command)
+        imnames = self.cv.run_js_code(js_command)
         
         logging.info('get imgcomplete jseval')
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
