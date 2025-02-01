@@ -170,6 +170,7 @@ class PILResourcePacker:
         self.imgs.append((name, img))
         
     def pack(self):
+        logging.info('packing images...')
         datas = []
         dataindexs = []
         datacount = 0
@@ -192,24 +193,31 @@ class PILResourcePacker:
             datas.append(data)
             dataindexs.append([name, [datacount, len(data)]])
             datacount += len(data)
-            
+            logging.info(f'image {name} size: {len(data)}')
+        
+        logging.info('Packing Done')
         return b"".join(datas), dataindexs
 
     def load(self, data: bytes, indexs: list[list[str, list[int, int]]]):
+        logging.info('webcv loading images...')
         rid = "pilrespacker_{}".format(randint(0, 2 << 31))
         self.cv.reg_res(data, rid)
         
+        logging.info('loading res package .')
         js_command = "loadrespackage('{}', {})".format(self.cv.get_resource_path(rid), indexs)
         imnames = self.cv.wait_jspromise(js_command)
         
+        logging.info('get imgcomplete jseval')
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
         self.cv.unreg_res(rid)
         
+        logging.info('revoke img urls')
         img_vars = ",".join(map(self.cv.get_img_jsvarname, imnames))
         js_revoke = "[{}].forEach(im => URL.revokeObjectURL(im.src));".format(img_vars)
         self.cv.run_js_code(js_revoke)
         
         def optimize():
+            logging.info('cache image to optimize')
             codes = []
             codes.append(f"cachecv = document.createElement('canvas');")
             codes.append(f"cachecv.width = cachecv.height = 1;")
@@ -217,11 +225,13 @@ class PILResourcePacker:
             for im in imnames:
                 codes.append(f"cachectx.drawImage({self.cv.get_img_jsvarname(im)}, 0, 0);")
             codes.append(f"delete cachecv; delete cachectx;")
+            logging.info('run_js_code imnames')
             self.cv.run_js_code("".join(codes))
             
             for im in imnames:
                 self._imgopted[im].set()
-            
+        
+        logging.info('start _imgopted update')
         self._imgopted.update({im: threading.Event() for im in imnames})
         threading.Thread(target=optimize, daemon=True).start()
     

@@ -504,11 +504,13 @@ def main():
         logging.info('Loading font...')
         with open("resources/font.ttf", "rb") as f:
             root.reg_res(f.read(),"PhigrosFont.ttf")
+        logging.info('Loading respacker...')
         respacker.load(*respacker.pack())
         
         root.wait_jspromise(f"""loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");""")
         root.unreg_res("PhigrosFont.ttf")
-        
+        logging.info("Load Font Successfully")
+
         # root.file_server.shutdown()
         logging.info("Calc note_max_height...")
         note_max_width = globalNoteWidth * const.NOTE_DUB_FIXSCALE
