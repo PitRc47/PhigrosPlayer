@@ -1300,7 +1300,8 @@ def getLevelText() -> str:
     return chart_information["Level"].split(" ")[0]
 
 def getFontSize(text: str, maxwidth: str, maxsize: float):
-    w1px = root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(text)}).width;") / 50
+    js_result = root.run_js_code(f"ctx.font='50px PhigrosFont'; ctx.measureText({root.string2sctring_hqm(text)}).width;")
+    w1px = float(js_result) / 50
     if w1px == 0: w1px = 1.0
     return min(maxsize, maxwidth / w1px)
 
