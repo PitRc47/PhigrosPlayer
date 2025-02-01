@@ -19,7 +19,7 @@ def start_server(host='192.168.1.28', port=7878):
             while True:
                 msg = client_socket.recv(81920)
                 if msg:
-                    print(msg.decode('utf-8'))
+                    print(msg.decode('utf-8'),file=f)
         except:
             pass
 
