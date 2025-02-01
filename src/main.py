@@ -507,7 +507,8 @@ def main():
         logging.info('Loading respacker...')
         respacker.load(*respacker.pack())
         
-        root.wait_jspromise(f"""loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");""")
+        logging.info("Load Font jscode")
+        root.run_js_code(f"""loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");""")
         root.unreg_res("PhigrosFont.ttf")
         logging.info("Load Font Successfully")
 
