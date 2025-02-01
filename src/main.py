@@ -506,6 +506,7 @@ def main():
             root.reg_res(f.read(),"PhigrosFont.ttf")
         logging.info('Loading respacker...')
         respacker.load(*respacker.pack())
+        
         root.run_js_code("{a: 123, b: \"asd\"}")
         result = root.run_js_code("{a: 123, b: \"asd\"}")
         logging.debug(repr(result))

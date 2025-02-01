@@ -353,6 +353,7 @@ class WebCanvas:
     def move(self, x: int, y:int): self.web.move(x, y)
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
+        logging.debug(f"run_js_code: {code}, repr of the code: {repr(code)}")
         if self.jslog and not code.endswith(";"): code += ";"
         
         if order is None:
