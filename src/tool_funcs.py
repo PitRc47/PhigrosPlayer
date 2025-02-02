@@ -3,10 +3,9 @@ import random
 import logging
 import time
 import re
-import threading
 from sys import argv
 from os import environ
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy
 import cv2
@@ -482,7 +481,19 @@ class PPLM_ProxyBase:
 class PPLM_PC_ClickEvent: time: float
 @dataclass
 class PPLM_PC_ReleaseEvent: time: float
+
+@dataclass
+class PPLM_MOB_Touch:
+    time: float
+    x: float
+    y: float
+    i: int
     
+    def update(self, t: float, x: float, y: float) -> list[tuple[float, float]]:
+        self.x = x
+        self.y = y
+        ...
+
 class PhigrosPlayLogicManager:
     def __init__(
             self,
@@ -498,12 +509,16 @@ class PhigrosPlayLogicManager:
         self.enable_cksound = enable_cksound
         self.psound = psound
         self.record = record
+        self.enable_mob: bool = False
         
         if self.record:
             self.recorder = binfile.PlayRecorderWriter()
         
         self.pc_clicks: list[PPLM_PC_ClickEvent] = []
         self.pc_clickings: int = 0
+        
+        self.mob_touches: list[PPLM_MOB_Touch] = []
+        self.mob_flicks: list[tuple[float, tuple[float, float]]] = []
         
         self.clickeffects: const.ClickEffectType = []
         self.badeffects: const.BadEffectType = []
@@ -708,6 +723,31 @@ class PhigrosPlayLogicManager:
                     eval(f"lambda w, h: ({npos[0]} * w, {npos[1]} * h)") if self.pp.nproxy_typeis(n, const.NOTE_TYPE.HOLD) and self.pp.nproxy_stime(n) >= t else e[-1]
                 ))
 
+    def _getmobt_byid(self, i: int):
+        for t in self.mob_touches:
+            if t.i == i: return t
+        return None
+    
+    def _removemobt_byid(self, i: int):
+        touch = self._getmobt_byid(i)
+        if touch is None: return
+        self.mob_touches.remove(touch)
+    
+    def mob_touchstart(self, t: float, x: float, y: float, i: int):
+        self.mob_touches.append(PPLM_MOB_Touch(t, x, y, i))
+
+    def mob_touchmove(self, t: float, x: float, y: float, i: int):
+        touch = self._getmobt_byid(i)
+        if touch is None: return
+        
+        self.mob_flicks.extend(touch.update(t, x, y))
+    
+    def mob_touchend(self, i: int):
+        self._removemobt_byid(i)
+    
+    def mob_update(self, t: float):
+        pnotes = self.pp.get_all_pnotes()
+    
 class FramerateCalculator:
     def __init__(self):
         self._frame_count = 0

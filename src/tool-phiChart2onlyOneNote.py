@@ -1,3 +1,5 @@
+import noprocessfp_warn as _
+
 import json
 from sys import argv
 
