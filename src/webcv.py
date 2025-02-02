@@ -335,7 +335,12 @@ class WebCanvas:
                 logging.info('Webview start')
             self.web.set_title(title)
         else:
-            self.web.native.webview.setWebContentsDebuggingEnabled(True)
+            while True:
+                try:
+                    self.web.native.webview.setWebContentsDebuggingEnabled(True)
+                except:
+                    continue
+                break
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("0.0.0.0", self.web_port + 1), WebCanvas_FileServerHandler)
