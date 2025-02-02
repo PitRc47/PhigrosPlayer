@@ -293,10 +293,9 @@ class WebCanvas:
         )
         self.preloadarg = (width, height, x, y)
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        self.start = lambda: webview.start(self.preload, self.web, debug=debug)
+        self.start = lambda: threading.Thread(self.preload).start(),webview.start(debug=debug)
     
-    def preload(self, window):
-        self.web = window
+    def preload(self):
         self._init(*self.preloadarg)
         self.maininit()
     
@@ -336,6 +335,7 @@ class WebCanvas:
             self.web.set_title(title)
         else:
             while True:
+                time.sleep(0.05)
                 try:
                     self.web.native.webview.setWebContentsDebuggingEnabled(True)
                 except:
@@ -343,7 +343,7 @@ class WebCanvas:
                 break
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         WebCanvas_FileServerHandler._canvas = self
-        self.file_server = http.server.HTTPServer(("0.0.0.0", self.web_port + 1), WebCanvas_FileServerHandler)
+        self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)
         logging.info('Starting file server')
         threading.Thread(target=self.file_server.serve_forever, daemon=True).start()
         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
