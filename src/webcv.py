@@ -85,6 +85,8 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
     _canvas: WebCanvas
     
     def do_GET(self):
+        client_ip = self.client_address[0]
+        logging.info(f"[FILE SERVER] GET {self.path} from {client_ip}")
         ctype = None
         if self.path[1:] in self._canvas._regims:
             im: Image.Image = self._canvas._regims[self.path[1:]]
@@ -140,6 +142,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
         self.wfile.write(data)
+        logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
     
     def log_request(self, *args, **kwargs) -> None: ...
 
