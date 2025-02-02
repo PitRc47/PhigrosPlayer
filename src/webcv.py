@@ -292,16 +292,9 @@ class WebCanvas:
             hidden = hidden
         )
         self.preloadarg = (width, height, x, y)
-        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        self.start = lambda: threading.Thread(self.preload).start(),webview.start(debug=debug)
-    
-    def preload(self):
-        self._init(*self.preloadarg)
-        self.maininit()
-    
-    def receive(self, func):
-        self.maininit = func
-    
+        self.init = lambda func: (self._init(width, height, x, y), func())
+        self.start = lambda: webview.start(debug=debug)
+
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview starting init in webcv')
         """

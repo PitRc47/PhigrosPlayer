@@ -1131,7 +1131,7 @@ def main():
 
     #Thread(target=, args=(init, ), daemon=True).start()
     logging.info("Starting root.start()")
-    root.receive(init)
+    Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
 
 if checksys.main != 'Android':
