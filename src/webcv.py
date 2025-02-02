@@ -290,7 +290,7 @@ class WebCanvas:
         )
         self.preloadarg = (width, height, x, y)
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
-        self.start = lambda: webview.start(self.preload, self.web, debug=True)
+        self.start = lambda: webview.start(self.preload, self.web, debug=debug)
     
     def preload(self, window):
         self.web = window
@@ -458,21 +458,32 @@ class WebCanvas:
         logging.info(f"Get resource path: {name}")
         return f"http://{host}:{self.web_port + 1}/{name}"
 
-    def wait_jspromise(self, code: str) -> None:
+    def wait_jspromise(self, code: str) -> typing.Any:
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"
         ete = threading.Event()
         ecbname = f"{eid}_callback"
         result = None
+        error = None
         
         def _callback(jsresult):
-            nonlocal result
-            result = jsresult
+            nonlocal result, error
+            if isinstance(jsresult, dict) and 'error' in jsresult:
+                error = jsresult['error']
+            else:
+                result = jsresult
             ete.set()
             
         self.jsapi.set_attr(ecbname, _callback)
-        self.run_js_code(f"eval({self.string2sctring_hqm(code)}).then((result) => pywebview.api.call_attr('{ecbname}', result));")
+        # 修改JS代码添加catch处理
+        self.run_js_code(
+            f"eval({self.string2sctring_hqm(code)})"
+            f".then(result => pywebview.api.call_attr('{ecbname}', result))"
+            f".catch(err => pywebview.api.call_attr('{ecbname}', {{ error: err.message }}));"
+        )
         ete.wait()
         delattr(self.jsapi, ecbname)
+        if error:
+            raise RuntimeError(f"JS Promise rejected: {error}")
         return result
     
     def _load_img(self, imgname: str) -> None:
