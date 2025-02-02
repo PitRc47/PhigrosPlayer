@@ -79,7 +79,7 @@ if checksys.main == 'Android':
                 logging.info(f"Folder: {item}")
             else:
                 logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen"]
+        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--nolocalhost']
 
 from graplib_webview import *
 import load_extended as _
