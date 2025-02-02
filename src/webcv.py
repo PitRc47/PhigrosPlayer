@@ -457,67 +457,21 @@ class WebCanvas:
         logging.info(f"Get resource path: {name}")
         return f"http://{host}:{self.web_port + 1}/{name}"
 
-    def wait_jspromise(self, code: str, timeout=10) -> typing.Any:
+    def wait_jspromise(self, code: str) -> None:
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"
         ete = threading.Event()
         ecbname = f"{eid}_callback"
         result = None
-        error_info = None  # 存储错误详细信息
 
         def _callback(jsresult):
-            nonlocal result, error_info
-            if isinstance(jsresult, dict) and 'error' in jsresult:
-                error_info = {
-                    'message': jsresult.get('error', 'Unknown error'),
-                    'stack': jsresult.get('stackTrace', 'No stack trace')
-                }
-            else:
-                result = jsresult
+            nonlocal result
+            result = jsresult
             ete.set()
-
-        self.jsapi.set_attr(ecbname, _callback)
-        
-        # 包裹代码在async函数中以捕获同步错误
-        wrapped_code = f"""
-        (async function() {{
-            try {{
-                const result = await (function() {{ 
-                    try {{ 
-                        return eval({self.string2sctring_hqm(code)}); 
-                    }} catch (e) {{ 
-                        return Promise.reject(e); 
-                    }}
-                }})();
-                return result;
-            }} catch (e) {{
-                return {{ 
-                    error: e.message,
-                    stackTrace: e.stack 
-                }};
-            }}
-        }})()
-        """
-
-        try:
-            self.run_js_code(
-                f"{wrapped_code}"
-                f".then(res => pywebview.api.call_attr('{ecbname}', res))"
-                f".catch(err => pywebview.api.call_attr('{ecbname}', {{ error: err }}));"
-            )
             
-            if not ete.wait(timeout):
-                raise TimeoutError(f"JS操作超时（{timeout}秒）未响应")
-
-        finally:
-            if hasattr(self.jsapi, ecbname):
-                delattr(self.jsapi, ecbname)
-
-        if error_info:
-            error_msg = f"JavaScript错误: {error_info['message']}\n调用栈:\n{error_info['stack']}"
-            logging.error(error_msg)
-            raise RuntimeError(error_msg)
-
-        return result
+        self.jsapi.set_attr(ecbname, _callback)
+        self.run_js_code(f"eval({self.string2sctring_hqm(code)}).then((result) => pywebview.api.call_attr('{ecbname}', result));")
+        ete.wait()
+        delattr(self.jsapi, ecbname)
     
     def _load_img(self, imgname: str) -> None:
         jsvarname = self.get_img_jsvarname(imgname)
