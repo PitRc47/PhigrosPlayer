@@ -293,7 +293,7 @@ class WebCanvas:
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug=debug)
+        self.start = lambda: webview.start(debug=True)
 
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview starting init in webcv')
@@ -335,6 +335,7 @@ class WebCanvas:
                     continue
                 break
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
+        logging.info(f'Starting web server at {self.web_port}')
         WebCanvas_FileServerHandler._canvas = self
         self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)
         logging.info('Starting file server')
