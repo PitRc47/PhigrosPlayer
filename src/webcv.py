@@ -38,6 +38,8 @@ elif checksys.main == 'Android':
     screen_height = metrics.heightPixels
 
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
+if checksys.main == 'Android':
+    host = '127.0.0.1'
 logging.info(f"server host: {host}")
 
 framerate_counter = '''\
@@ -133,7 +135,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-type", ctype)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "*")
-        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
         data = _parseRangeHeader(data, rangeHeader, self.send_header)
         self.end_headers()
 
@@ -330,13 +332,6 @@ class WebCanvas:
                     continue
                 break
         logging.info(f'Get webview port, server address: {self.web._server.address}')
-        global host
-        address = self.web._server.address
-        if address.startswith("http://"):
-            address = address[len("http://"):]
-        elif address.startswith("https://"):
-            address = address[len("https://"):]
-        host = address.split(":")[0]
         self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
         logging.info(f'Starting web server at {self.web_port}')
         WebCanvas_FileServerHandler._canvas = self
