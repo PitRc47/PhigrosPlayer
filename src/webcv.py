@@ -451,6 +451,7 @@ class WebCanvas:
         return f"http://{host}:{self.web_port + 1}/{name}"
 
     def wait_jspromise(self, code: str) -> None:
+        logging.info(f"Wait JS promise: {code}")
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"
         ete = threading.Event()
         ecbname = f"{eid}_callback"
