@@ -87,60 +87,64 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
     _canvas: WebCanvas
     
     def do_GET(self):
-        logging.info(f"[FILE SERVER] GET {self.path}")
-        if self.path[1:] in self._canvas._regims:
-            im: Image.Image = self._canvas._regims[self.path[1:]]
-            if hasattr(im, "byteData"):
-                data = im.byteData
-            else:
-                temp_btyeio = io.BytesIO()
-                im.save(temp_btyeio, "png")
-                data = temp_btyeio.getvalue()
-            ctype = "image/png"
+        try:
+            logging.info(f"[FILE SERVER] GET {self.path}")
+            if self.path[1:] in self._canvas._regims:
+                im: Image.Image = self._canvas._regims[self.path[1:]]
+                if hasattr(im, "byteData"):
+                    data = im.byteData
+                else:
+                    temp_btyeio = io.BytesIO()
+                    im.save(temp_btyeio, "png")
+                    data = temp_btyeio.getvalue()
+                ctype = "image/png"
+                    
+            elif self.path[1:] in self._canvas._regres:
+                data = self._canvas._regres[self.path[1:]]
                 
-        elif self.path[1:] in self._canvas._regres:
-            data = self._canvas._regres[self.path[1:]]
+                if self.path.endswith(".png"): ctype = "image/png"
+                elif self.path.endswith(".js"): ctype = "application/javascript"
+                elif self.path.endswith(".html"): ctype = "text/html"
+                elif self.path.endswith(".css"): ctype = "text/css"
+                elif self.path.endswith(".json"): ctype = "application/json"
+                elif self.path.endswith(".ttf"): ctype = "font/ttf"
+                elif self.path.endswith(".woff"): ctype = "font/woff"
+                elif self.path.endswith(".woff2"): ctype = "font/woff2"
+                elif self.path.endswith(".eot"): ctype = "font/eot"
+                elif self.path.endswith(".svg"): ctype = "image/svg+xml"
+                elif self.path.endswith(".ttc"): ctype = "font/ttc"
+                elif self.path.endswith(".otf"): ctype = "font/otf"
+                elif self.path.endswith(".xml"): ctype = "application/xml"
+                elif self.path.endswith(".txt"): ctype = "text/plain"
+                elif self.path.endswith(".ico"): ctype = "image/x-icon"
+                elif self.path.endswith(".webp"): ctype = "image/webp"
+                elif self.path.endswith(".mp4"): ctype = "video/mp4"
+                elif self.path.endswith(".webm"): ctype = "video/webm"
+                elif self.path.endswith(".ogg"): ctype = "video/ogg"
+                elif self.path.endswith(".mp3"): ctype = "audio/mpeg"
+                elif self.path.endswith(".wav"): ctype = "audio/wav"
+                elif self.path.endswith(".flac"): ctype = "audio/flac"
+                elif self.path.endswith(".aac"): ctype = "audio/aac"
+                elif self.path.endswith(".avi"): ctype = "video/x-msvideo"
+                elif self.path.endswith(".mov"): ctype = "video/quicktime"
+                elif self.path.endswith(".mkv"): ctype = "video/x-matroska"
+                else: ctype = "application/octet-stream"
             
-            if self.path.endswith(".png"): ctype = "image/png"
-            elif self.path.endswith(".js"): ctype = "application/javascript"
-            elif self.path.endswith(".html"): ctype = "text/html"
-            elif self.path.endswith(".css"): ctype = "text/css"
-            elif self.path.endswith(".json"): ctype = "application/json"
-            elif self.path.endswith(".ttf"): ctype = "font/ttf"
-            elif self.path.endswith(".woff"): ctype = "font/woff"
-            elif self.path.endswith(".woff2"): ctype = "font/woff2"
-            elif self.path.endswith(".eot"): ctype = "font/eot"
-            elif self.path.endswith(".svg"): ctype = "image/svg+xml"
-            elif self.path.endswith(".ttc"): ctype = "font/ttc"
-            elif self.path.endswith(".otf"): ctype = "font/otf"
-            elif self.path.endswith(".xml"): ctype = "application/xml"
-            elif self.path.endswith(".txt"): ctype = "text/plain"
-            elif self.path.endswith(".ico"): ctype = "image/x-icon"
-            elif self.path.endswith(".webp"): ctype = "image/webp"
-            elif self.path.endswith(".mp4"): ctype = "video/mp4"
-            elif self.path.endswith(".webm"): ctype = "video/webm"
-            elif self.path.endswith(".ogg"): ctype = "video/ogg"
-            elif self.path.endswith(".mp3"): ctype = "audio/mpeg"
-            elif self.path.endswith(".wav"): ctype = "audio/wav"
-            elif self.path.endswith(".flac"): ctype = "audio/flac"
-            elif self.path.endswith(".aac"): ctype = "audio/aac"
-            elif self.path.endswith(".avi"): ctype = "video/x-msvideo"
-            elif self.path.endswith(".mov"): ctype = "video/quicktime"
-            elif self.path.endswith(".mkv"): ctype = "video/x-matroska"
-            else: ctype = "application/octet-stream"
-        
-        rangeHeader = self.headers.get("Range")
-        code = 206 if rangeHeader else 200
-        self.send_response(code)
-        self.send_header("Content-type", ctype)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "*")
-        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
-        data = _parseRangeHeader(data, rangeHeader, self.send_header)
-        self.end_headers()
+            rangeHeader = self.headers.get("Range")
+            code = 206 if rangeHeader else 200
+            self.send_response(code)
+            self.send_header("Content-type", ctype)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "*")
+            self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
+            data = _parseRangeHeader(data, rangeHeader, self.send_header)
+            self.end_headers()
 
-        self.wfile.write(data)
-        logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
+            self.wfile.write(data)
+            logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
+        except BaseException as e:
+            logging.error(f"[FILE SERVER] Error")
+            logging.error(f"[FILE SERVER] Error: {e}")
     
     def log_request(self, *args, **kwargs) -> None: ...
 
