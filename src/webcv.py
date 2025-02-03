@@ -145,6 +145,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             
             logging.info('[FILE SERVER] wfile write')
+            logging.info(f'[FILE SERVER] wfile write size: {len(data)}')
             self.wfile.write(data)
             logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
         except BaseException as e:
