@@ -90,6 +90,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
         try:
             logging.info(f"[FILE SERVER] GET {self.path}")
             if self.path[1:] in self._canvas._regims:
+                logging.info(f"[FILE SERVER] _regims bytes)")
                 im: Image.Image = self._canvas._regims[self.path[1:]]
                 if hasattr(im, "byteData"):
                     data = im.byteData
@@ -100,6 +101,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
                 ctype = "image/png"
                     
             elif self.path[1:] in self._canvas._regres:
+                logging.info(f"[FILE SERVER] _regres bytes)")
                 data = self._canvas._regres[self.path[1:]]
                 
                 if self.path.endswith(".png"): ctype = "image/png"
