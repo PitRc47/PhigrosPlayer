@@ -132,6 +132,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
                 elif self.path.endswith(".mkv"): ctype = "video/x-matroska"
                 else: ctype = "application/octet-stream"
             
+            logging.info('[FILE SERVER] main process')
             rangeHeader = self.headers.get("Range")
             code = 206 if rangeHeader else 200
             self.send_response(code)
