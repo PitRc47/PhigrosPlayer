@@ -478,7 +478,6 @@ class WebCanvas:
         if (!window.{jsvarname}){chr(123)}\
             {jsvarname} = document.createElement('img');\
             {jsvarname}.crossOrigin = \"Anonymous\";\
-            {jsvarname}.onerror = function() {{ console.error('Failed to load image: {imgname}'); }};\
             {jsvarname}.src = 'http://{host}:{self.web_port + 1}/{imgname}';\
             {jsvarname}.loading = \"eager\";\
         {chr(125)}\
