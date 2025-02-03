@@ -327,7 +327,6 @@ class WebCanvas:
             while True:
                 time.sleep(0.05)
                 try:
-                    self.web.native.webview.setWebContentsDebuggingEnabled(True)
                     self.web.native.webview.getSettings().setAllowUniversalAccessFromFileURLs(True)
                     self.web.native.webview.getSettings().setAllowFileAccessFromFileURLs(True)
                     self.web.native.webview.getSettings().setMixedContentMode(1)  # 或者 1
