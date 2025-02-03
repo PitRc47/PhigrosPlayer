@@ -447,7 +447,7 @@ class WebCanvas:
     
     def get_resource_path(self, name: str) -> str:
         logging.info(f"Get resource path: {name}")
-        return f"http://{host}:{self.web_port + 1}/{name}"
+        return f"http://localhost:{self.web_port + 1}/{name}"
 
     def wait_jspromise(self, code: str) -> None:
         logging.info(f"Wait JS promise: {code}")
