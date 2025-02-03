@@ -210,10 +210,7 @@ class PILResourcePacker:
         self.cv.reg_res(data, rid)
         
         logging.info('loading res package .')
-        indexs_json = json.dumps(indexs)
-        js_code = f"loadrespackage('{self.cv.get_resource_path(rid)}', {indexs_json})"
-        imnames = self.cv.wait_jspromise(js_code)
-        
+        imnames = self.cv.wait_jspromise(f"loadrespackage('{self.cv.get_resource_path(rid)}', {indexs});")
         logging.info('get imgcomplete jseval')
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
         self.cv.unreg_res(rid)
