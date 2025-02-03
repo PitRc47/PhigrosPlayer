@@ -465,6 +465,7 @@ class WebCanvas:
         self.run_js_code(f"eval({self.string2sctring_hqm(code)}).then((result) => pywebview.api.call_attr('{ecbname}', result));")
         ete.wait()
         delattr(self.jsapi, ecbname)
+        return result
     
     def _load_img(self, imgname: str) -> None:
         jsvarname = self.get_img_jsvarname(imgname)
