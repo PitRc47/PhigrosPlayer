@@ -39,7 +39,7 @@ elif checksys.main == 'Android':
 
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
 if checksys.main == 'Android':
-    host = 'localhost'
+    host = '127.0.0.1'
 logging.info(f"server host: {host}")
 
 framerate_counter = '''\
