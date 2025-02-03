@@ -142,7 +142,8 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
             data = _parseRangeHeader(data, rangeHeader, self.send_header)
             self.end_headers()
-
+            
+            logging.info('[FILE SERVER] wfile write')
             self.wfile.write(data)
             logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
         except BaseException as e:
