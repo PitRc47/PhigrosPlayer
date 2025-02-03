@@ -79,6 +79,7 @@ def _parseRangeHeader(data: bytes, rg: typing.Optional[str], setrep_header: typi
     end = int(end) if end else len(data) - 1
     start = min(max(start, 0), len(data) - 1)
     end = min(end, len(data) - 1)
+    logging.info(f"[FILE SERVER] _parseRangeHeader sendheader")
     setrep_header("Content-Range", f"bytes {start}-{end}/{len(data)}")
     setrep_header("Content-Length", str(end - start + 1))
     return data[start:end+1]
