@@ -79,7 +79,7 @@ if checksys.main == 'Android':
                 logging.info(f"Folder: {item}")
             else:
                 logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--nolocalhost']
+        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen"]
 
 from graplib_webview import *
 import load_extended as _
@@ -918,7 +918,10 @@ def main():
                     
                     for Task in lfdaot_tasks.values():
                         Task.ExecTask()
-                        root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
+                        if checksys.main != 'Android':
+                            root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
+                        else:
+                            root.wait_jspromise(f"uploadFrame('http://0.0.0.0:{port}/');")
                     
                     httpd.shutdown()
                     

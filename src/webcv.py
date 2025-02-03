@@ -38,6 +38,8 @@ elif checksys.main == 'Android':
     screen_height = metrics.heightPixels
 
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
+if checksys.main == "Android":
+    host = "0.0.0.0"
 logging.info(f"server host: {host}")
 
 framerate_counter = '''\
