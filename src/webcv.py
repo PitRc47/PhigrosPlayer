@@ -85,9 +85,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
     _canvas: WebCanvas
     
     def do_GET(self):
-        client_ip = self.client_address[0]
-        logging.info(f"[FILE SERVER] GET {self.path} from {client_ip}")
-        ctype = None
+        logging.info(f"[FILE SERVER] GET {self.path}")
         if self.path[1:] in self._canvas._regims:
             im: Image.Image = self._canvas._regims[self.path[1:]]
             if hasattr(im, "byteData"):
@@ -132,8 +130,6 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
         rangeHeader = self.headers.get("Range")
         code = 206 if rangeHeader else 200
         self.send_response(code)
-        if not ctype:
-            logging.error(f'Unknown file type:{self.path}')
         self.send_header("Content-type", ctype)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "*")
