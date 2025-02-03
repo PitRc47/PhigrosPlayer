@@ -39,7 +39,7 @@ elif checksys.main == 'Android':
 
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
 if checksys.main == 'Android':
-    host = '127.0.0.1'
+    host = 'localhost'
 logging.info(f"server host: {host}")
 
 framerate_counter = '''\
@@ -447,7 +447,7 @@ class WebCanvas:
     
     def get_resource_path(self, name: str) -> str:
         logging.info(f"Get resource path: {name}")
-        return f"http://localhost:{self.web_port + 1}/{name}"
+        return f"http://{host}:{self.web_port + 1}/{name}"
 
     def wait_jspromise(self, code: str) -> None:
         logging.info(f"Wait JS promise: {code}")
