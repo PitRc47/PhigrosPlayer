@@ -15,8 +15,6 @@ import logging
 from os.path import abspath
 from random import randint
 
-
-
 import webview
 from PIL import Image
 
@@ -34,9 +32,6 @@ elif checksys.main == 'Android':
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
     screen_height = metrics.heightPixels
-
-host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
-logging.info(f"server host: {host}")
 
 framerate_counter = '''\
 (() => {
