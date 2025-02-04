@@ -20,8 +20,9 @@ if checksys.main == 'Windows':
 
 if checksys.main == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
-    request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
-    time.sleep(0.5)
+    def _androidPermissionwait(permissions, grant_results):
+        pass
+    request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
 
 if checksys.main == 'Android':
     if True:
