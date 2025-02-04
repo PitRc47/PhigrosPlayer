@@ -242,19 +242,20 @@ class WebCanvas:
                 while not self.web_hwnd:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
                     time.sleep(0.05)
+            self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+            self._raevent.set()
             self.web.set_title(title)
         else:
             while True:
                 time.sleep(0.05)
                 try:
                     self.web.native.webview.setWebContentsDebuggingEnabled(True)
+                    self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+                    self._raevent.set()
                 except:
                     continue
                 break
         logging.info('Webview start')
-        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-        self._raevent.set()
-        
         graplib_webview.root = self
     
     def title(self, title: str) -> str: self.web.set_title(title)
