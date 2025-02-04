@@ -488,6 +488,8 @@ def main():
         def dle_warn(a: float):
             drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
         
+        logging.info('enter show start')
+        
         animationst = time.time()
         while time.time() - animationst < 1.0:
             clearCanvas(wait_execute=True)
@@ -495,6 +497,7 @@ def main():
             dle_warn(1.0 - (1.0 - tool_funcs.fixorp(p)) ** 4)
             root.run_js_wait_code()
         
+        logging.info('show start stage 2')
         time.sleep(0.35)
         
         animationst = time.time()
@@ -506,10 +509,12 @@ def main():
             dle_warn((tool_funcs.fixorp(p) - 1.0) ** 4)
             root.run_js_wait_code()
         
+        logging.info('show start stage 3')
         time.sleep(0.25)
         clearCanvas(wait_execute=True)
         phicore.drawBg()
         phicore.draw_ui(animationing=True)
+        logging.info('show start stage 4')
         root.run_js_wait_code()
         Thread(target=PlayerStart, daemon=True).start()
 
@@ -536,6 +541,8 @@ def main():
 
     def PlayerStart():
         global show_start_time, cksmanager
+
+        logging.info('enter player start')
         
         Resource["Over"].stop()
         
@@ -544,6 +551,8 @@ def main():
 
         show_start_time = time.time() - skip_time
         PhiCoreConfigObject.show_start_time = show_start_time
+
+        logging.info("updateCoreConfig")
         updateCoreConfig()
         now_t = 0
         
