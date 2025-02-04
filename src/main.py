@@ -484,13 +484,14 @@ def main():
                     root.wait_jspromise(f"""loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');""")
         
         logging.info('Loading font...')
-        with open("resources/font.ttf", "rb") as f:
-            root.reg_res(f.read(),"PhigrosFont.ttf")
         logging.info('Loading respacker...')
         respacker.load(*respacker.pack())
 
         logging.info("Load Font jscode")
-        root.wait_jspromise(f"""loadFont('PhigrosFont',\"{root.get_resource_path("PhigrosFont.ttf")}\");""")
+        with open("resources/font.ttf", "rb") as f:
+            font = f.read()
+            root.reg_res(font, "PhigrosFont.ttf")
+            root.wait_jspromise(f"""loadFont('PhigrosFont',URL.createObjectURL(new Blob([new Uint8Array({list(font)})], {{type: 'application/octet-stream'}})));""")
         root.unreg_res("PhigrosFont.ttf")
         logging.info("Load Font Successfully")
 
