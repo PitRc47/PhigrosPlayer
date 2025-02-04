@@ -5,9 +5,6 @@ import sys
 import time
 import logging
 import typing
-import os
-import socket
-import traceback
 
 from threading import Thread
 from os.path import exists, basename, abspath
@@ -22,63 +19,7 @@ if checksys.main == 'Android':
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
 
 if checksys.main == 'Android':
-    if True:
-        class SocketSender:
-            def __init__(self, host='192.168.1.28', port=7878):
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.sock.connect_ex((host, port))
-            
-            def send(self, data):
-                try:
-                    self.sock.sendall(data.encode() + b'\n')
-                except:
-                    pass
-            
-            def close(self):
-                self.sock.close()
-        class StreamToSocket:
-            def __init__(self, sender):
-                self.sender = sender
-            
-            def write(self, message):
-                if message:
-                    self.sender.send(message)
-            
-            def flush(self):
-                pass
-
-        sender = SocketSender()
-
-        sys.stdout = StreamToSocket(sender)
-        sys.stderr = StreamToSocket(sender)
-        class SocketLogHandler(logging.Handler):
-            def __init__(self, sender):
-                super().__init__()
-                self.sender = sender
-
-            def emit(self, record):
-                log_entry = self.format(record)
-                self.sender.send(log_entry)
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-
-        for handler in logger.handlers[:]:
-            logger.removeHandler(handler)
-
-        socket_handler = SocketLogHandler(sender)
-        socket_handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s %(filename)s %(funcName)s: %(message)s", "%H:%M:%S"))
-        logger.addHandler(socket_handler)
-
-        current_directory = os.getcwd()
-        logging.info(f'Current Path: {current_directory}')
-        for item in os.listdir(current_directory):
-            full_path = os.path.join(current_directory, item)
-            
-            if os.path.isdir(full_path):
-                logging.info(f"Folder: {item}")
-            else:
-                logging.info(f"File: {item}")
-        sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen"]
+    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen"]
 
 from graplib_webview import *
 import load_extended as _
@@ -92,7 +33,6 @@ loop = "--loop" in sys.argv
 lfdaot = "--lfdaot" in sys.argv
 lfdoat_file = "--lfdaot-file" in sys.argv
 render_range_more = "--render-range-more" in sys.argv
-
 
 render_range_more_scale = 2.0 if "--render-range-more-scale" not in sys.argv else eval(sys.argv[sys.argv.index("--render-range-more-scale") + 1])
 noautoplay = "--noautoplay" in sys.argv
@@ -168,6 +108,8 @@ def main():
     from PIL import Image, ImageFilter, ImageEnhance
     from pydub import AudioSegment
 
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
     mixer.init()
 
     if "--clickeffect-easing" in sys.argv:
@@ -1149,18 +1091,4 @@ def main():
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
 
-if checksys.main != 'Android':
-    logger = logging.getLogger()
-    main()
-else:
-    try:
-        main()
-    except BaseException as e:
-        error_message = traceback.format_exc()
-    try:
-        import time 
-        error_message = f"{error_message}\n"
-        sender.send(error_message)
-    except:
-        pass
-    time.sleep(5)
+main()
