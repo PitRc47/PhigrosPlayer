@@ -971,22 +971,16 @@ def main():
         global Resource
         global errFlag
         
-        try:
-            if disengage_webview:
-                socket_webviewbridge.hook(root)
+        if disengage_webview:
+            socket_webviewbridge.hook(root)
 
-            webdpr = root.run_js_code("window.devicePixelRatio;")
-            logging.info(f'webdpr: {webdpr}')
-            webdpr = float(webdpr)
-            if webdpr != 1.0:
-                lowquality = True
-                lowquality_scale *= 1.0 / webdpr # ...?
+        webdpr = float(root.run_js_code("window.devicePixelRatio;"))
+        if webdpr != 1.0:
+            lowquality = True
+            lowquality_scale *= 1.0 / webdpr # ...?
 
-            if lowquality:
-                root.run_js_code(f"lowquality_scale = {lowquality_scale};")
-        except Exception as e:
-            errFlag = "Error while main init webview."
-            print(f"Caught an exception: {e}")
+        if lowquality:
+            root.run_js_code(f"lowquality_scale = {lowquality_scale};")
 
         if disengage_webview:
             w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
@@ -994,10 +988,7 @@ def main():
             if "--window-host" in sys.argv and checksys.main == 'Windows':
                 windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
             if "--fullscreen" in sys.argv:
-                w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-                logging.info(f'w: {w}; h: {h}')
-                w = int(w)
-                h = int(h)
+                w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
                 root.web.toggle_fullscreen()
             if disengage_webview:
                 w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
@@ -1066,8 +1057,6 @@ def main():
         jslog = "--enable-jslog" in sys.argv,
         jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "./ppr-jslog-nofmt.js"
     )
-    #Thread(target=, args=(init, ), daemon=True).start()
-    logging.info("Starting root.start()")
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
 
