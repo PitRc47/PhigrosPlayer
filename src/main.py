@@ -164,6 +164,11 @@ def main():
     import wcv2matlike
     import needrelease
     from dxsmixer import mixer
+    
+    import cv2
+    import requests
+    from PIL import Image, ImageFilter, ImageEnhance
+    from pydub import AudioSegment
 
     mixer.init()
 
