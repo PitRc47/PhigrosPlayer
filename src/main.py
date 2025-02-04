@@ -1043,23 +1043,22 @@ def main():
             enable_controls = enable_controls
         )
         phicore.CoreConfigure(PhiCoreConfigObject)
-
-    root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
-    root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
-    root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
-    root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
-    
-    rw, rh = w, h
-    if usu169:
-        ratio = w / h
-        if ratio > 16 / 9:
-            w = int(h * 16 / 9)
-        else:
-            h = int(w / 16 * 9)
-        root.run_js_code("usu169 = true;")
-    root.run_js_code(f"resizeCanvas({rw}, {rh});")
+        root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
+        root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
+        root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
+        root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
         
-    Resource = Load_Resource()
+        rw, rh = w, h
+        if usu169:
+            ratio = w / h
+            if ratio > 16 / 9:
+                w = int(h * 16 / 9)
+            else:
+                h = int(w / 16 * 9)
+            root.run_js_code("usu169 = true;")
+        root.run_js_code(f"resizeCanvas({rw}, {rh});")
+            
+        Resource = Load_Resource()
 
     def init():
         global disengage_webview
