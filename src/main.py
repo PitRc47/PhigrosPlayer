@@ -1,4 +1,5 @@
 import checksys
+import requests
 import zipfile
 import json
 import sys
@@ -1212,7 +1213,18 @@ def main():
             Thread(target=Show_Start, daemon=True).start()
             root.wait_for_close()
             tempdir.clearTempDir()
-
+    root = webcv.WebCanvas(
+        width = 1, height = 1,
+        x = 0, y = 0,
+        title = "PhigrosPlayer - Simulator",
+        debug = "--debug" in sys.argv,
+        resizable = False,
+        frameless = "--frameless" in sys.argv,
+        renderdemand = "--renderdemand" in sys.argv,
+        renderasync = "--renderasync" in sys.argv,
+        jslog = "--enable-jslog" in sys.argv,
+        jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "./ppr-jslog-nofmt.js"
+    )
     #Thread(target=, args=(init, ), daemon=True).start()
     logging.info("Starting root.start()")
     Thread(target=root.init, args=(init, ), daemon=True).start()
