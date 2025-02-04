@@ -121,7 +121,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         command9 = run(self.checkBox_9," --noclicksound")
         command10 = run(self.checkBox_10," --loop")
         command11 = run(self.checkBox_11," --fullscreen")
-        command13 = " --combotips "+ self.combotips
+        command13 = " --combotips "+ self.combotips if self.combotips else ""
         command14 = " "+self.lineEdit_3.text()
         if self.chart:
             command12 = " \""+self.chart+"\""
