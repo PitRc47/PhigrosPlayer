@@ -963,6 +963,11 @@ def main():
         )
         phicore.CoreConfigure(PhiCoreConfigObject)
 
+    def atexit_run():
+        tempdir.clearTempDir()
+        needrelease.run()
+        sys.exit(0)
+
     def init():
         global disengage_webview
         global webdpr
@@ -1042,7 +1047,7 @@ def main():
 
             Thread(target=Show_Start, daemon=True).start()
             root.wait_for_close()
-            tempdir.clearTempDir()
+            atexit_run()
 
     logging.info("Loading Window...")
     root = webcv.WebCanvas(
@@ -1059,5 +1064,6 @@ def main():
     )
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
+    atexit_run()
 
 main()
