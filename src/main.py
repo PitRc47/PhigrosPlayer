@@ -332,46 +332,35 @@ def main():
             "ButtonLeftBlack": Image.open("resources/Button_Left_Black.png"),
             "ButtonRightBlack": None
         }
-        
-        logging.info("Loading phi_rpack.createResourceDict...")
         Resource.update(phi_rpack.createResourceDict())
         
-        logging.info("Loading PILResourcePacker...")
         respacker = webcv.PILResourcePacker(root)
-        logging.info("Load background_image...")
         background_image_blur = chart_image.resize((w, h)).filter(ImageFilter.GaussianBlur((w + h) / 50))
         background_image = ImageEnhance.Brightness(background_image_blur).enhance(1.0 - chart_information["BackgroundDim"])
         respacker.reg_img(background_image, "background")
         
-        logging.info("Loading finish_animation_image...")
         finish_animation_image_mask = Image.new("RGBA", (1, 5), (0, 0, 0, 0))
         finish_animation_image_mask.putpixel((0, 4), (0, 0, 0, 204))
         finish_animation_image_mask.putpixel((0, 3), (0, 0, 0, 128))
         finish_animation_image_mask.putpixel((0, 2), (0, 0, 0, 64))
         
-        logging.info('Loading animation_image...')
         animation_image = chart_image.copy().convert("RGBA")
         tool_funcs.cutAnimationIllImage(animation_image)
         
-        logging.info("Loading finish_animation_image 2...")
         finish_animation_image = chart_image.copy().convert("RGBA")
         finish_animation_image_mask = finish_animation_image_mask.resize(finish_animation_image.size)
         finish_animation_image.paste(finish_animation_image_mask, (0, 0), finish_animation_image_mask)
         
-        logging.info("Loading finish_animation_image 3...")
         Resource["ButtonRightBlack"] = Resource["ButtonLeftBlack"].transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.FLIP_TOP_BOTTOM)
         const.set_NOTE_DUB_FIXSCALE(Resource["Notes"]["Hold_Body_dub"].width / Resource["Notes"]["Hold_Body"].width)
         
-        logging.info("reg_img Note...")
         for k, v in Resource["Notes"].items():
             respacker.reg_img(Resource["Notes"][k], f"Note_{k}")
         
-        logging.info("reg_img Note_Click_Effect...")
         for i in range(ClickEffectFrameCount): # reg click effect
             respacker.reg_img(Resource["Note_Click_Effect"]["Perfect"][i], f"Note_Click_Effect_Perfect_{i + 1}")
             respacker.reg_img(Resource["Note_Click_Effect"]["Good"][i], f"Note_Click_Effect_Good_{i + 1}")
             
-        logging.info("reg_img level...")
         for k,v in Resource["levels"].items(): # reg levels img
             respacker.reg_img(v, f"Level_{k}")
         
@@ -421,18 +410,13 @@ def main():
                     root.reg_res(mp4data, f"{name}.mp4")
                     root.wait_jspromise(f"""loadvideo(URL.createObjectURL(new Blob([new Uint8Array({list(mp4data)})], {{type: 'application/octet-stream'}})), '{name}_img');""")
         
-        logging.info('Loading font...')
-        logging.info('Loading respacker...')
         respacker.load(*respacker.pack())
 
-        logging.info("Load Font jscode")
         with open("resources/font.ttf", "rb") as f:
             font = f.read()
             root.wait_jspromise(f"""loadFont('PhigrosFont',URL.createObjectURL(new Blob([new Uint8Array({list(font)})], {{type: 'application/octet-stream'}})));""")
-        logging.info("Load Font Successfully")
 
         # root.file_server.shutdown()
-        logging.info("Calc note_max_height...")
         note_max_width = globalNoteWidth * const.NOTE_DUB_FIXSCALE
         note_max_height = max((
             note_max_width / Resource["Notes"]["Tap"].width * Resource["Notes"]["Tap"].height,
@@ -447,7 +431,6 @@ def main():
         ))
         note_max_size_half = ((note_max_width ** 2 + note_max_height ** 2) ** 0.5) / 2
         
-        logging.info("Open shaders...")
         shaders = {
             "chromatic": open("shaders/chromatic.glsl", "r", encoding="utf-8").read(),
             "circleBlur": open("shaders/circle_blur.glsl", "r", encoding="utf-8").read(),
@@ -490,7 +473,6 @@ def main():
                     else:
                         logging.info(f"Loaded shader {name}")
         
-        logging.info("Loading phicore.ClickSoundManager...")
         cksmanager = phicore.ClickSoundManager(Resource["Note_Click_Audio"])
         logging.info("Load Resource Successfully")
         return Resource
