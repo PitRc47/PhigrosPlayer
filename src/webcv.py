@@ -89,9 +89,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
     
     def do_GET(self):
         try:
-            logging.info(f"[FILE SERVER] GET {self.path}")
             if self.path[1:] in self._canvas._regims:
-                logging.info(f"[FILE SERVER] _regims bytes)")
                 im: Image.Image = self._canvas._regims[self.path[1:]]
                 if hasattr(im, "byteData"):
                     data = im.byteData
@@ -102,7 +100,6 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
                 ctype = "image/png"
                     
             elif self.path[1:] in self._canvas._regres:
-                logging.info(f"[FILE SERVER] _regres bytes)")
                 data = self._canvas._regres[self.path[1:]]
                 
                 if self.path.endswith(".png"): ctype = "image/png"
@@ -133,7 +130,6 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
                 elif self.path.endswith(".mkv"): ctype = "video/x-matroska"
                 else: ctype = "application/octet-stream"
             
-            logging.info('[FILE SERVER] main process')
             rangeHeader = self.headers.get("Range")
             code = 206 if rangeHeader else 200
             self.send_response(code)
@@ -144,10 +140,7 @@ class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
             data = _parseRangeHeader(data, rangeHeader, self.send_header)
             self.end_headers()
             
-            logging.info('[FILE SERVER] wfile write')
-            logging.info(f'[FILE SERVER] wfile write size: {len(data)}')
             self.wfile.write(data)
-            logging.info(f"[FILE SERVER] Responding with {ctype} ({len(data)} bytes)")
         except BaseException as e:
             logging.error(f"[FILE SERVER] Error")
             logging.error(f"[FILE SERVER] Error: {e}")
@@ -183,7 +176,6 @@ class PILResourcePacker:
         self._imgopted: dict[str, threading.Event] = {}
     
     def reg_img(self, img: Image.Image|bytes, name: str):
-        logging.info(f'register image: {name}')
         self.imgs.append((name, img))
         
     def pack(self):
@@ -369,7 +361,7 @@ class WebCanvas:
     def move(self, x: int, y:int): self.web.move(x, y)
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
-        logging.debug(f"run_js_code: {code}, repr of the code: {repr(code)}")
+        #logging.debug(f"run_js_code: {code}, repr of the code: {repr(code)}")
         if self.jslog and not code.endswith(";"): code += ";"
         
         if order is None:
@@ -464,7 +456,7 @@ class WebCanvas:
         return f"http://{host}:{self.web_port + 1}/{name}"
 
     def wait_jspromise(self, code: str) -> None:
-        logging.info(f"Wait JS promise: {code}")
+        #logging.info(f"Wait JS promise: {code}")
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"
         ete = threading.Event()
         ecbname = f"{eid}_callback"
