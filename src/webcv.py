@@ -4,7 +4,6 @@ import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
 import checksys
-import json
 import threading
 import typing
 import io
@@ -37,8 +36,6 @@ elif checksys.main == 'Android':
     screen_height = metrics.heightPixels
 
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
-if checksys.main == 'Android':
-    host = '127.0.0.1'
 logging.info(f"server host: {host}")
 
 framerate_counter = '''\
@@ -234,18 +231,6 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug)
 
     def _init(self, width: int, height: int, x: int, y: int):
-        logging.info('Webview starting init in webcv')
-        """
-        if checksys.main == 'Android':
-            while True:
-                try:
-                    self.web.native.webview
-                except:
-                    continue
-                break
-            logging.info('Android Webview inited')
-        """
-        
         self.web.events.closed += self._destroyed.set
         
         if checksys.main != 'Android':
