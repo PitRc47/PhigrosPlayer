@@ -93,8 +93,9 @@ loop = "--loop" in sys.argv
 lfdaot = "--lfdaot" in sys.argv
 lfdoat_file = "--lfdaot-file" in sys.argv
 render_range_more = "--render-range-more" in sys.argv
+
+
 render_range_more_scale = 2.0 if "--render-range-more-scale" not in sys.argv else eval(sys.argv[sys.argv.index("--render-range-more-scale") + 1])
-lfdaot_render_video = "--lfdaot-render-video" in sys.argv
 noautoplay = "--noautoplay" in sys.argv
 rtacc = "--rtacc" in sys.argv
 lowquality = "--lowquality" in sys.argv
@@ -110,66 +111,38 @@ musicsound_volume = float(sys.argv[sys.argv.index("--musicsound-volume") + 1]) i
 lowquality_imjscvscale_x = float(sys.argv[sys.argv.index("--lowquality-imjscvscale-x") + 1]) if "--lowquality-imjscvscale-x" in sys.argv else 1.0
 lowquality_imjs_maxsize = float(sys.argv[sys.argv.index("--lowquality-imjs-maxsize") + 1]) if "--lowquality-imjs-maxsize" in sys.argv else 256
 enable_controls = "--enable-controls" in sys.argv
-lfdaot_video_fourcc = sys.argv[sys.argv.index("--lfdaot-video-fourcc") + 1] if "--lfdaot-video-fourcc" in sys.argv else "mp4v"
-record_play = "--record-play" in sys.argv
-lfdaot_use_recordfile = sys.argv[sys.argv.index("--lfdaot-use-recordfile") + 1] if "--lfdaot-use-recordfile" in sys.argv else None
 wl_more_chinese = "--wl-more-chinese" in sys.argv
 skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
 disengage_webview = "--disengage-webview" in sys.argv
+usu169 = "--usu169" in sys.argv
+render_video = "--render-video" in sys.argv
+render_video_fps = float(sys.argv[sys.argv.index("--render-video-fps") + 1]) if "--render-video-fps" in sys.argv else 60.0
+render_video_fourcc = sys.argv[sys.argv.index("--render-video-fourcc") + 1] if "--render-video-fourcc" in sys.argv else "mp4v"
 
 if lfdaot and noautoplay:
     noautoplay = False
     logging.warning("if use --lfdaot, you cannot use --noautoplay")
 
-if showfps and lfdaot and lfdaot_render_video:
-    showfps = False
-    logging.warning("if use --lfdaot-render-video, you cannot use --showfps")
-
 if lfdaot and speed != 1.0:
     speed = 1.0
     logging.warning("if use --lfdaot, you cannot use --speed")
 
-if record_play and not noautoplay:
-    noautoplay = True
-    logging.warning("if use --record-play, you must use --noautoplay")
-
-if record_play and lfdaot:
-    record_play = False
-    logging.warning("if use --lfdaot, you cannot use --record-play")
-
-if lfdaot_use_recordfile and not lfdaot:
-    lfdaot_use_recordfile = None
-    logging.warning("if use --lfdaot-use-recordfile, you must use --lfdaot")
-
-if lfdaot_use_recordfile and lfdoat_file:
-    lfdaot_use_recordfile = None
-    logging.warning("if use --lfdoat-file, you cannot use --lfdaot-use-recordfile")
-
 if lfdaot and skip_time != 0.0:
     skip_time = 0.0
     logging.warning("if use --lfdaot, you cannot use --skip-time")
-    
-if lfdaot_render_video and disengage_webview:
-    disengage_webview = False
-    logging.warning("if use --lfdaot-render-video, you cannot use --disengage-webview")
 
-combotips = ("RECORD" if lfdaot_use_recordfile is not None else (
-    "AUTOPLAY" if not noautoplay else "COMBO"
-)) if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
+if render_video and noautoplay:
+    noautoplay = False
+    logging.warning("if use --render-video, you cannot use --noautoplay")
 
+if render_video and showfps:
+    showfps = False
+    logging.warning("if use --render-video, you cannot use --showfps")
+
+combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
 def main():
-    import err_processer as _
-    import init_logging as _
-    import fix_workpath as _
-    import import_argvs as _
-    import check_edgechromium as _
-
-    import cv2
-    import requests
-    from PIL import Image, ImageFilter, ImageEnhance
-    from pydub import AudioSegment
     import webcv
     import dxsound
     import chartobj_phi
@@ -182,7 +155,6 @@ def main():
     import dialog
     import info_loader
     import ppr_help
-    import binfile
     import file_loader
     import phira_resource_pack
     import phicore
@@ -190,8 +162,12 @@ def main():
     import socket_webviewbridge
     import wcv2matlike
     import needrelease
-
     from dxsmixer import mixer
+
+    mixer.init()
+
+    if "--clickeffect-easing" in sys.argv:
+        phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
 
     if checksys.main == 'Windows':
         from os import add_dll_directory
@@ -646,12 +622,10 @@ def main():
         updateCoreConfig()
         now_t = 0
         
-        if not lfdaot:
+        if not (lfdaot or render_video):
             mixer.music.play()
             mixer.music.set_pos(skip_time)
             while not mixer.music.get_busy(): pass
-        
-        if not lfdaot:
             if noautoplay:
                 if CHART_TYPE == const.CHART_TYPE.PHI:
                     pplm_proxy = chartobj_phi.PPLMPHI_Proxy(chart_obj)
@@ -661,15 +635,14 @@ def main():
                 pppsm = tool_funcs.PhigrosPlayManager(chart_obj.note_num)
                 pplm = tool_funcs.PhigrosPlayLogicManager(
                     pplm_proxy, pppsm,
-                    enable_clicksound, lambda nt: Resource["Note_Click_Audio"][nt].play(),
-                    record_play
+                    enable_clicksound, lambda nt: Resource["Note_Click_Audio"][nt].play()
                 )
                 
                 convertTime2Chart = lambda t: (t - show_start_time) * speed - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
-                root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t: pplm.pc_click(convertTime2Chart(t)))
-                root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t: pplm.pc_release(convertTime2Chart(t)))
-                root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent(() => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000)}, false);")
-                root.run_js_code("_PhigrosPlay_KeyUp = PhigrosPlay_KeyEvent(() => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000)}, false);")
+                root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t, key: pplm.pc_click(convertTime2Chart(t) if not disengage_webview else now_t, key))
+                root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t, key: pplm.pc_release(convertTime2Chart(t) if not disengage_webview else now_t, key))
+                root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
+                root.run_js_code("_PhigrosPlay_KeyUp = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000, e.key)}, false);")
                 root.run_js_code("window.addEventListener('keydown', _PhigrosPlay_KeyDown);")
                 root.run_js_code("window.addEventListener('keyup', _PhigrosPlay_KeyUp);")
                 
@@ -728,17 +701,12 @@ def main():
             root.run_js_code("window.removeEventListener('keydown', _Noautoplay_Restart);")
             root.run_js_code("window.removeEventListener('keydown', _SpaceClicked);")
             
-            if record_play:
-                record_fp = dialog.savefile(fn="record.bin")
-                with open(record_fp, "wb") as f:
-                    f.write(pplm.recorder.writer.data)
-            
             if play_restart_flag:
                 mixer.music.fadeout(250)
                 LoadChartObject()
                 Thread(target=PlayerStart, daemon=True).start()
                 return
-        else:
+        elif lfdaot:
             lfdaot_tasks: dict[int, chartobj_phi.FrameRenderTask] = {}
             frame_speed = 60
             if "--lfdaot-frame-speed" in sys.argv:
@@ -747,57 +715,17 @@ def main():
             frame_time = 1 / frame_speed
             allframe_num = int(audio_length / frame_time) + 1
             
-            if lfdaot and not lfdoat_file: #eq if not lfdoat_file
-                if lfdaot_use_recordfile is not None:
-                    with open(lfdaot_use_recordfile, "rb") as f:
-                        recorder_data = list(binfile.readPlayRecorder(f.read()))
-                    
-                    if CHART_TYPE == const.CHART_TYPE.PHI:
-                        pplm_proxy = chartobj_phi.PPLMPHI_Proxy(chart_obj)
-                    elif CHART_TYPE == const.CHART_TYPE.RPE:
-                        pplm_proxy = chartobj_rpe.PPLMRPE_Proxy(chart_obj)
-                    
-                    pppsm = tool_funcs.PhigrosPlayManager(chart_obj.note_num)
-                    pplm = tool_funcs.PhigrosPlayLogicManager(
-                        pplm_proxy, pppsm,
-                        enable_clicksound, lambda nt: Resource["Note_Click_Audio"][nt].play(),
-                        record_play
-                    )
-                else:
-                    pplm = None
-                
+            if lfdaot and not lfdoat_file: # eq if not lfdoat_file
                 while True:
                     if frame_count * frame_time > audio_length or frame_count - lfdaot_start_frame_num >= lfdaot_run_frame_num:
                         break
                     
                     now_t = frame_count * frame_time
                     
-                    if pplm is not None:
-                        for event in recorder_data.copy():
-                            match event[0]:
-                                case binfile.PlayRecorderBase.PLAY_CLICKSOUND:
-                                    continue # emm.?
-                                    if event[1] <= now_t:
-                                        Resource["Note_Click_Audio"][event[2]].play()
-                                        recorder_data.remove(event)
-                                
-                                case binfile.PlayRecorderBase.PC_CLICK:
-                                    if event[1] <= now_t:
-                                        pplm.pc_click(event[1])
-                                        recorder_data.remove(event)
-                                
-                                case binfile.PlayRecorderBase.PC_RELEASE:
-                                    if event[1] <= now_t:
-                                        pplm.pc_release(event[1])
-                                        recorder_data.remove(event)
-
-                                case _:
-                                    logging.warning(f"Unknown event type: {event[0]}")
-                    
                     if CHART_TYPE == const.CHART_TYPE.PHI:
-                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Phi(now_t, pplm=pplm)})
+                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Phi(now_t, None)})
                     elif CHART_TYPE == const.CHART_TYPE.RPE:
-                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Rpe(now_t, pplm=pplm)})
+                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Rpe(now_t, None)})
                     
                     frame_count += 1
                     
@@ -826,6 +754,151 @@ def main():
                 if "--lfdaot-file-output-autoexit" in sys.argv:
                     root.destroy()
                     return
+                
+            else: #--lfdaot-file
+                fp = sys.argv[sys.argv.index("--lfdaot-file") + 1]
+                with open(fp,"r",encoding="utf-8") as f:
+                    data = json.load(f)
+                frame_speed = data["meta"]["frame_speed"]
+                frame_time = 1 / frame_speed
+                allframe_num = data["meta"]["frame_num"]
+                
+                funcmap = getLfdaotFuncs()
+                
+                for index,Task_data in enumerate(data["data"]):
+                    lfdaot_tasks.update({
+                        index: chartobj_phi.FrameRenderTask(
+                            RenderTasks = [
+                                chartobj_phi.RenderTask(
+                                    func = funcmap[render_task_data["func_name"]],
+                                    args = tuple(render_task_data["args"]),
+                                    kwargs = render_task_data["kwargs"]
+                                )
+                                for render_task_data in Task_data["render"]
+                            ],
+                            ExTask = tuple(Task_data["ex"])
+                        )
+                    })
+                if data["meta"]["size"] != [w, h]:
+                    logging.warning("The size of the lfdaot file is not the same as the size of the window")
+            
+            mixer.music.play()
+            while not mixer.music.get_busy(): pass
+            
+            totm: tool_funcs.TimeoutTaskManager[chartobj_phi.FrameRenderTask] = tool_funcs.TimeoutTaskManager()
+            totm.valid = lambda x: bool(x)
+            
+            for fc, task in lfdaot_tasks.items():
+                totm.add_task(fc, task.ExTask)
+            
+            pst = time.time()
+            
+            while True:
+                now_t = time.time() - pst
+                music_play_fcount = int(now_t / frame_time)
+                
+                try:
+                    Task: chartobj_phi.FrameRenderTask = lfdaot_tasks[music_play_fcount]
+                except KeyError:
+                    continue
+                
+                Task.ExecTask(clear=False)
+                extasks = totm.get_task(music_play_fcount)
+                
+                break_flag_oside = False
+                
+                for extask in extasks:
+                    break_flag = phicore.processExTask(extask)
+                    
+                    if break_flag:
+                        break_flag_oside = True
+                        break
+                
+                if break_flag_oside:
+                    break
+                
+                pst += tool_funcs.checkOffset(now_t, raw_audio_length, mixer)
+        elif render_video:
+            video_fp = sys.argv[sys.argv.index("--render-video-savefp") + 1] if "--render-video-savefp" in sys.argv else dialog.savefile(
+                fn = "render_video.mp4"
+            )
+            
+            if "--render-video-savefp" not in sys.argv and video_fp == "render_video.mp4":
+                root.destroy()
+                return
+            
+            writer = cv2.VideoWriter(
+                video_fp,
+                cv2.VideoWriter.fourcc(*render_video_fourcc),
+                render_video_fps,
+                (w, h),
+                True
+            )
+            needrelease.add(writer.release)
+            
+            def writeFrame(data: bytes):
+                matlike = tool_funcs.bytes2matlike(data, w, h)
+                writer.write(matlike)
+            
+            wcv2matlike.callback = writeFrame
+            httpd, port = wcv2matlike.createServer()
+            
+            now_t = 0.0
+            while now_t < audio_length:
+                if CHART_TYPE == const.CHART_TYPE.PHI:
+                    Task = phicore.GetFrameRenderTask_Phi(now_t, None)
+                elif CHART_TYPE == const.CHART_TYPE.RPE:
+                    Task = phicore.GetFrameRenderTask_Rpe(now_t, None)
+                    
+                Task.ExecTask()
+                root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
+                now_t += 1 / render_video_fps
+            
+            httpd.shutdown()
+            writer.release()
+            needrelease.remove(writer.release)
+                    
+            if "--render-video-autoexit" in sys.argv:
+                root.destroy()
+                return
+            
+        else:
+            assert False, "never"
+        
+        mixer.music.set_volume(1.0)
+        phicore.initSettlementAnimation(pplm if noautoplay else None)
+        
+
+
+    
+    def Chart_Finish_Animation():
+        animation_1_time = 0.75
+        a1_combo = pplm.ppps.getCombo() if noautoplay else None
+        
+        animation_1_start_time = time.time()
+        while True:
+            p = (time.time() - animation_1_start_time) / animation_1_time
+            if p > 1.0: break
+            phicore.lineCloseAimationFrame(p, a1_combo)
+        
+        time.sleep(0.25)
+        Resource["Over"].play(-1)
+    
+        animation_2_time = 3.5
+        animation_2_start_time = time.time()
+        a2_loop_clicked = False
+        a2_continue_clicked = False
+        a2_break = False
+        
+        def whileCheck():
+            nonlocal a2_break
+            while True:
+                if a2_loop_clicked or (loop and (time.time() - animation_2_start_time) > 0.25):
+                    def _f():
+                        LoadChartObject()
+                        PlayerStart()
+                    Thread(target=_f, daemon=True).start()
+                    break
                 
             else: #--lfdaot-file
                 fp = sys.argv[sys.argv.index("--lfdaot-file") + 1]
@@ -1033,19 +1106,22 @@ def main():
         )
         phicore.CoreConfigure(PhiCoreConfigObject)
 
-    logging.info("Loading Window...")
-    root = webcv.WebCanvas(
-        width = 1, height = 1,
-        x = 0, y = 0,
-        title = "PhigrosPlayer - Simulator",
-        debug = "--debug" in sys.argv,
-        resizable = False,
-        frameless = "--frameless" in sys.argv,
-        renderdemand = "--renderdemand" in sys.argv,
-        renderasync = "--renderasync" in sys.argv,
-        jslog = "--enable-jslog" in sys.argv,
-        jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "ppr-jslog-nofmt.js"
-    )
+    root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
+    root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
+    root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
+    root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
+    
+    rw, rh = w, h
+    if usu169:
+        ratio = w / h
+        if ratio > 16 / 9:
+            w = int(h * 16 / 9)
+        else:
+            h = int(w / 16 * 9)
+        root.run_js_code("usu169 = true;")
+    root.run_js_code(f"resizeCanvas({rw}, {rh});")
+        
+    Resource = Load_Resource()
 
     def init():
         global disengage_webview

@@ -192,6 +192,7 @@ void main() {
     lowquality_imjs_maxsize = 256;
     enable_jscanvas_bitmap = false;
     RPEVersion = -1;
+    usu169 = false;
     const colorMatrix = document.getElementById("colorMatrix");
     const lowquality_imweakmap = new WeakMap();
     const letters = [
@@ -278,6 +279,18 @@ void main() {
         dialog_canvas_ele.height = h;
         ctx.reset();
         dialog_canvas_ctx.reset();
+
+        if (usu169) {
+            const ratio = w / h;
+            let [dx, dy] = [0.0, 0.0];
+            if (ratio > 16 / 9) {
+                dx = (w - h * 16 / 9) / 2;
+            } else {
+                dy = (h - w / 16 * 9) / 2;
+            }
+            ctx.translate(dx, dy);
+            dialog_canvas_ctx.translate(dx, dy);
+        }
     }
 
     async function loadFont(family, url) {
@@ -402,11 +415,11 @@ void main() {
 
     function connectToSocketBridge() {
         window.removeEventListener("touchstart", connectToSocketBridge);
-        document.body.requestFullscreen();
         const addr = prompt("please input the server address: ");
         const port = 8080;
         const socket = new WebSocket(`ws://${addr}:${port}`);
         const split_magic = "\x00";
+        document.body.requestFullscreen();
 
         window.pywebview = {
             api: {
@@ -930,7 +943,10 @@ void main() {
     }
 
     CanvasRenderingContext2D.prototype.clear = function() {
-        this.clearRect(0, 0, this.canvas.width * lowquality_scale, this.canvas.height * lowquality_scale);
+        this.save();
+        this.setTransform(1, 0, 0, 1, 0, 0);
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.restore();
     }
 
     window.addEventListener("touchstart", connectToSocketBridge);
@@ -950,6 +966,15 @@ void main() {
     proxyTouchEvent("touchstart", "mousedown");
     proxyTouchEvent("touchmove", "mousemove");
     proxyTouchEvent("touchend", "mouseup");
+
+    window.addEventListener("touchstart", (e) => {
+        try {pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
+        catch (e) {}
+    });
+    window.addEventListener("touchend", (e) => {
+        try {pywebview.api.call_attr("PhigrosPlay_KeyUp", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
+        catch (e) {}
+    });
 
     // temp
     // window.addEventListener("touchstart", () => {

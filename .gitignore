@@ -5,7 +5,6 @@ error_*.txt
 unpack-result
 unpack-temp
 Chart.lfdaot
-record.bin
 .vscode
 ppr-jslog-nofmt.js
 default-argvs.json

@@ -119,7 +119,6 @@ arg_setting = [
     ("生成lfdaot文件", "lfdaot"),
     ("禁用点击音效", "noclicksound"),
     ("扩展渲染范围", "render-range-more"),
-    ("使用lfdaot文件渲染视频", "lfdaot-render-video"),
     ("窗口无边框", "frameless"),
     ("禁用自动游玩", "noautoplay"),
     ("启用实时准度", "rtacc"),
@@ -134,9 +133,12 @@ arg_setting = [
     ("保留渲染的 JavaScript 代码", "enable-jslog"),
     ("启用 BitmapImage", "enable-jscanvas-bitmap"),
     ("降级音频API", "soundapi-downgrade"),
-    ("lfdaot渲染完成视频后自动退出", "lfdaot-render-video-autoexit"),
     ("不清理临时文件", "nocleartemp"),
-    ("脱离 WebView", "disengage-webview")
+    ("脱离 WebView", "disengage-webview"),
+    ("禁用 localhost 作为内置服务器地址", "nolocalhost"),
+    ("使用 16:9 的比例", "usu169"),
+    ("渲染视频", "render-video"),
+    ("渲染视频后自动退出", "render-video-autoexit"),
 ]
 
 kwarg_setting = [
@@ -148,8 +150,7 @@ kwarg_setting = [
     ("设置生成 lfdaot 文件的帧速度", "lfdaot-frame-speed", 60, "int"),
     ("设置渲染范围更多的缩放", "render-range-more-scale", 2.0, "float"),
     ("设置窗口宿主 (hwnd)", "window-host", None, "int"),
-    ("生成lfdaot文件的变成路径", "lfdaot-file-savefp", None, "path"),
-    ("设置lfdaot渲染视频输出路径", "lfdaot-render-video-savefp", None, "path"),
+    ("生成lfdaot文件的生成路径", "lfdaot-file-savefp", None, "path"),
     ("设置低画质渲染缩放", "lowquality-scale", 2.0, "float"),
     ("设置资源路径", "res", None, "path-dir"),
     ("设置生成 lfdaot 文件的开始帧数", "lfdaot-start-frame-num", 0, "int"),
@@ -159,14 +160,16 @@ kwarg_setting = [
     ("设置打击音效音量", "clicksound-volume", 1.0, "float"),
     ("设置音乐音量", "musicsound-volume", 1.0, "float"),
     ("设置低画质渲染缩放 (js调用层)", "lowquality-imjscvscale-x", 1.0, "float"),
-    ("设置 lfdaot 文件生成的视频编码", "lfdaot-video-fourcc", "mp4v", "string"),
     ("使用 phira 谱面 (id)", "phira-chart", None, "int"),
     ("保存 phira 谱面路径", "phira-chart-save", None, "path"),
     ("播放时跳过的时间", "skip-time", 0.0, "float"),
     ("设置 渲染JavaScript 代码输出路径", "jslog-path", None, "path"),
     ("设置低画质渲染最大尺寸 (js调用层)", "lowquality-imjs-maxsize", 256, "int"),
     ("设置 rpe 谱面纹理缩放方法", "rpe-texture-scalemethod", "by-width", "choice", ["by-width", "by-height"]),
-    ("扩展", "extended", None, "path")
+    ("扩展", "extended", None, "path"),
+    ("设置渲染视频的帧率", "render-video-fps", 60.0, "float"),
+    ("设置生成视频编码", "render-video-fourcc", "mp4v", "string"),
+    ("设置渲染视频的保存路径", "render-video-savefp", None, "path"),
 ]
 
 arg_widgets = []

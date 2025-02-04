@@ -171,7 +171,10 @@ class JsApi:
         setattr(self, name, value)
     
     def call_attr(self, name: str, *args, **kwargs):
-        return getattr(self, name)(*args, **kwargs)
+        try: func = getattr(self, name)
+        except AttributeError:
+            return logging.warning(f"JsApi: No such attribute '{name}'")
+        return func(*args, **kwargs)
 
 class PILResourcePacker:
     def __init__(self, cv: WebCanvas):

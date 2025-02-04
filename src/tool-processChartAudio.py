@@ -46,37 +46,39 @@ for line in Chart["judgeLineList"]:
     for note in line["notesBelow"]:
         note["time"] += delay / (1.875 / line["bpm"])
 
-ChartAudio: AudioSegment = AudioSegment.from_file(argv[2])
-ChartAudio_Length = ChartAudio.duration_seconds
+chartAudio: AudioSegment = AudioSegment.from_file(argv[2])
+allLength = chartAudio.duration_seconds
 
-ChartAudio_Split_Audio_Block_Length = ChartAudio.duration_seconds * 1000 / 85 #ms
-ChartAudio_Split_Length = int(ChartAudio_Length / (ChartAudio_Split_Audio_Block_Length / 1000)) + 1
-ChartAudio_Split_Audio_List = [AudioSegment.silent(ChartAudio_Split_Audio_Block_Length + 500) for _ in [None] * ChartAudio_Split_Length]
-JudgeLine_cut = 0
+# 分割次数为 note 数量开根号时, 性能最好
+blockLength = chartAudio.duration_seconds * 1000 / max(1.0, sum(len(l["notesAbove"] + l["notesBelow"]) for l in Chart["judgeLineList"]) ** 0.5) # ms
+blockNum = int(allLength / (blockLength / 1000)) + 1
+blocks = [AudioSegment.silent(blockLength + 500) for _ in [None] * blockNum]
 
-for JudgeLine in Chart["judgeLineList"]:
-    t_dw = 1.875 / JudgeLine["bpm"]
-    Note_cut = 0
-    notes = (JudgeLine["notesAbove"] + JudgeLine["notesBelow"]) if (JudgeLine["notesAbove"] and JudgeLine["notesBelow"]) else (
-        JudgeLine["notesAbove"] if JudgeLine["notesAbove"] else JudgeLine["notesBelow"]
+for line_index, line in enumerate(Chart["judgeLineList"]):
+    T = 1.875 / line["bpm"]
+    notes = (line["notesAbove"] + line["notesBelow"]) if (line["notesAbove"] and line["notesBelow"]) else (
+        line["notesAbove"] if line["notesAbove"] else line["notesBelow"]
     )
-    for note in notes:
+    for note_index, note in enumerate(notes):
         try:
-            t = note["time"] * t_dw
-            t_index = int(t / (ChartAudio_Split_Audio_Block_Length / 1000))
-            seg: AudioSegment = ChartAudio_Split_Audio_List[t_index]
-            t %= ChartAudio_Split_Audio_Block_Length / 1000
-            ChartAudio_Split_Audio_List[t_index] = seg.overlay(NoteClickAudios[note["type"]], t * 1000)
-            print(f"Process Note: {JudgeLine_cut}+{Note_cut}")
-            Note_cut += 1
+            nt = note["time"] * T
+            t_index = int(nt / (blockLength / 1000))
+            seg: AudioSegment = blocks[t_index]
+            nt %= blockLength / 1000
+            blocks[t_index] = seg.overlay(NoteClickAudios[note["type"]], nt * 1000)
+            print(f"Process Note: {line_index}+{note_index}")
         except IndexError:
             pass
-    JudgeLine_cut += 1
+
+class SegMerger:
+    def __init__(self, segs: list[AudioSegment]):
+        self.segs = segs
+    
+    def merge(self, chartAudio: AudioSegment, rawlen: float):
+        for i, seg in enumerate(self.segs):
+            chartAudio = chartAudio.overlay(seg, i * rawlen)
+        return chartAudio
 
 print("Merge...")
-for i,seg in enumerate(ChartAudio_Split_Audio_List):
-    ChartAudio = ChartAudio.overlay(seg, i * ChartAudio_Split_Audio_Block_Length)
-
-ChartAudio.export(argv[3])
-
+SegMerger(blocks).merge(chartAudio, blockLength).export(argv[3])
 print("Done.")

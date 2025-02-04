@@ -22,29 +22,57 @@ def fixre_readmsg(infile, status_byte, peek_data, delta, clip=False):
     return mido.messages.messages.Message.from_bytes([status_byte] + data_bytes, time=delta)
 mido.midifiles.midifiles.read_message = fixre_readmsg
 
+class MidiNoteBin:
+    def __init__(self):
+        self.bin: dict[int, tuple[float, int]] = {}
+        self.result: list[tuple[float, float, int]] = []
+    
+    def add(self, msg: mido.messages.Message, t: float):
+        msghash = hash((msg.channel, msg.note))
+        if msghash in self.bin: return
+
+        self.bin[msghash] = (t, msg.note)
+    
+    def off(self, msg: mido.messages.Message, t: float):
+        msghash = hash((msg.channel, msg.note))
+        if msghash not in self.bin: return
+        
+        ont, note = self.bin.pop(msghash)
+        self.result.append((ont, t, note))
+    
+    def flush(self):
+        for ont, note in self.bin.values():
+            self.result.append((ont, ont + 0.05, note))
+
 mid = mido.MidiFile(argv[1])
-times = []
+notebin = MidiNoteBin()
 tempo = 500000
+
 for track in mid.tracks:
     cumulative_time = 0.0
     for msg in track:
         cumulative_time += mido.tick2second(msg.time, mid.ticks_per_beat, tempo=tempo)
         
-        if msg.type == "set_tempo":
-            tempo = msg.tempo
-        
-        if msg.type == "note_on":
-            times.append((cumulative_time, msg.note))
-        
-times.sort(key=lambda x: x[0])
-min_note, max_note = min(times, key=lambda x: x[1])[1], max(times, key=lambda x: x[1])[1]
+        match msg.type:
+            case "set_tempo":
+                tempo = msg.tempo
+                
+            case "note_on":
+                notebin.add(msg, cumulative_time)
+            
+            case "note_off":
+                notebin.off(msg, cumulative_time)
+
+notebin.flush()
+notebin.result.sort(key=lambda x: x[0])
+min_note, max_note = min(notebin.result, key=lambda x: x[-1])[-1], max(notebin.result, key=lambda x: x[-1])[-1]
 
 def pcs():
-    for sec, n in times:
+    for sec, et, n in notebin.result:
         hz = 440 * (2 ** ((n - 69) / 12))
         dt = 1 / hz
         t = sec
-        while t < sec + 0.2:
+        while t < et:
             yield t, (n + 1 - (max_note - min_note) / 2 - min_note) / (max_note - min_note) / const.PGR_UW * 0.8
             t += dt
 
@@ -102,6 +130,9 @@ result = {
         }
     ]
 }
+
+result["judgeLineList"][0]["notesAbove"].sort(key=lambda x: x["time"])
+print(f"length: {result["judgeLineList"][0]["notesAbove"][-1]["time"]} s")
 
 with open(argv[2], "w", encoding="utf-8") as f:
     json.dump(result, f)

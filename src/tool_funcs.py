@@ -13,7 +13,6 @@ from PIL import Image, ImageDraw
 
 import const
 import rpe_easing
-import binfile
 import phira_resource_pack
 import tempdir
 from light_tool_funcs import *
@@ -419,7 +418,10 @@ class PhigrosPlayManager:
             return "AP"
         
         return "F" if score < 0 else "AP"
-        
+
+def PPLM_vaildKey(key: str) -> bool:
+    return key.lower() in const.ALL_LETTER
+
 class PPLM_ProxyBase:
     def __init__(self, cobj: typing.Any) -> None: ...
     
@@ -501,21 +503,16 @@ class PhigrosPlayLogicManager:
             ppps: PhigrosPlayManager,
             enable_cksound: bool,
             psound: typing.Callable[[str], typing.Any],
-            record: bool = False
         ) -> None:
         
         self.pp = pplm_proxy
         self.ppps = ppps
         self.enable_cksound = enable_cksound
         self.psound = psound
-        self.record = record
         self.enable_mob: bool = False
         
-        if self.record:
-            self.recorder = binfile.PlayRecorderWriter()
-        
         self.pc_clicks: list[PPLM_PC_ClickEvent] = []
-        self.pc_clickings: int = 0
+        self.pc_keymap: dict[str, bool] = {i: False for i in const.ALL_LETTER}
         
         self.mob_touches: list[PPLM_MOB_Touch] = []
         self.mob_flicks: list[tuple[float, tuple[float, float]]] = []
@@ -524,24 +521,19 @@ class PhigrosPlayLogicManager:
         self.badeffects: const.BadEffectType = []
         # self.misseffects: const.MissEffectType = []
     
-    def pc_click(self, t: float) -> None:
-        self.pc_clickings += 1
+    def pc_click(self, t: float, key: str) -> None:
+        if not PPLM_vaildKey(key): return
+        self.pc_keymap[key] = True
         self.pc_clicks.append(PPLM_PC_ClickEvent(time=t))
         
-        if self.record:
-            self.recorder.pc_click(t)
-        
-    def pc_release(self, t: float) -> None:
-        if self.pc_clickings > 0:
-            self.pc_clickings -= 1
-        
-        if self.record:
-            self.recorder.pc_release(t)
+    def pc_release(self, t: float, key: str) -> None:
+        if not PPLM_vaildKey(key): return
+        self.pc_keymap[key] = False
     
     def pc_update(self, t: float) -> None:
         pnotes = self.pp.get_all_pnotes()
         
-        keydown = self.pc_clickings > 0
+        keydown = any(self.pc_keymap.values())
         
         for i in pnotes.copy():
             if ( # drag / flick range judge
@@ -569,8 +561,6 @@ class PhigrosPlayLogicManager:
             ):
                 if self.enable_cksound:
                     self.psound(self.pp.nproxy_phitype(i))
-                    if self.record:
-                        self.recorder.clicksound(t, self.pp.nproxy_phitype(i))
                 self.pp.nproxy_set_cksound_played(i, True)
             
             if ( # miss judge
