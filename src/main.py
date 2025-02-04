@@ -285,7 +285,7 @@ def main():
         chart_information["Charter"] = chart_obj.META.charter
 
     logging.info("Loading Chart Information Successfully")
-    logging.info("Inforamtions: ")
+    logging.info("Informations: ")
     for k,v in chart_information.items():
         logging.info(f"              {k}: {v}")
 
