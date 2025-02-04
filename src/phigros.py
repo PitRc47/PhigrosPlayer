@@ -196,14 +196,14 @@ def Load_Resource():
     
     Resource = {
         "levels":{
-            "AP": Image.open("resources/levels/AP.png"),
-            "FC": Image.open("resources/levels/FC.png"),
-            "V": Image.open("resources/levels/V.png"),
-            "S": Image.open("resources/levels/S.png"),
-            "A": Image.open("resources/levels/A.png"),
-            "B": Image.open("resources/levels/B.png"),
-            "C": Image.open("resources/levels/C.png"),
-            "F": Image.open("resources/levels/F.png")
+            "AP": Image.open("resources/Levels/AP.png"),
+            "FC": Image.open("resources/Levels/FC.png"),
+            "V": Image.open("resources/Levels/V.png"),
+            "S": Image.open("resources/Levels/S.png"),
+            "A": Image.open("resources/Levels/A.png"),
+            "B": Image.open("resources/Levels/B.png"),
+            "C": Image.open("resources/Levels/C.png"),
+            "F": Image.open("resources/Levels/F.png")
         },
         "logoipt": Image.open("resources/logoipt.png"),
         "warning": Image.open("resources/le_warn.png"),
