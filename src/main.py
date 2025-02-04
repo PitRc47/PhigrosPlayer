@@ -1066,4 +1066,7 @@ def main():
     root.start()
     atexit_run()
 
-main()
+try:
+    main()
+except BaseException as e:
+    logging.error(f'{e}')
