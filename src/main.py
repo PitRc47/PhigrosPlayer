@@ -1,5 +1,4 @@
 import checksys
-import requests
 import zipfile
 import json
 import sys
@@ -10,9 +9,7 @@ import os
 import socket
 import traceback
 
-from io import StringIO
 from threading import Thread
-from os import popen
 from os.path import exists, basename, abspath
 
 if checksys.main == 'Windows':
