@@ -261,19 +261,17 @@ class WebCanvas:
             if checksys.main == "Windows":
                 while not self.web_hwnd:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
-                    time.sleep(0.01)
-                logging.info('Webview start')
+                    time.sleep(0.05)
             self.web.set_title(title)
         else:
             while True:
                 time.sleep(0.05)
                 try:
                     self.web.native.webview.setWebContentsDebuggingEnabled(True)
-                    logging.info('Webview getSettings')
                 except:
                     continue
                 break
-        logging.info(f'Get webview port, server address: {self.web._server.address}')
+        logging.info('Webview start')
         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
         self._raevent.set()
         
@@ -291,7 +289,6 @@ class WebCanvas:
     def move(self, x: int, y:int): self.web.move(x, y)
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
-        #logging.debug(f"run_js_code: {code}, repr of the code: {repr(code)}")
         if self.jslog and not code.endswith(";"): code += ";"
         
         if order is None:
