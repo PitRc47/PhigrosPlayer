@@ -481,7 +481,7 @@ def main():
                     chart_res[line.Texture] = (None, size)
                     name = f"lineTexture_{chart_obj.judgeLineList.index(line)}"
                     root.reg_res(mp4data, f"{name}.mp4")
-                    root.wait_jspromise(f"""loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');""")
+                    root.wait_jspromise(f"""loadvideo(URL.createObjectURL(new Blob([new Uint8Array({list(mp4data)})], {{type: 'application/octet-stream'}})), '{name}_img');""")
         
         logging.info('Loading font...')
         logging.info('Loading respacker...')
@@ -490,9 +490,7 @@ def main():
         logging.info("Load Font jscode")
         with open("resources/font.ttf", "rb") as f:
             font = f.read()
-            root.reg_res(font, "PhigrosFont.ttf")
             root.wait_jspromise(f"""loadFont('PhigrosFont',URL.createObjectURL(new Blob([new Uint8Array({list(font)})], {{type: 'application/octet-stream'}})));""")
-        root.unreg_res("PhigrosFont.ttf")
         logging.info("Load Font Successfully")
 
         # root.file_server.shutdown()

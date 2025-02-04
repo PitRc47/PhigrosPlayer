@@ -7,7 +7,6 @@ import checksys
 import json
 import threading
 import typing
-import http.server
 import io
 import time
 import socket
@@ -83,69 +82,6 @@ def _parseRangeHeader(data: bytes, rg: typing.Optional[str], setrep_header: typi
     setrep_header("Content-Range", f"bytes {start}-{end}/{len(data)}")
     setrep_header("Content-Length", str(end - start + 1))
     return data[start:end+1]
-
-class WebCanvas_FileServerHandler(http.server.BaseHTTPRequestHandler):
-    _canvas: WebCanvas
-    
-    def do_GET(self):
-        try:
-            if self.path[1:] in self._canvas._regims:
-                im: Image.Image = self._canvas._regims[self.path[1:]]
-                if hasattr(im, "byteData"):
-                    data = im.byteData
-                else:
-                    temp_btyeio = io.BytesIO()
-                    im.save(temp_btyeio, "png")
-                    data = temp_btyeio.getvalue()
-                ctype = "image/png"
-                    
-            elif self.path[1:] in self._canvas._regres:
-                data = self._canvas._regres[self.path[1:]]
-                
-                if self.path.endswith(".png"): ctype = "image/png"
-                elif self.path.endswith(".js"): ctype = "application/javascript"
-                elif self.path.endswith(".html"): ctype = "text/html"
-                elif self.path.endswith(".css"): ctype = "text/css"
-                elif self.path.endswith(".json"): ctype = "application/json"
-                elif self.path.endswith(".ttf"): ctype = "font/ttf"
-                elif self.path.endswith(".woff"): ctype = "font/woff"
-                elif self.path.endswith(".woff2"): ctype = "font/woff2"
-                elif self.path.endswith(".eot"): ctype = "font/eot"
-                elif self.path.endswith(".svg"): ctype = "image/svg+xml"
-                elif self.path.endswith(".ttc"): ctype = "font/ttc"
-                elif self.path.endswith(".otf"): ctype = "font/otf"
-                elif self.path.endswith(".xml"): ctype = "application/xml"
-                elif self.path.endswith(".txt"): ctype = "text/plain"
-                elif self.path.endswith(".ico"): ctype = "image/x-icon"
-                elif self.path.endswith(".webp"): ctype = "image/webp"
-                elif self.path.endswith(".mp4"): ctype = "video/mp4"
-                elif self.path.endswith(".webm"): ctype = "video/webm"
-                elif self.path.endswith(".ogg"): ctype = "video/ogg"
-                elif self.path.endswith(".mp3"): ctype = "audio/mpeg"
-                elif self.path.endswith(".wav"): ctype = "audio/wav"
-                elif self.path.endswith(".flac"): ctype = "audio/flac"
-                elif self.path.endswith(".aac"): ctype = "audio/aac"
-                elif self.path.endswith(".avi"): ctype = "video/x-msvideo"
-                elif self.path.endswith(".mov"): ctype = "video/quicktime"
-                elif self.path.endswith(".mkv"): ctype = "video/x-matroska"
-                else: ctype = "application/octet-stream"
-            
-            rangeHeader = self.headers.get("Range")
-            code = 206 if rangeHeader else 200
-            self.send_response(code)
-            self.send_header("Content-type", ctype)
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Methods", "*")
-            self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, Range")
-            data = _parseRangeHeader(data, rangeHeader, self.send_header)
-            self.end_headers()
-            
-            self.wfile.write(data)
-        except BaseException as e:
-            logging.error(f"[FILE SERVER] Error")
-            logging.error(f"[FILE SERVER] Error: {e}")
-    
-    def log_request(self, *args, **kwargs) -> None: ...
 
 class JsApi:
     def __init__(self) -> None:
@@ -295,7 +231,7 @@ class WebCanvas:
         )
         self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug=True)
+        self.start = lambda: webview.start(debug=debug)
 
     def _init(self, width: int, height: int, x: int, y: int):
         logging.info('Webview starting init in webcv')
@@ -338,12 +274,6 @@ class WebCanvas:
                     continue
                 break
         logging.info(f'Get webview port, server address: {self.web._server.address}')
-        self.web_port = int(self.web._server.address.split(":")[2].split("/")[0])
-        logging.info(f'Starting web server at {self.web_port}')
-        WebCanvas_FileServerHandler._canvas = self
-        self.file_server = http.server.HTTPServer(("", self.web_port + 1), WebCanvas_FileServerHandler)
-        logging.info('Starting file server')
-        threading.Thread(target=self.file_server.serve_forever, daemon=True).start()
         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
         self._raevent.set()
         
@@ -434,10 +364,6 @@ class WebCanvas:
     def wait_loadimgs(self, complete_code: str) -> None:
         while not all(self.run_js_code(complete_code)):
             time.sleep(0.01)
-        
-    def load_allimg(self) -> None:
-        for imgname in self._regims: self._load_img(imgname)
-        self.wait_loadimgs(self.get_imgcomplete_jseval(self._regims))
     
     def reg_event(self, name: str, callback: typing.Callable) -> None:
         setattr(self.web.events, name, getattr(self.web.events, name) + callback)
@@ -450,13 +376,8 @@ class WebCanvas:
             self.jslog_f.write(f"\n\n// Webview closed.\n")
             self.jslog_f.flush()
             self.jslog_f.close()
-    
-    def get_resource_path(self, name: str) -> str:
-        logging.info(f"Get resource path: {name}")
-        return f"http://{host}:{self.web_port + 1}/{name}"
 
     def wait_jspromise(self, code: str) -> None:
-        #logging.info(f"Wait JS promise: {code}")
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"
         ete = threading.Event()
         ecbname = f"{eid}_callback"
@@ -472,16 +393,3 @@ class WebCanvas:
         ete.wait()
         delattr(self.jsapi, ecbname)
         return result
-    
-    def _load_img(self, imgname: str) -> None:
-        jsvarname = self.get_img_jsvarname(imgname)
-        code = f"""\
-        if (!window.{jsvarname}){chr(123)}\
-            {jsvarname} = document.createElement('img');\
-            {jsvarname}.crossOrigin = \"Anonymous\";\
-            {jsvarname}.src = 'http://{host}:{self.web_port + 1}/{imgname}';\
-            {jsvarname}.loading = \"eager\";\
-        {chr(125)}\
-        """
-        self.run_js_code(code)
-        self._is_loadimg[imgname] = True

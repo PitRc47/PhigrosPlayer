@@ -328,13 +328,11 @@ def Load_Resource():
     
     for index, avatar in enumerate(assetConfig["avatars"]):
         respacker.reg_img(open(tool_funcs.gtpresp(avatar), "rb").read(), f"avatar_{index}")
-    
-    with open("resources/font.ttf", "rb") as f:
-        root.reg_res(f.read(), "PhigrosFont.ttf")
     respacker.load(*respacker.pack())
     
-    root.wait_jspromise(f"""loadFont('PhigrosFont', \"{root.get_resource_path("PhigrosFont.ttf")}\");""")
-    root.unreg_res("PhigrosFont.ttf")
+    with open("resources/font.ttf", "rb") as f:
+        font = f.read()
+        root.wait_jspromise(f"""loadFont('PhigrosFont',URL.createObjectURL(new Blob([new Uint8Array({list(font)})], {{type: 'application/octet-stream'}})));""")
     
     updateUserAvatar()
     root._regims.clear()
