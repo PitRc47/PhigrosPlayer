@@ -8,7 +8,9 @@ import struct
 import logging
 import tempfile
 import os
+
 from io import BytesIO
+from pydub import AudioSegment
 
 import checksys
 
@@ -24,7 +26,6 @@ else:
     import win32comext.directsound.directsound as ds
     import win32event as w32e
     from pywintypes import WAVEFORMATEX
-    from pydub import AudioSegment
 
 CACHE_BUFFER_MAXSIZE = 32
 PRE_CACHE_SIZE = CACHE_BUFFER_MAXSIZE
@@ -93,9 +94,11 @@ class directSoundAndroid:
                 f.write(data)
                 self._file_path = f.name
                 self._is_temp_file = True
-        self._channels = 2
-        self._sample_rate = 44100
-        self._audio_format = 16
+        with BytesIO(data) if isinstance(data, bytes) else open(self._file_path, 'rb') as f:
+            seg = AudioSegment.from_file(f)
+            self._channels = seg.channels
+            self._sample_rate = seg.frame_rate
+            self._audio_format = seg.sample_width * 8
         self._enable_cache = enable_cache
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = None
