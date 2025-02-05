@@ -176,6 +176,21 @@ void main() {
 </script>
 
 <script>
+    CanvasRenderingContext2D.prototype.reset = (
+        CanvasRenderingContext2D.prototype.reset ||
+        function () {
+            this.resetTransform();
+            this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    );
+
+    CanvasRenderingContext2D.prototype.roundRect = (
+        CanvasRenderingContext2D.prototype.roundRect ||
+        CanvasRenderingContext2D.prototype.rect
+    );
+</script>
+
+<script>
     root_ele = document.getRootNode();
     html_ele = root_ele.children[0];
     body_ele = html_ele.children[1];
@@ -420,13 +435,23 @@ void main() {
         }
     }
 
-    function connectToSocketBridge() {
+    async function connectToSocketBridge() {
         window.removeEventListener("touchstart", connectToSocketBridge);
         const addr = prompt("please input the server address: ");
         const port = 8080;
         const socket = new WebSocket(`ws://${addr}:${port}`);
         const split_magic = "\x00";
-        document.body.requestFullscreen();
+
+        try {
+            await document.body.requestFullscreen();
+        } catch (e) {
+            const reqfs = document.body.requestFullscreen || document.body.webkitRequestFullscreen || document.body.mozRequestFullscreen || document.body.msRequestFullscreen;
+            const callback = () => {
+                reqfs.call(document.body);
+                window.removeEventListener("touchstart", callback);
+            };
+            window.addEventListener("touchend", callback);
+        }
 
         window.pywebview = {
             api: {
