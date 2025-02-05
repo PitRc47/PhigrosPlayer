@@ -97,7 +97,7 @@ class musicCls:
         if not self._paused: return
         self._paused = False
         
-        if enableKivy:
+        if enableKivy and self.buffer:
             self.buffer.play()
         else:
             self.buffer.Play(self.lflag)
