@@ -973,7 +973,7 @@ def main():
     def atexit_run():
         tempdir.clearTempDir()
         needrelease.run()
-        sys.exit(0)
+        sys.exit()
 
     def init():
         global disengage_webview

@@ -37,7 +37,7 @@ version = 0.6
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.10.10,hostpython3==3.10.10,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets,ffmpeg,libogg,libvorbis,pygame-ce
+requirements = python3,hostpython3,kivy,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets,ffmpeg,libogg,libvorbis,pygame-ce
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -64,7 +64,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.10.10
+osx.python_version = 3.11.5
 
 # Kivy version to use
 osx.kivy_version = 2.3.1
@@ -321,7 +321,7 @@ p4a.url = https://github.com/PitRc47/python-for-android
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = ppr-build
+p4a.branch = master
 
 # (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
 #p4a.commit = HEAD

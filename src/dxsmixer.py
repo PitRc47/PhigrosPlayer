@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import typing
 import time
 from sys import argv
@@ -214,5 +215,6 @@ def toDowngradeAPI():
 mixer = mixerCls()
 
 if "--soundapi-downgrade" in argv:
+    logging.info('Downgrading Sound API...')
     toDowngradeAPI()
     
