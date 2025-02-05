@@ -65,23 +65,17 @@ class musicCls:
     def play(self, isloop: typing.Literal[0, -1] = 0):
         self.lflag = 0 if isloop == 0 else 1
         
-        try:
-            if self.buffer is None:
-                _, self.buffer = self.dxs.create(self.lflag)
-                self._setBufferVolume(self._volume)
-                if checksys.main == 'Android':
-                    self.buffer.prepare()
-            else:
-                self.set_pos(0.0)
-                if checksys.main == 'Android':
-                    if not self.buffer.isPlaying():
-                        self.buffer.start()
-                else:
-                    self.buffer.Play(self.lflag)
-        except Exception as e:
-            print(f"Play error: {e}")
-            self.buffer = None
+        if self.buffer is None:
+            _, self.buffer = self.dxs.create(self.lflag)
+            self._setBufferVolume(self._volume)
             
+        else:
+            self.set_pos(0.0)
+            if checksys.main == 'Android':
+                self.buffer.start()
+            else:
+                self.buffer.Play(self.lflag)
+        
     def stop(self):
         if checksys.main == 'Android' and self.buffer is not None:
             self.buffer.release()
