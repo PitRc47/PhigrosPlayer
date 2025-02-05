@@ -11,7 +11,7 @@ import tool_funcs
 
 enableKivy = False
 if checksys.main == 'Android':
-    logging.info('Downgrading Sound API For ANDROID...')
+    logging.info('Downgrading Sound API For ANDROID ...')
     enableKivy = True
     from kivy.core.audio import SoundLoader
 
@@ -78,7 +78,7 @@ class musicCls:
             self.buffer.play()
         
     def stop(self):
-        if enableKivy:
+        if enableKivy and self.buffer:
             self.buffer.stop()
         self.buffer = None
         
