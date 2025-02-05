@@ -9,6 +9,11 @@ import checksys
 import dxsound
 import tool_funcs
 
+enableKivy = True
+
+if enableKivy:
+    from kivy.core.audio import SoundLoader
+
 class musicCls:
     def __init__(self):
         self.dxs = None
@@ -23,32 +28,22 @@ class musicCls:
     
     def _setBufferVolume(self, v: float):
         if self.buffer is None: return
-        if checksys.main == 'Android':
-            self.dxs.set_volume(v)
+        if enableKivy:
+            self.buffer.volume = v
         else:
             self.buffer.SetVolume(self.dxs.transform_volume(v))
      
     def _getBufferPosition(self) -> int:
         if self.buffer is None: return 0
-        if checksys.main == 'Android':
-            # 返回当前播放位置（毫秒转换为字节位置）
-            current_time_ms = self.dxs._media_player.getCurrentPosition()
-            byte_position = int(current_time_ms / 1000 * 
-                               self.dxs._media_player.getSampleRate() *
-                               self.dxs._media_player.getAudioChannels() *
-                               self.dxs._media_player.getAudioFormat() // 8)
-            return byte_position
+        if enableKivy:
+            pass
         else:
             return self.buffer.GetCurrentPosition()[1]
     
     def _setBufferPosition(self, v: int):
         if self.buffer is None: return
-        if checksys.main == 'Android':
-            # Android使用时间（秒）定位，需将字节位置转换为时间
-            pos_seconds = v / (self.dxs._media_player.getSampleRate() * 
-                              self.dxs._media_player.getAudioChannels() *
-                              self.dxs._media_player.getAudioFormat() // 8)
-            self.dxs._media_player.seekTo(int(pos_seconds * 1000))
+        if enableKivy:
+            pass
         else:
             minv = 0
             maxv = self.dxs._sdesc.dwBufferBytes - 1
@@ -56,7 +51,10 @@ class musicCls:
     
     def load(self, fp: str):
         self.unload()
-        self.dxs = dxsound.directSound(fp, enable_cache=False)
+        if enableKivy:
+            self.buffer = SoundLoader.load(fp)
+        else:
+            self.dxs = dxsound.directSound(fp, enable_cache=False)
         
     def unload(self):
         self.dxs = None
@@ -64,43 +62,31 @@ class musicCls:
         self._paused = False
         
     def play(self, isloop: typing.Literal[0, -1] = 0):
-        self.lflag = 0 if isloop == 0 else 1
-        
-        if self.buffer is None:
-            _, self.buffer = self.dxs.create(self.lflag)
-            self._setBufferVolume(self._volume)
-        else:
-            if checksys.main == 'Android':
-                self.buffer.reset()
-                from jnius import autoclass, cast  # type: ignore
-                FileInputStream = autoclass('java.io.FileInputStream')
-                fis = FileInputStream(self.dxs._file_path)
-                fd = cast('java.io.FileDescriptor', fis.getFD())
-                self.buffer.setDataSource(fd)
-                self.buffer.prepare()
-                fis.close()
-            self.set_pos(0.0)
-        
-        # 开始播放
-        if checksys.main == 'Android':
-            if not self.buffer.isPlaying():
-                self.buffer.start()
-        else:
+        if not enableKivy:
+            self.lflag = 0 if isloop == 0 else 1
+            
+            if self.buffer is None:
+                _, self.buffer = self.dxs.create(self.lflag)
+                self._setBufferVolume(self._volume)
+            else:
+                self.set_pos(0.0)
+            
             self.buffer.Play(self.lflag)
+        else:
+            self.buffer.loop = isloop
+            self.buffer.play()
         
     def stop(self):
-        if checksys.main == 'Android' and self.buffer is not None:
-            self.buffer.release()
-            self.buffer = None
-        else:
-            self.buffer = None
+        if enableKivy:
+            self.buffer.stop()
+        self.buffer = None
         
     def pause(self):
         if self._paused: return
         self._paused = True
         
-        if checksys.main == 'Android':
-            self.dxs._media_player.pause()
+        if enableKivy:
+            self.buffer.stop()
         else:
             self._pause_pos = self._getBufferPosition()
             self._pause_volume = self.get_volume()
@@ -110,8 +96,8 @@ class musicCls:
         if not self._paused: return
         self._paused = False
         
-        if checksys.main == 'Android':
-            self.dxs._media_player.start()
+        if enableKivy:
+            self.buffer.play()
         else:
             self.buffer.Play(self.lflag)
             self._setBufferVolume(self._pause_volume)
@@ -153,26 +139,26 @@ class musicCls:
     def get_busy(self) -> bool:
         if self.buffer is None:
             return False
-        if checksys.main == 'Android':
-            return self.dxs._media_player.isPlaying() and not self._paused
+        if enableKivy:
+            return self.buffer.state
         else:
             return self.buffer.GetStatus() != 0 and not self._paused
     
     def set_pos(self, pos: float):
-        if checksys.main == 'Android':
-            self.dxs._media_player.seekTo(int(pos * 1000))
+        if enableKivy:
+            self.buffer.seek(pos)
         else:
             self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
         
     def get_pos(self) -> float:
-        if checksys.main == 'Android':
-            return self.dxs._media_player.getCurrentPosition() / 1000.0
+        if enableKivy:
+            return self.buffer.get_pos()
         else:
             return self._getBufferPosition() / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
     def get_length(self) -> float:
-        if checksys.main == 'Android':
-            return self.dxs._media_player.getDuration() / 1000.0  # 毫秒转秒
+        if enableKivy:
+            return self.buffer.length
         else:
             return self.dxs._sdesc.dwBufferBytes / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
@@ -209,10 +195,14 @@ def toDowngradeAPI():
     mixer.music.load = _loadhook
     mixer.music.get_length = lambda: length
     mixer.music.get_pos = lambda: _get_pos() / 1000
+
     
 mixer = mixerCls()
 
 if "--soundapi-downgrade" in argv:
     logging.info('Downgrading Sound API...')
-    toDowngradeAPI()
+    if checksys.main == 'Android':
+        enableKivy = True
+    else:
+        toDowngradeAPI()
     
