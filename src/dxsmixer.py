@@ -215,6 +215,6 @@ def toDowngradeAPI():
     
 mixer = mixerCls()
 
-if "--soundapi-downgrade" in argv and checksys.main != 'Android':
+if "--soundapi-downgrade" in argv:
     toDowngradeAPI()
     
