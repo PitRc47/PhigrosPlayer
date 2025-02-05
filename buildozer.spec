@@ -37,7 +37,7 @@ version = 0.6
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.10.12,kivy==2.3.0,hostpython3==3.10.12,pywebview,pyjnius==1.5.0,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets,ffmpeg,libogg,libvorbis,pygame
+requirements = python3,kivy==2.3.1,hostpython3,pywebview,pyjnius,bottle,proxy-tools,typing_extensions,cryptography,requests,Pillow,pydub,numba,opencv,numpy,rjsmin,librosa==0.10.2.post1,UnityPy==1.10.18,fsb5,mido,PyYAML,websockets,ffmpeg,libogg,libvorbis,pygame
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -64,7 +64,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.10.12
+osx.python_version = 3.11.5
 
 # Kivy version to use
 osx.kivy_version = 2.3.0
