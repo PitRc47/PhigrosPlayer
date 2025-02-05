@@ -298,7 +298,7 @@ def main():
         global cksmanager
         
         logging.info("Loading Resource...")
-        WaitLoading = mixer.Sound("resources/WaitLoading.mp3")
+        WaitLoading = mixer.Sound(abspath("resources/WaitLoading.mp3"))
         LoadSuccess = mixer.Sound("resources/LoadSuccess.wav")
         Thread(target=WaitLoading_FadeIn, daemon = True).start()
         LoadSuccess.set_volume(0.75)
