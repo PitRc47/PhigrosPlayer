@@ -68,7 +68,7 @@ jobs:
             python3 -m virtualenv venv
           fi
           source venv/bin/activate
-          pip3 install -q Cython==0.29.33 git+https://github.com/kivy/buildozer.git wheel setuptools
+          pip3 install -q Cython==0.29.33 buildozer wheel setuptools
           buildozer android debug
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.0
