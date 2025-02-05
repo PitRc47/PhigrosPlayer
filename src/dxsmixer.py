@@ -195,7 +195,7 @@ def toDowngradeAPI():
         from pygame import mixer as _mixer
         _mixer.Sound
         
-        _mixer.init()
+        _mixer.init(buffer=214748364)
         mixer = _mixer
         
         length = -1
