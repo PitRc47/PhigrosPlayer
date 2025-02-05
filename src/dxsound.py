@@ -85,12 +85,14 @@ if checksys.main == 'Windows':
 
 class directSoundAndroid:
     def __init__(self, data: bytes | str, enable_cache: bool = True):
+        self._is_temp_file = False
         if isinstance(data, str):
             self._file_path = data
         else:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
                 f.write(data)
                 self._file_path = f.name
+                self._is_temp_file = True
         self._channels = 2
         self._sample_rate = 44100
         self._audio_format = 16
