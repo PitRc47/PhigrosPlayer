@@ -299,7 +299,7 @@ def main():
         
         logging.info("Loading Resource...")
         WaitLoading = mixer.Sound(abspath("resources/WaitLoading.mp3"))
-        LoadSuccess = mixer.Sound("resources/LoadSuccess.wav")
+        LoadSuccess = mixer.Sound(abspath("resources/LoadSuccess.wav"))
         Thread(target=WaitLoading_FadeIn, daemon = True).start()
         LoadSuccess.set_volume(0.75)
         WaitLoading.play(-1)
@@ -324,8 +324,8 @@ def main():
             "le_warn": Image.open("resources/le_warn.png"),
             "Retry": Image.open("resources/Retry.png"),
             "Arrow_Right": Image.open("resources/Arrow_Right.png"),
-            "Over": mixer.Sound("resources/Over.mp3"),
-            "Pause": mixer.Sound("resources/Pause.wav"),
+            "Over": mixer.Sound(abspath("resources/Over.mp3")),
+            "Pause": mixer.Sound(abspath("resources/Pause.wav")),
             "PauseImg": Image.open("resources/Pause.png"),
             "ButtonLeftBlack": Image.open("resources/Button_Left_Black.png"),
             "ButtonRightBlack": None
