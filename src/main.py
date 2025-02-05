@@ -157,7 +157,6 @@ def main():
         "images": [],
         "audio": [],
     }
-    chartimages = {}
     cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}/", "")
 
     for item in tool_funcs.getAllFiles(temp_dir):
@@ -272,7 +271,6 @@ def main():
     mixer.music.load(audio_fp)
     raw_audio_length = mixer.music.get_length()
     audio_length = raw_audio_length + (chart_obj.META.offset / 1000 if CHART_TYPE == const.CHART_TYPE.RPE else 0.0)
-    all_inforamtion = {}
     logging.info("Loading Chart Information...")
 
     ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}/info.csv", f"{temp_dir}/info.txt", f"{temp_dir}/info.yml"])

@@ -103,6 +103,7 @@ class directSoundAndroid:
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = None
         self._sdesc = None
+    
     def getSampleRate(self):
         return self._sample_rate
 

@@ -28,14 +28,12 @@ def loadfile(fp: str):
     try:
         return LoadResult(FILE_TYPE.IMAGE, Image.open(fp), None)
     except Exception as e:
-        logging.warning(f"IMAGE Loadfile {fp} Error: {repr(e)}")
         errs.append(e)
         
     try:
         mixer.music.load(fp)
         return LoadResult(FILE_TYPE.SONG, None, None)
     except Exception as e:
-        logging.warning(f"SONG Loadfile {fp} Error: {repr(e)}")
         errs.append(e)
     
     try:
