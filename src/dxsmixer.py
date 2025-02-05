@@ -190,10 +190,18 @@ class mixerCls:
 def toDowngradeAPI():
     global mixer
     
-    if checksys.main != 'Android':
-        from os import environ; environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
-        from pygame import mixer as _mixer
-        _mixer.Sound
+    from os import environ; environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
+    from pygame import mixer as _mixer
+    
+    _mixer.init()
+    mixer = _mixer
+    
+    length = -1
+    _load = mixer.music.load
+    _get_pos = mixer.music.get_pos
+    
+    def _loadhook(fn: str):
+        nonlocal length
         
         _mixer.init(buffer=214748364)
         mixer = _mixer
