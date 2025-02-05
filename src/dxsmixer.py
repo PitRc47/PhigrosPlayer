@@ -8,6 +8,10 @@ import checksys
 import dxsound
 import tool_funcs
 
+if checksys.main == 'Android':
+    from jnius import autoclass, cast  # type: ignore
+    FileInputStream = autoclass('java.io.FileInputStream')
+
 class musicCls:
     def __init__(self):
         self.dxs = None
@@ -68,13 +72,22 @@ class musicCls:
         if self.buffer is None:
             _, self.buffer = self.dxs.create(self.lflag)
             self._setBufferVolume(self._volume)
-            
         else:
-            self.set_pos(0.0)
             if checksys.main == 'Android':
+                self.buffer.reset()
+                fis = FileInputStream(self.dxs._file_path)
+                fd = cast('java.io.FileDescriptor', fis.getFD())
+                self.buffer.setDataSource(fd)
+                self.buffer.prepare()
+                fis.close()
+            self.set_pos(0.0)
+        
+        # 开始播放
+        if checksys.main == 'Android':
+            if not self.buffer.isPlaying():
                 self.buffer.start()
-            else:
-                self.buffer.Play(self.lflag)
+        else:
+            self.buffer.Play(self.lflag)
         
     def stop(self):
         if checksys.main == 'Android' and self.buffer is not None:
