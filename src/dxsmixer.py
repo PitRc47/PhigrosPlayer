@@ -9,9 +9,10 @@ import checksys
 import dxsound
 import tool_funcs
 
-enableKivy = True
-
-if enableKivy:
+enableKivy = False
+if checksys.main == 'Android':
+    logging.info('Downgrading Sound API...')
+    enableKivy = True
     from kivy.core.audio import SoundLoader
 
 class musicCls:
@@ -199,10 +200,6 @@ def toDowngradeAPI():
     
 mixer = mixerCls()
 
-if "--soundapi-downgrade" in argv:
-    logging.info('Downgrading Sound API...')
-    if checksys.main == 'Android':
-        enableKivy = True
-    else:
-        toDowngradeAPI()
+if "--soundapi-downgrade" in argv and checksys.main != 'Android':
+    toDowngradeAPI()
     
