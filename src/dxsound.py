@@ -98,15 +98,6 @@ class directSoundAndroid:
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = None
         self._sdesc = None
-        try:
-            fis = FileInputStream(self._file_path)
-            fd = cast('java.io.FileDescriptor', fis.getFD())
-            self._media_player.setDataSource(fd)
-            self._media_player.prepare()
-        finally:
-            fis.close()
-            if not isinstance(data, str):
-                os.remove(self._file_path)
     def getSampleRate(self):
         return self._sample_rate
 
@@ -129,7 +120,7 @@ class directSoundAndroid:
         if self._media_player is None:
             self._media_player = MediaPlayer()
             fis = FileInputStream(self._file_path)
-            fd = cast('java.io.FileDescriptor', fis.getFD())
+            fd = cast(FileDescriptor, fis.getFD())
             self._media_player.setDataSource(fd)
             self._media_player.prepare()
             fis.close()
