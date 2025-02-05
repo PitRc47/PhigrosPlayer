@@ -94,11 +94,9 @@ class directSoundAndroid:
                 f.write(data)
                 self._file_path = f.name
                 self._is_temp_file = True
-        with BytesIO(data) if isinstance(data, bytes) else open(self._file_path, 'rb') as f:
-            seg = AudioSegment.from_file(f)
-            self._channels = seg.channels
-            self._sample_rate = seg.frame_rate
-            self._audio_format = seg.sample_width * 8
+        self._channels = 2
+        self._sample_rate = 44100
+        self._audio_format = 16
         self._enable_cache = enable_cache
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = None
