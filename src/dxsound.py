@@ -134,6 +134,11 @@ class directSoundAndroid:
         if self._media_player is not None:
             self._media_player.release()
             self._media_player = None
+        if self._is_temp_file:
+            try:
+                os.remove(self._file_path)
+            except:
+                pass
 
 class directSound:
     def __new__(cls, data: bytes | str, enable_cache: bool = True):
