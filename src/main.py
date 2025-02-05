@@ -17,6 +17,32 @@ if checksys.main == 'Windows':
     from ctypes import windll
 
 if checksys.main == 'Android':
+    def get_current_directory():
+        import os
+        current_directory = os.getcwd()
+        print(f"当前目录: {current_directory}\n")
+
+        # 列出当前目录下的所有文件和文件夹
+        contents = os.listdir(current_directory)
+
+        # 过滤出文件夹
+        directories = [item for item in contents if os.path.isdir(os.path.join(current_directory, item))]
+
+        # 过滤出文件
+        files = [item for item in contents if os.path.isfile(os.path.join(current_directory, item))]
+
+        # 打印文件夹列表
+        print("文件夹列表:")
+        print("-" * 40)
+        for directory in directories:
+            print(f" - {directory}")
+
+        # 打印文件列表
+        print("\n文件列表:")
+        print("-" * 40)
+        for file in files:
+            print(f" - {file}")
+    get_current_directory()
     from android.permissions import request_permissions, Permission # type: ignore
     def _androidPermissionwait(permissions, grant_results):
         pass
