@@ -24,6 +24,7 @@ class FileLoadError(Exception): ...
 
 def loadfile(fp: str):
     errs: list[Exception] = []
+    logging.info(f'Loading file: {fp}')
     
     try:
         return LoadResult(FILE_TYPE.IMAGE, Image.open(fp), None)
