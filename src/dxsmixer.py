@@ -8,10 +8,6 @@ import checksys
 import dxsound
 import tool_funcs
 
-if checksys.main == 'Android':
-    from jnius import autoclass, cast  # type: ignore
-    FileInputStream = autoclass('java.io.FileInputStream')
-
 class musicCls:
     def __init__(self):
         self.dxs = None
@@ -75,6 +71,8 @@ class musicCls:
         else:
             if checksys.main == 'Android':
                 self.buffer.reset()
+                from jnius import autoclass, cast  # type: ignore
+                FileInputStream = autoclass('java.io.FileInputStream')
                 fis = FileInputStream(self.dxs._file_path)
                 fd = cast('java.io.FileDescriptor', fis.getFD())
                 self.buffer.setDataSource(fd)
