@@ -8,14 +8,15 @@ from sys import argv
 from pydub import AudioSegment
 
 import checksys
-import dxsound
-import tool_funcs
+from tool_funcs import NoJoinThreadFunc
 
 enableKivy = False
-if checksys.main == 'Android':
-    logging.info('Downgrading Sound API For ANDROID ...')
+if checksys.main == 'Android' or checksys.main == 'Linux':
+    logging.info('Downgrading Sound API ...')
     enableKivy = True
     from kivy.core.audio import SoundLoader
+else:
+    import dxsound
 
 class musicCls:
     def __init__(self):
@@ -123,7 +124,7 @@ class musicCls:
             self._setBufferVolume(self._pause_volume)
             self._setBufferPosition(self._pause_pos)
     
-    @tool_funcs.NoJoinThreadFunc
+    @NoJoinThreadFunc
     def fadeout(self, t: int):
         if self._paused: return
         
@@ -221,4 +222,9 @@ mixer = mixerCls()
 
 if "--soundapi-downgrade" in argv and checksys.main != 'Android':
     toDowngradeAPI()
-    
+
+if __name__ == "__main__":
+    mixer.Sound("ShineAfter.ADeanJocularACE.0.ogg")
+    mixer.music.play()
+    import time
+    time.sleep(100)

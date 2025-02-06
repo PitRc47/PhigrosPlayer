@@ -2,13 +2,16 @@ import fix_workpath as _
 import init_logging as _
 
 import typing
+import checksys
 from os.path import exists, isfile, isdir
 
 import yaml
 from PIL import Image, ImageChops
 
 import const
-import dxsound
+
+if checksys.main == 'Windows':
+    import dxsound
 
 DEFAULT_PATH = "resources/resource_default"
 globalPack = None
