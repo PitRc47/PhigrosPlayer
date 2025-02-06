@@ -12,7 +12,7 @@ from tool_funcs import NoJoinThreadFunc
 
 enableKivy = False
 if checksys.main == 'Android' or checksys.main == 'Linux':
-    logging.info('Downgrading Sound API ...')
+    logging.info('Change Sound API to Kivy...')
     enableKivy = True
     from kivy.core.audio import SoundLoader
 else:

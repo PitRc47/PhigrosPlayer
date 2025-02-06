@@ -1112,6 +1112,7 @@ def main():
 try:
     main()
 except BaseException as e:
-    import traceback
-    stack_trace = traceback.format_exc()
-    logging.error(f'捕获到异常: {e}\n堆栈跟踪:\n{stack_trace}')
+    if e != SystemExit:
+        import traceback
+        stack_trace = traceback.format_exc()
+        logging.error(f'捕获到异常: {e}\n堆栈跟踪:\n{stack_trace}')
