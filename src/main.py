@@ -328,6 +328,7 @@ def main():
         LoadSuccess = mixer.Sound(abspath("resources/LoadSuccess.wav"))
         Thread(target=WaitLoading_FadeIn, daemon = True).start()
         LoadSuccess.set_volume(0.75)
+        logging.info("Loading WaitLoading...")
         WaitLoading.play(-1)
         noteWidth_raw = (0.125 * w + 0.2 * h) / 2
         globalNoteWidth = (noteWidth_raw) * (eval(sys.argv[sys.argv.index("--scale-note") + 1]) if "--scale-note" in sys.argv else 1.0)
