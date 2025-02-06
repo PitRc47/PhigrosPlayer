@@ -56,7 +56,7 @@ class musicCls:
     
     def _convert(self, fp: str):
         output_file_path = fp + '.wav'
-        FFMPEG.Run(f"-i {fp} {output_file_path}")
+        FFMPEG.Run(f"-i -y {fp} {output_file_path}")
         logging.info(f"File {fp} successfully converted to {output_file_path}")
         return output_file_path
     
