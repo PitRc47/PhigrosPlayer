@@ -326,6 +326,7 @@ def main():
         logging.info("Loading Resource...")
         WaitLoading = mixer.Sound(abspath("resources/WaitLoading.mp3"))
         LoadSuccess = mixer.Sound(abspath("resources/LoadSuccess.wav"))
+        logging.info("mixer.Sound...")
         Thread(target=WaitLoading_FadeIn, daemon = True).start()
         LoadSuccess.set_volume(0.75)
         logging.info("Loading WaitLoading...")
