@@ -63,18 +63,6 @@ requestAnimationFrame(_frame_counter);
 })();
 '''
 
-def _parseRangeHeader(data: bytes, rg: typing.Optional[str], setrep_header: typing.Callable[[str, str], typing.Any]):
-    if rg is None: return data
-    start, end = rg.split("=")[1].split("-")
-    start = int(start)
-    end = int(end) if end else len(data) - 1
-    start = min(max(start, 0), len(data) - 1)
-    end = min(end, len(data) - 1)
-    logging.info(f"[FILE SERVER] _parseRangeHeader sendheader")
-    setrep_header("Content-Range", f"bytes {start}-{end}/{len(data)}")
-    setrep_header("Content-Length", str(end - start + 1))
-    return data[start:end+1]
-
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
@@ -130,27 +118,21 @@ class PILResourcePacker:
             datas.append(data)
             dataindexs.append([name, [datacount, len(data)]])
             datacount += len(data)
-            logging.info(f'image {name} size: {len(data)}')
         
         logging.info('Packing Done')
         return b"".join(datas), dataindexs
 
     def load(self, data: bytes, indexs: list[list[str, list[int, int]]]):
-        logging.info('webcv loading images...')
         rid = f"pilrespacker_{randint(0, 2 << 31)}"
         self.cv.reg_res(data, rid)
         
-        logging.info('loading res package.')
         imnames = self.cv.wait_jspromise(f"loadrespackage(URL.createObjectURL(new Blob([new Uint8Array({list(data)})], {{type: 'application/octet-stream'}})), {indexs});")
-        logging.info('get imgcomplete jseval')
         self.cv.wait_loadimgs(self.cv.get_imgcomplete_jseval(imnames))
         self.cv.unreg_res(rid)
         
-        logging.info('revoke img urls')
         self.cv.run_js_code(f"""[{",".join(map(self.cv.get_img_jsvarname, imnames))}].forEach(im => URL.revokeObjectURL(im.src));""")
         
         def optimize():
-            logging.info('cache image to optimize')
             codes = []
             codes.append(f"cachecv = document.createElement('canvas');")
             codes.append(f"cachecv.width = cachecv.height = 1;")
@@ -158,13 +140,11 @@ class PILResourcePacker:
             for im in imnames:
                 codes.append(f"cachectx.drawImage({self.cv.get_img_jsvarname(im)}, 0, 0);")
             codes.append(f"delete cachecv; delete cachectx;")
-            logging.info('run_js_code imnames')
             self.cv.run_js_code("".join(codes))
             
             for im in imnames:
                 self._imgopted[im].set()
         
-        logging.info('start _imgopted update')
         self._imgopted.update({im: threading.Event() for im in imnames})
         threading.Thread(target=optimize, daemon=True).start()
     
