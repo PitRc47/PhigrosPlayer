@@ -5,7 +5,8 @@ import typing
 import time
 from sys import argv
 
-from pydub import AudioSegment
+from jnius import autoclass # type: ignore
+FFMPEG = autoclass('com.sahib.pyff.ffpy')
 
 import checksys
 from tool_funcs import NoJoinThreadFunc
@@ -54,18 +55,9 @@ class musicCls:
             self.buffer.SetCurrentPosition(min(max(minv, v), maxv))
     
     def _convert(self, fp: str):
-        if fp.lower().endswith('.mp3'):
-            audio = AudioSegment.from_mp3(fp)
-        elif fp.lower().endswith('.wav'):
-            audio = AudioSegment.from_wav(fp)
-        elif fp.lower().endswith('.flac'):
-            audio = AudioSegment.from_file(fp, "flac")
-        elif fp.lower().endswith('.ogg'):
-            audio = AudioSegment.from_ogg(fp)
-        
         output_file_path = fp + '.wav'
-        audio.export(output_file_path, format="wav")
-        logging.info(f"File successfully converted to {output_file_path}")
+        FFMPEG.Run(f"-i {fp} {output_file_path}")
+        logging.info(f"File {fp} successfully converted to {output_file_path}")
         return output_file_path
     
     def load(self, fp: str):
