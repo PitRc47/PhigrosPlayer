@@ -76,7 +76,7 @@ class musicCls:
             
             self.buffer.Play(self.lflag)
         else:
-            self.buffer.loop = isloop
+            #self.buffer.loop = isloop
             self.buffer.play()
         
     def stop(self):
