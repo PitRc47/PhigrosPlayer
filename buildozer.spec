@@ -29,7 +29,7 @@ source.exclude_dirs = src/__pycache__
 source.exclude_patterns = lib/*, bin/*, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
-version = 0.7
+version = 0.8
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -74,7 +74,7 @@ osx.kivy_version = 2.3.1
 #
 
 # (bool) Indicate if the application should be fullscreen or not
-fullscreen = 0
+fullscreen = 1
 
 # (string) Presplash background color (for android toolchain)
 # Supported formats are: #RRGGBB #AARRGGBB or one of the following names:
@@ -186,7 +186,7 @@ android.add_jars = lib/pywebview-android.jar
 # Either form may be used, and assets need not be in 'source.include_exts'.
 # 1) android.add_assets = source_asset_relative_path
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
-#android.add_assets = src/resources
+#android.add_assets = 
 
 # (list) Put these files or directories in the apk res directory.
 # The option may be used in three ways, the value may contain one or zero ':'
@@ -198,7 +198,7 @@ android.add_jars = lib/pywebview-android.jar
 # 3) A directory, here 'legal_resources' must contain one or more directories, 
 # each of a resource kind:  drawable, xml, etc...
 # android.add_resources = legal_resources
-# android.add_resources = network_security_config.xml
+# android.add_resources = 
 
 # (list) Gradle dependencies to add
 android.gradle_dependencies = com.arqies:ffmpeg-kit-python:6.0-2.LTS@aar, com.arthenica:smart-exception-common:0.2.1@jar, com.arthenica:smart-exception-java:0.2.1@jar
@@ -299,10 +299,10 @@ android.allow_backup = True
 # you can do so with the manifestPlaceholders property.
 # This property takes a map of key-value pairs. (via a string)
 # Usage example : android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]
-#android.manifest_placeholders = android:usesCleartextTraffic="true"
+#android.manifest_placeholders = 
 
 # (bool) Skip byte compile for .py files
-# android.no-byte-compile-python = False
+android.no-byte-compile-python = True
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
 # android.release_artifact = aab
@@ -405,48 +405,10 @@ ios.codesign.allowed = false
 log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
-warn_on_root = 1
+warn_on_root = 0
 
 # (str) Path to build artifact storage, absolute or relative to spec file
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .aab, .ipa) storage
 # bin_dir = ./bin
-
-#    -----------------------------------------------------------------------------
-#    List as sections
-#
-#    You can define all the "list" as [section:key].
-#    Each line will be considered as a option to the list.
-#    Let's take [app] / source.exclude_patterns.
-#    Instead of doing:
-#
-#[app]
-#source.exclude_patterns = license,data/audio/*.wav,data/images/original/*
-#
-#    This can be translated into:
-#
-#[app:source.exclude_patterns]
-#license
-#data/audio/*.wav
-#data/images/original/*
-#
-
-
-#    -----------------------------------------------------------------------------
-#    Profiles
-#
-#    You can extend section / key with a profile
-#    For example, you want to deploy a demo version of your application without
-#    HD content. You could first change the title to add "(demo)" in the name
-#    and extend the excluded directories to remove the HD content.
-#
-#[app@demo]
-#title = My Application (demo)
-#
-#[app:source.exclude_patterns@demo]
-#images/hd/*
-#
-#    Then, invoke the command line with the "demo" profile:
-#
-#buildozer --profile demo android debug
