@@ -81,7 +81,7 @@ class musicCls:
             
             self.buffer.Play(self.lflag)
         else:
-            self.setLooping(self.lflag)
+            self.dxs.setLooping(self.lflag)
             self.dxs.play(isloop)
         
     def stop(self):
