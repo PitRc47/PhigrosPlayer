@@ -10,8 +10,7 @@ from PIL import Image, ImageChops
 
 import const
 
-if checksys.main == 'Windows':
-    import dxsound
+import dxsound
 
 DEFAULT_PATH = "resources/resource_default"
 globalPack = None
