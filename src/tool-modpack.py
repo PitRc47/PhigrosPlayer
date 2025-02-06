@@ -1,5 +1,4 @@
 import fix_workpath as _
-import check_bin as _
 
 import json
 import typing

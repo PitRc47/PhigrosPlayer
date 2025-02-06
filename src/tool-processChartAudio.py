@@ -1,5 +1,3 @@
-import check_bin as _
-
 import sys
 import time
 from json import load
