@@ -8,8 +8,11 @@ from sys import argv
 import checksys
 from tool_funcs import NoJoinThreadFunc
 
-if checksys.main != 'Android':
-    import dxsound
+import dxsound
+
+if checksys.main == 'Android':
+    from jnius import autoclass  # type: ignore
+    MediaPlayer = autoclass('android.media.MediaPlayer')
 
 class musicCls:
     def __init__(self):
@@ -22,6 +25,8 @@ class musicCls:
         self._paused = False
         self._pause_pos = 0
         self._pause_volume = 0.0
+        if checksys.main == 'Android':
+            self.dxs = MediaPlayer()
     
     def _setBufferVolume(self, v: float):
         if self.buffer is None: return
@@ -49,18 +54,24 @@ class musicCls:
     def load(self, fp: str):
         self.unload()
         if checksys.main == 'Android':
-            pass
+            if not self.dxs:
+                self.dxs = MediaPlayer()
+            self.dxs.setDataSource(fp)
+            self.dxs.prepare()
         else:
             self.dxs = dxsound.directSound(fp, enable_cache=False)
         
     def unload(self):
+        if checksys.main == 'Android':
+            if self.dxs:
+                self.dxs.release()
         self.dxs = None
         self.buffer = None
         self._paused = False
         
     def play(self, isloop: typing.Literal[0, -1] = 0):
+        self.lflag = 0 if isloop == 0 else 1
         if checksys.main != 'Android':
-            self.lflag = 0 if isloop == 0 else 1
             
             if self.buffer is None:
                 _, self.buffer = self.dxs.create(self.lflag)
@@ -70,11 +81,13 @@ class musicCls:
             
             self.buffer.Play(self.lflag)
         else:
-            pass
+            self.setLooping(self.lflag)
+            self.dxs.play(isloop)
         
     def stop(self):
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                self.dxs.stop()
         self.buffer = None
         
     def pause(self):
@@ -82,7 +95,8 @@ class musicCls:
         self._paused = True
         
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                self.dxs.pause()
         else:
             self._pause_pos = self._getBufferPosition()
             self._pause_volume = self.get_volume()
@@ -93,7 +107,8 @@ class musicCls:
         self._paused = False
         
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                self.dxs.start()
         else:
             self.buffer.Play(self.lflag)
             self._setBufferVolume(self._pause_volume)
@@ -127,34 +142,43 @@ class musicCls:
     
     def set_volume(self, volume: float):
         self._volume = volume
-        self._setBufferVolume(volume)
+        if checksys.main == 'Android':
+            if self.dxs:
+                self.dxs.setVolume(volume, volume)
+        else:
+            self._setBufferVolume(volume)
         
     def get_volume(self):
         return self._volume
     
     def get_busy(self) -> bool:
+        if checksys.main == 'Android':
+            if self.dxs:
+                return self.dxs.isPlaying()
+            return False
         if self.buffer is None:
             return False
-        if checksys.main == 'Android':
-            pass
         else:
             return self.buffer.GetStatus() != 0 and not self._paused
     
     def set_pos(self, pos: float):
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                self.dxs.seekTo(int(pos * 1000))
         else:
             self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
         
     def get_pos(self) -> float:
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                return self.dxs.getCurrentPosition() / 1000.0
         else:
             return self._getBufferPosition() / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
     def get_length(self) -> float:
         if checksys.main == 'Android':
-            pass
+            if self.dxs:
+                return self.dxs.getDuration() / 1000.0
         else:
             return self.dxs._sdesc.dwBufferBytes / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
