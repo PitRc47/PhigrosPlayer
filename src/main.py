@@ -81,8 +81,8 @@ if render_video and showfps:
 combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
 if checksys.main == 'Android':
     from jnius import autoclass #type: ignore
-    from pydub import receiveff
     FFMPEG = autoclass('com.sahib.pyff.ffpy')
+    from pydub import receiveff
     receiveff(FFMPEG)
 def main():
     import webcv
