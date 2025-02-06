@@ -957,6 +957,7 @@ def main():
     atexit_run()
 
 try:
+    logger = logging.getLogger()
     main()
 except SystemExit:
     sys.exit(0)
