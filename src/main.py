@@ -131,9 +131,10 @@ def main():
     import requests
     from PIL import Image, ImageFilter, ImageEnhance
     
-    from pydub import AudioSegment, receiveff
+    from pydub import AudioSegment
     if checksys.main == 'Android':
         from jnius import autoclass #type: ignore
+        from pydub import receiveff
         FFMPEG = autoclass('com.sahib.pyff.ffpy')
         receiveff(FFMPEG)
 
