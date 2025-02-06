@@ -29,7 +29,7 @@ source.exclude_dirs = src/__pycache__
 source.exclude_patterns = lib/*, bin/*, src/gui_launcher.py
 
 # (str) Application versioning (method 1)
-version = 0.8
+version = 0.9
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -246,7 +246,7 @@ android.add_jars = lib/pywebview-android.jar
 
 # (str) screenOrientation to set for the main activity.
 # Valid values can be found at https://developer.android.com/guide/topics/manifest/activity-element
-#android.manifest.orientation = fullSensor
+android.manifest.orientation = sensorLandscape
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
