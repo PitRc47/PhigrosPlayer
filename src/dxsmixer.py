@@ -52,13 +52,25 @@ class musicCls:
             maxv = self.dxs._sdesc.dwBufferBytes - 1
             self.buffer.SetCurrentPosition(min(max(minv, v), maxv))
     
+    def _convert(self, fp: str):
+        if fp.lower().endswith('.mp3'):
+            audio = AudioSegment.from_mp3(fp)
+        elif fp.lower().endswith('.wav'):
+            audio = AudioSegment.from_wav(fp)
+        elif fp.lower().endswith('.flac'):
+            audio = AudioSegment.from_file(fp, "flac")
+        elif fp.lower().endswith('.ogg'):
+            audio = AudioSegment.from_ogg(fp)
+        
+        output_file_path = fp + '.wav'
+        audio.export(output_file_path, format="wav")
+        logging.info(f"File successfully converted to {output_file_path}")
+        return output_file_path
+    
     def load(self, fp: str):
         self.unload()
         if enableKivy:
-            if fp.endswith('.mp3'):
-                AudioSegment.from_mp3(fp).export(fp+'.wav', format='wav')
-                fp = fp+'.wav'
-            self.buffer = SoundLoader.load(fp)
+            self.buffer = SoundLoader.load(self._convert(fp))
             if not self.buffer:
                 raise RuntimeError("Unable to load sound file!")
         else:
