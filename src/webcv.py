@@ -95,7 +95,7 @@ class PILResourcePacker:
         self.imgs.append((name, img))
         
     def pack(self):
-        logging.info('packing images...')
+        logging.info('Packing images...')
         datas = []
         dataindexs = []
         datacount = 0
@@ -329,7 +329,6 @@ class WebCanvas:
     def wait_for_close(self) -> None:
         while not self._destroyed.wait(0.1):
             pass
-        
         if self.jslog:
             self.jslog_f.write(f"\n\n// Webview closed.\n")
             self.jslog_f.flush()

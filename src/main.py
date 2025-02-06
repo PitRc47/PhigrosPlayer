@@ -396,7 +396,6 @@ def main():
         for k,v in Resource["levels"].items(): # reg levels img
             respacker.reg_img(v, f"Level_{k}")
         
-        logging.info('reg_img le_warn, begin_animation_image, finish_animation_image, Retry, Arrow_Right, PauseImg, ButtonLeftBlack, ButtonRightBlack...')
         respacker.reg_img(Resource["le_warn"], "le_warn")
         respacker.reg_img(chart_image, "begin_animation_image")
         respacker.reg_img(finish_animation_image, "finish_animation_image")
@@ -890,7 +889,7 @@ def main():
     def atexit_run():
         tempdir.clearTempDir()
         needrelease.run()
-        sys.exit()
+        sys.exit(0)
 
     def init():
         global disengage_webview
@@ -942,8 +941,6 @@ def main():
                         )
                         root.resize(winw, winh)
                         w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-                        logging.info(f'Type of w_legacy {type(w_legacy)}, Type of h_legacy {type(h_legacy)}')
-                        logging.info(f'Type of winw {type(winw)}, Type of winh {type(winh)}')
                         logging.info(f'w_legacy {w_legacy}, h_legacy {h_legacy}')
                         logging.info(f'winw {winw},  winh {winh}')
                         winw = int(winw)
