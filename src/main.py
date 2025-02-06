@@ -79,6 +79,8 @@ if render_video and showfps:
     logging.warning("if use --render-video, you cannot use --showfps")
 
 combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
+if checksys.main == 'Android':
+    from pydub import AudioSegment
 def main():
     import webcv
     import dxsound
