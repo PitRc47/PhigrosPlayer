@@ -54,6 +54,8 @@ class musicCls:
         self.unload()
         if enableKivy:
             self.buffer = SoundLoader.load(fp)
+            if not self.buffer:
+                raise RuntimeError("Unable to load sound file!")
         else:
             self.dxs = dxsound.directSound(fp, enable_cache=False)
         
