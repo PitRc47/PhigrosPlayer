@@ -5,6 +5,8 @@ import typing
 import time
 from sys import argv
 
+from pydub import AudioSegment
+
 import checksys
 import dxsound
 import tool_funcs
@@ -53,6 +55,9 @@ class musicCls:
     def load(self, fp: str):
         self.unload()
         if enableKivy:
+            if fp.endswith('.mp3'):
+                AudioSegment.from_mp3(fp).export(fp+'.wav', format='wav')
+                fp = fp+'.wav'
             self.buffer = SoundLoader.load(fp)
             if not self.buffer:
                 raise RuntimeError("Unable to load sound file!")
