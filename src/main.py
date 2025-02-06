@@ -80,10 +80,7 @@ if render_video and showfps:
 
 combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
 if checksys.main == 'Android':
-    from jnius import autoclass #type: ignore
-    FFMPEG = autoclass('com.sahib.pyff.ffpy')
-    from pydub import receiveff
-    receiveff(FFMPEG)
+    from pydub import AudioSegment
 def main():
     import webcv
     import dxsound
