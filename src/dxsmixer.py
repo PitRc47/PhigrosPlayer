@@ -190,9 +190,9 @@ class mixerCls:
     def init(*args, **kwargs) -> None: ...
     
     def Sound(self, fp: str):
-        self.music = musicCls()
-        self.music.load(fp)
-        return self.music
+        music = musicCls()
+        music.load(fp)
+        return music
 
 def toDowngradeAPI():
     global mixer
