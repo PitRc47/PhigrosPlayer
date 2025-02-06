@@ -133,7 +133,8 @@ def main():
     import requests
     from PIL import Image, ImageFilter, ImageEnhance
     
-    from pydub import AudioSegment
+    from pydub import AudioSegment, receiveff
+    receiveff(FFMPEG)
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
