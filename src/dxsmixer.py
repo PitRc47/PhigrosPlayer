@@ -82,7 +82,7 @@ class musicCls:
             self.buffer.Play(self.lflag)
         else:
             self.dxs.setLooping(self.lflag)
-            self.dxs.play(isloop)
+            self.dxs.play()
         
     def stop(self):
         if checksys.main == 'Android':
