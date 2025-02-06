@@ -36,7 +36,6 @@ import tempdir
 import socket_webviewbridge
 from dxsmixer import mixer
 from graplib_webview import *
-
     
 if not exists("phigros_assets") or not all([
     exists(tool_funcs.gtpresp(i)) for i in [
@@ -348,16 +347,16 @@ def bindEvents():
     global settingUIChooseAvatarAndBackgroundSlideControler
     
     root.jsapi.set_attr("click", eventManager.click)
-    root.run_js_code("_click = (e) => pywebview.api.call_attr('click', e.x * dpr, e.y * dpr);")
-    root.run_js_code("document.addEventListener('mousedown', _click);")
+    root.run_js_code("_click = (e) => pywebview.api.call_attr('click', e.x, e.y);")
+    root.run_js_code("window.addEventListener('mousedown-np', _click);")
     
     root.jsapi.set_attr("mousemove", eventManager.move)
-    root.run_js_code("_mousemove = (e) => pywebview.api.call_attr('mousemove', e.x * dpr, e.y * dpr);")
-    root.run_js_code("document.addEventListener('mousemove', _mousemove);")
+    root.run_js_code("_mousemove = (e) => pywebview.api.call_attr('mousemove', e.x, e.y);")
+    root.run_js_code("window.addEventListener('mousemove-np', _mousemove);")
     
     root.jsapi.set_attr("mouseup", eventManager.release)
-    root.run_js_code("_mouseup = (e) => pywebview.api.call_attr('mouseup', e.x * dpr, e.y * dpr);")
-    root.run_js_code("document.addEventListener('mouseup', _mouseup);")
+    root.run_js_code("_mouseup = (e) => pywebview.api.call_attr('mouseup', e.x, e.y);")
+    root.run_js_code("window.addEventListener('mouseup-np', _mouseup);")
     
     mainUISlideControler = phigame_obj.SlideControler(
         mainUI_slideControlerMouseDown_valid,
@@ -3323,7 +3322,7 @@ def chartPlayerRender(
             lambda ts: Resource["Note_Click_Audio"][ts].play()
         )
         
-        convertTime2Chart = lambda t: (t - show_start_time) - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
+        convertTime2Chart = lambda t: (t - globals().get("show_start_time", time.time())) - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
         root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t, key: pplm.pc_click(convertTime2Chart(t), key)) # 这里没写diswebview的判断, 希望别埋坑..
         root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t, key: pplm.pc_release(convertTime2Chart(t), key))
         root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
@@ -3771,11 +3770,6 @@ def updateFontSizes():
     if userName_FontSize > w * 0.0234375:
         userName_FontSize = w * 0.0234375
 
-def resize(w_: int, h_: int):
-    global w, h
-    w, h = w_ - dw_legacy, h_ - dh_legacy
-    updateFontSizes()
-
 def updateSettingConfig():
     userData.update({
         "setting-chartOffset": PlaySettingWidgets["OffsetSlider"].value,
@@ -3832,7 +3826,7 @@ def applyConfig():
         root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
         root.run_js_code(f"lowquality_imjscvscale_x = 1.0;")
         root.run_js_code(f"ctx.imageSmoothingEnabled = true;")
-    root.run_js_code(f"resizeCanvas({w}, {h});") # update canvas
+    root.run_js_code(f"resizeCanvas({rw}, {rh});") # update canvas
 
 root = webcv.WebCanvas(
     width = 1, height = 1,
@@ -3846,42 +3840,55 @@ root = webcv.WebCanvas(
 def init():
     global webdpr
     global dw_legacy, dh_legacy
+    global rw, rh
     global w, h
     global Resource, eventManager
     
-    if "--disengage-webview" in sys.argv:
+    disengage_webview = "--disengage-webview" in sys.argv
+    
+    if disengage_webview:
         socket_webviewbridge.hook(root)
         
     webdpr = root.run_js_code("window.devicePixelRatio;")
     root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
 
-    if "--fullscreen" in sys.argv:
-        w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-        root.resize(w, h)
-        root.web.toggle_fullscreen()
-        dw_legacy, dh_legacy = 0, 0
+    if disengage_webview:
+        w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
     else:
-        if "--size" not in sys.argv:
-            w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+        if "--fullscreen" in sys.argv:
+            w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+            root.resize(w, h)
+            root.web.toggle_fullscreen()
+            dw_legacy, dh_legacy = 0, 0
         else:
-            w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
-        winw, winh = (
-            w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
-            h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
-        )
-        root.resize(winw, winh)
-        w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-        dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
-        dw_legacy *= webdpr; dh_legacy *= webdpr
-        dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
-        del w_legacy, h_legacy
-        root.resize(winw + dw_legacy, winh + dh_legacy)
-        root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
+            if "--size" not in sys.argv:
+                w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
+            else:
+                w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
+            winw, winh = (
+                w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
+                h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
+            )
+            root.resize(winw, winh)
+            w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+            dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
+            dw_legacy *= webdpr; dh_legacy *= webdpr
+            dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
+            del w_legacy, h_legacy
+            root.resize(winw + dw_legacy, winh + dh_legacy)
+            root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
 
     w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 
-    root.reg_event("resized", resize)
-    root.run_js_code(f"resizeCanvas({w}, {h});")
+    rw, rh = w, h
+    if "--usu169" in sys.argv:
+        ratio = w / h
+        if ratio > 16 / 9:
+            w = int(h * 16 / 9)
+        else:
+            h = int(w / 16 * 9)
+        root.run_js_code("usu169 = true;")
+    root.run_js_code(f"resizeCanvas({rw}, {rh});")
 
     if "--window-host" in sys.argv and checksys.main == 'Windows':
         from ctypes import windll

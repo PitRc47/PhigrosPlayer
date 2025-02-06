@@ -793,188 +793,71 @@ def main():
                 root.destroy()
                 return
             
-            writer = cv2.VideoWriter(
-                video_fp,
-                cv2.VideoWriter.fourcc(*render_video_fourcc),
-                render_video_fps,
-                (w, h),
-                True
-            )
-            needrelease.add(writer.release)
+        else: #--lfdaot-file
+            fp = sys.argv[sys.argv.index("--lfdaot-file") + 1]
+            with open(fp,"r",encoding="utf-8") as f:
+                data = json.load(f)
+            frame_speed = data["meta"]["frame_speed"]
+            frame_time = 1 / frame_speed
+            allframe_num = data["meta"]["frame_num"]
             
-            def writeFrame(data: bytes):
-                matlike = tool_funcs.bytes2matlike(data, w, h)
-                writer.write(matlike)
+            funcmap = getLfdaotFuncs()
             
-            wcv2matlike.callback = writeFrame
-            httpd, port = wcv2matlike.createServer()
-            
-            now_t = 0.0
-            while now_t < audio_length:
-                if CHART_TYPE == const.CHART_TYPE.PHI:
-                    Task = phicore.GetFrameRenderTask_Phi(now_t, None)
-                elif CHART_TYPE == const.CHART_TYPE.RPE:
-                    Task = phicore.GetFrameRenderTask_Rpe(now_t, None)
-                    
-                Task.ExecTask()
-                root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
-                now_t += 1 / render_video_fps
-            
-            httpd.shutdown()
-            writer.release()
-            needrelease.remove(writer.release)
-                    
-            if "--render-video-autoexit" in sys.argv:
-                root.destroy()
-                return
-            
-        else:
-            assert False, "never"
+            for index,Task_data in enumerate(data["data"]):
+                lfdaot_tasks.update({
+                    index: chartobj_phi.FrameRenderTask(
+                        RenderTasks = [
+                            chartobj_phi.RenderTask(
+                                func = funcmap[render_task_data["func_name"]],
+                                args = tuple(render_task_data["args"]),
+                                kwargs = render_task_data["kwargs"]
+                            )
+                            for render_task_data in Task_data["render"]
+                        ],
+                        ExTask = tuple(Task_data["ex"])
+                    )
+                })
+            if data["meta"]["size"] != [w, h]:
+                logging.warning("The size of the lfdaot file is not the same as the size of the window")
         
-        mixer.music.set_volume(1.0)
-        phicore.initSettlementAnimation(pplm if noautoplay else None)
+        mixer.music.play()
+        while not mixer.music.get_busy(): pass
         
-
-
+        totm: tool_funcs.TimeoutTaskManager[chartobj_phi.FrameRenderTask] = tool_funcs.TimeoutTaskManager()
+        totm.valid = lambda x: bool(x)
+        
+        for fc, task in lfdaot_tasks.items():
+            totm.add_task(fc, task.ExTask)
+        
+        pst = time.time()
+        
+        while True:
+            now_t = time.time() - pst
+            music_play_fcount = int(now_t / frame_time)
+            
+            try:
+                Task: chartobj_phi.FrameRenderTask = lfdaot_tasks[music_play_fcount]
+            except KeyError:
+                continue
+            
+            Task.ExecTask(clear=False)
+            extasks = totm.get_task(music_play_fcount)
+            
+            break_flag_oside = False
+            
+            for extask in extasks:
+                break_flag = phicore.processExTask(extask)
+                
+                if break_flag:
+                    break_flag_oside = True
+                    break
+            
+            if break_flag_oside:
+                break
+            
+            pst += tool_funcs.checkOffset(now_t, raw_audio_length, mixer)
     
-        def Chart_Finish_Animation():
-            animation_1_time = 0.75
-            a1_combo = pplm.ppps.getCombo() if noautoplay else None
-            
-            animation_1_start_time = time.time()
-            while True:
-                p = (time.time() - animation_1_start_time) / animation_1_time
-                if p > 1.0: break
-                phicore.lineCloseAimationFrame(p, a1_combo)
-            
-            time.sleep(0.25)
-            Resource["Over"].play(-1)
-        
-            animation_2_time = 3.5
-            animation_2_start_time = time.time()
-            a2_loop_clicked = False
-            a2_continue_clicked = False
-            a2_break = False
-            
-            def whileCheck():
-                nonlocal a2_break
-                while True:
-                    if a2_loop_clicked or (loop and (time.time() - animation_2_start_time) > 0.25):
-                        def _f():
-                            LoadChartObject()
-                            PlayerStart()
-                        Thread(target=_f, daemon=True).start()
-                        break
-                    
-                    if a2_continue_clicked:
-                        root.destroy()
-                        break
-                        
-                    time.sleep(1 / 240)
-                
-                root.run_js_code("window.removeEventListener('click', _loopClick);")
-                root.run_js_code("window.removeEventListener('click', _continueClick);")
-                a2_break = True
-            
-            Thread(target=whileCheck, daemon=True).start()
-            
-            def loopClick(clientX, clientY):
-                nonlocal a2_loop_clicked
-                if clientX <= w * const.FINISH_UI_BUTTON_SIZE and clientY <= w * const.FINISH_UI_BUTTON_SIZE / 190 * 145:
-                    a2_loop_clicked = True
-            
-            def continueClick(clientX, clientY):
-                nonlocal a2_continue_clicked
-                if clientX >= w - w * const.FINISH_UI_BUTTON_SIZE and clientY >= h - w * const.FINISH_UI_BUTTON_SIZE / 190 * 145:
-                    a2_continue_clicked = True
-            
-            root.jsapi.set_attr("loopClick", loopClick)
-            root.jsapi.set_attr("continueClick", continueClick)
-            root.run_js_code("_loopClick = (e) => {pywebview.api.call_attr('loopClick', e.clientX * dpr, e.clientY * dpr);}")
-            root.run_js_code("_continueClick = (e) => {pywebview.api.call_attr('continueClick', e.clientX * dpr, e.clientY * dpr);}")
-            root.run_js_code("window.addEventListener('click', _loopClick);")
-            root.run_js_code("window.addEventListener('click', _continueClick);")
-            
-            while not a2_break:
-                p = (time.time() - animation_2_start_time) / animation_2_time
-                if p > 1.0: break
-                phicore.settlementAnimationFrame(p)
-            
-            while not a2_break:
-                phicore.settlementAnimationFrame(1.0)
-        
-        mixer.music.set_volume(1.0)
-        phicore.initSettlementAnimation(pplm if noautoplay else None)
-        
-        def Chart_Finish_Animation():
-            animation_1_time = 0.75
-            a1_combo = pplm.ppps.getCombo() if noautoplay else None
-            
-            animation_1_start_time = time.time()
-            while True:
-                p = (time.time() - animation_1_start_time) / animation_1_time
-                if p > 1.0: break
-                phicore.lineCloseAimationFrame(p, a1_combo)
-            
-            time.sleep(0.25)
-            Resource["Over"].play(-1)
-        
-            animation_2_time = 3.5
-            animation_2_start_time = time.time()
-            a2_loop_clicked = False
-            a2_continue_clicked = False
-            a2_break = False
-            
-            def whileCheck():
-                nonlocal a2_break
-                while True:
-                    if a2_loop_clicked or (loop and (time.time() - animation_2_start_time) > 0.25):
-                        def _f():
-                            LoadChartObject()
-                            PlayerStart()
-                        Thread(target=_f, daemon=True).start()
-                        break
-                    
-                    if a2_continue_clicked:
-                        root.destroy()
-                        break
-                        
-                    time.sleep(1 / 240)
-                
-                root.run_js_code("window.removeEventListener('click', _loopClick);")
-                root.run_js_code("window.removeEventListener('click', _continueClick);")
-                a2_break = True
-            
-            Thread(target=whileCheck, daemon=True).start()
-            
-            def loopClick(clientX, clientY):
-                nonlocal a2_loop_clicked
-                if clientX <= w * const.FINISH_UI_BUTTON_SIZE and clientY <= w * const.FINISH_UI_BUTTON_SIZE / 190 * 145:
-                    a2_loop_clicked = True
-            
-            def continueClick(clientX, clientY):
-                nonlocal a2_continue_clicked
-                if clientX >= w - w * const.FINISH_UI_BUTTON_SIZE and clientY >= h - w * const.FINISH_UI_BUTTON_SIZE / 190 * 145:
-                    a2_continue_clicked = True
-            
-            root.jsapi.set_attr("loopClick", loopClick)
-            root.jsapi.set_attr("continueClick", continueClick)
-            root.run_js_code("_loopClick = (e) => {pywebview.api.call_attr('loopClick', e.clientX * dpr, e.clientY * dpr);}")
-            root.run_js_code("_continueClick = (e) => {pywebview.api.call_attr('continueClick', e.clientX * dpr, e.clientY * dpr);}")
-            root.run_js_code("window.addEventListener('click', _loopClick);")
-            root.run_js_code("window.addEventListener('click', _continueClick);")
-            
-            while not a2_break:
-                p = (time.time() - animation_2_start_time) / animation_2_time
-                if p > 1.0: break
-                phicore.settlementAnimationFrame(p)
-            
-            while not a2_break:
-                phicore.settlementAnimationFrame(1.0)
-        
-        mixer.music.fadeout(250)
-        Chart_Finish_Animation()
-
+    
     def updateCoreConfig():
         global PhiCoreConfigObject
         

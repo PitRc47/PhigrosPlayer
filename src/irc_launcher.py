@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import fix_workpath as _
+
 import os
 import sys
 import subprocess
@@ -47,7 +51,7 @@ class SettingsWindow(QWidget):
     
     def __init__(self):
         super().__init__()
-        self.setupUi(self)
+        self.setupUi()
 
     def openFile(self):
         options = QFileDialog.Options()
@@ -57,16 +61,17 @@ class SettingsWindow(QWidget):
         return self.chart
 
     def messagebox_when_render_up(self):
-        self.MessageBox1 = Dialog("注意", "要开始渲染谱面了，启动器可能会未响应。如果Windows弹出了未响应窗口，请无视。否则渲染和启动器一块闪退").exec_()
+        Dialog("注意", "要开始渲染谱面了，启动器可能会未响应。如果Windows弹出了未响应窗口，请无视。否则渲染和启动器一块闪退").exec_()
         
     def messagebox_when_render_off(self):
-        self.MessageBox2 = Dialog("渲染结束", "渲染结束，请自行查看渲染结果。如遇到视频损坏或有改进建议，欢迎点击侧边栏的Github Repository来向qaqFei。(当然gui有问题来抽IrCat-Ninth位于natayark@outlook.com)").exec_()
+        Dialog("渲染结束", "渲染结束，请自行查看渲染结果。如遇到视频损坏或有改进建议，欢迎点击侧边栏的Github Repository来向qaqFei。(当然gui有问题来抽IrCat-Ninth位于natayark@outlook.com)").exec_()
   
     def render_chart(self):
         self.messagebox_when_render_up()
         check = lambda checkbox, command: command if checkbox.isChecked() else ""
         command = []
-        command.append("main.exe" if os.path.isfile("main.exe") else "python main.py")
+        if os.path.isfile("main.exe"): command.append("main.exe")
+        else: command.extend(("python", "main.py"))
         
         if self.chart:
             command.append(self.chart)
@@ -106,11 +111,11 @@ class SettingsWindow(QWidget):
         finally:
             self.messagebox_when_render_off()
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.setWindowModality(QtCore.Qt.ApplicationModal)
-        MainWindow.resize(974, 601)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+    def setupUi(self):
+        self.setObjectName("MainWindow")
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.resize(974, 601)
+        self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox.setGeometry(QtCore.QRect(10, 100, 571, 81))
@@ -265,23 +270,23 @@ class SettingsWindow(QWidget):
         self.size_y.setObjectName("size_y")
         self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
         # self.setCentralWidget(self.centralwidget)
-        # self.menubar = QtWidgets.QMenuBar(MainWindow)
+        # self.menubar = QtWidgets.QMenuBar(self)
         # self.menubar.setGeometry(QtCore.QRect(0, 0, 974, 23))
         # self.menubar.setObjectName("menubar")
         # self.menuGithub_Repository = QtWidgets.QMenu(self.menubar)
         # #self.menuGithub_Repository.setObjectName("menuGithub_Repository")
-        # MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        # self.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
-        # MainWindow.setStatusBar(self.statusbar)
+        # self.setStatusBar(self.statusbar)
         # self.menubar.addAction(self.menuGithub_Repository.menuAction())
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi()
+        QtCore.QMetaObject.connectSlotsByName(self)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Launcher"))
+        self.setWindowTitle(_translate("MainWindow", "Launcher"))
         self.groupBox.setTitle(_translate("MainWindow", "谱面文件"))
         self.chooseFile.setText(_translate("MainWindow", "在电脑上选择一个文件"))
         self.label.setText(_translate("MainWindow", "或者"))
@@ -321,6 +326,5 @@ QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPo
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 app = QApplication(sys.argv)
-w = MainWindow()
-w.show()
+MainWindow().show()
 app.exec_()

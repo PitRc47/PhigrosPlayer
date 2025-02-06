@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import init_logging as _
+import check_bin as _
 
 import math
 import typing

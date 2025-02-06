@@ -1,7 +1,14 @@
 __pycache__
+.vscode
+
 phigros_assets
 phigros_userdata.json
+default-argvs.json
+
 error_*.txt
+Chart.lfdaot
+ppr-jslog-nofmt.js
+
 unpack-result
 unpack-temp
 Chart.lfdaot

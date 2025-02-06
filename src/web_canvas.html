@@ -215,6 +215,8 @@ void main() {
     enable_jscanvas_bitmap = false;
     RPEVersion = -1;
     usu169 = false;
+    canvasPosD = [0.0, 0.0];
+
     const colorMatrix = document.getElementById("colorMatrix");
     const lowquality_imweakmap = new WeakMap();
     const letters = [
@@ -310,6 +312,7 @@ void main() {
             } else {
                 dy = (h - w / 16 * 9) / 2;
             }
+            canvasPosD = [dx, dy];
             ctx.translate(dx, dy);
             dialog_canvas_ctx.translate(dx, dy);
         }
@@ -998,6 +1001,31 @@ void main() {
     proxyTouchEvent("touchstart", "mousedown");
     proxyTouchEvent("touchmove", "mousemove");
     proxyTouchEvent("touchend", "mouseup");
+
+    const fixEventPosition = (x, y) => [x * dpr - canvasPosD[0], y * dpr - canvasPosD[1]];
+    const proxyNeedPositionEvent = function (from, to, cls) {
+        const othernames = ["altKey", "bubbles", "button", "buttons", "cancelBubble", "cancelable", "clientX", "clientY", "composed", "ctrlKey", "currentTarget", "defaultPrevented", "detail", "eventPhase", "fromElement", "layerX", "layerY", "metaKey", "movementX", "movementY", "offsetX", "offsetY", "pageX", "pageY", "relatedTarget", "returnValue", "screenX", "screenY", "shiftKey", "sourceCapabilities", "srcElement", "target", "timeStamp", "toElement", "type", "view", "which", "x", "y"];
+        window.addEventListener(from, (e) => {
+            const [x, y] = fixEventPosition(e.x, e.y);
+            const [clientX, clientY] = fixEventPosition(e.clientX, e.clientY);
+            const eventValues = {
+                ...(() => {
+                    const result = {};
+                    for (const name of othernames) result[name] = e[name];
+                    return result;
+                })(),
+                x: x, y: y,
+                clientX: clientX, clientY: clientY
+            };
+            const newEvent = new cls(to, eventValues);
+            window.dispatchEvent(newEvent);
+        });
+    }
+
+    proxyNeedPositionEvent("mousedown", "mousedown-np", MouseEvent);
+    proxyNeedPositionEvent("mousemove", "mousemove-np", MouseEvent);
+    proxyNeedPositionEvent("mouseup", "mouseup-np", MouseEvent);
+    proxyNeedPositionEvent("click", "click-np", MouseEvent);
 
     window.addEventListener("touchstart", (e) => {
         try {pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
