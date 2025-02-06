@@ -1011,6 +1011,8 @@ def main():
         global Resource
         global errFlag
         
+        if checksys.main == 'Android':
+            time.sleep(0.05)
         if disengage_webview:
             socket_webviewbridge.hook(root)
 
