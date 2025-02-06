@@ -111,9 +111,9 @@ class PhiraResourcePack:
             for k in ("click.ogg", "drag.ogg", "flick.ogg")
         }
         
-        self.resource["endpath"] = f"{directory}/ending.mp3"
+        self.resource["endpath"] = f"{directory}/ending.wav"
         if not validFile(self.resource["endpath"]):
-            self.resource["endpath"] = f"{DEFAULT_PATH}/ending.mp3"
+            self.resource["endpath"] = f"{DEFAULT_PATH}/ending.wav"
 
         info: dict = yaml.load(open(f"{directory}/info.yml", "r", encoding="utf-8"), Loader=yaml.FullLoader)
         

@@ -786,7 +786,7 @@ def showStartAnimation():
     
     a1_t = 5.0
     a1_st = time.time()
-    mixer.music.load("resources/NewSplashSceneBGM.mp3")
+    mixer.music.load("resources/NewSplashSceneBGM.wav")
     played_NewSplashSceneBGM = False
     while True:
         p = (time.time() - a1_st) / a1_t
@@ -1046,7 +1046,7 @@ def mainRender():
     
     faManager.faculas.clear()
     mainRenderSt = time.time()
-    mixer.music.load("resources/ChapterSelect.mp3")
+    mixer.music.load("resources/ChapterSelect.wav")
     mixer.music.play(-1)
     
     messageRect = (w * 0.015, h * 0.985 - MessageButtonSize, MessageButtonSize, MessageButtonSize)
@@ -1745,7 +1745,7 @@ def settingRender():
         if settingState.atis_o and tool_funcs.inrect(x, y, otherSettingButtonRects[1]) and inSettingUI:
             unregEvents()
             nextUI, tonextUI, tonextUISt = lambda: chartPlayerRender(
-                chartAudio = "resources/introduction_chart/audio.mp3",
+                chartAudio = "resources/introduction_chart/audio.wav",
                 chartImage = "resources/introduction_chart/image.png",
                 chartFile = "resources/introduction_chart/chart.json",
                 startAnimation = False,
@@ -2994,7 +2994,7 @@ def audioQARender():
             text = "播放音频",
             fontsize = (w + h) / 75,
             width = w * 0.19375,
-            command = lambda: (mixer.music.load("resources/TouchToStart.mp3"), mixer.music.play())
+            command = lambda: (mixer.music.load("resources/TouchToStart.wav"), mixer.music.play())
         )
     })
     
@@ -3141,7 +3141,7 @@ def aboutUsRender():
         
         if clickedStart:
             if not mixer.music.get_busy():
-                mixer.music.load("resources/AboutUs.mp3")
+                mixer.music.load("resources/AboutUs.wav")
                 mixer.music.play(-1)
             dy = h - h * ((time.time() - clickedStartButtonTime) / 12.5)
             fontsize = (w + h) / 102.5
@@ -3515,7 +3515,7 @@ def chartPlayerRender(
                         rendingAnimation((time.time() - rendingAnimationSt) / 0.75, pplm.ppps.getCombo() if phicore.noautoplay else phicore.chart_obj.note_num, False)
                     else:
                         rendingAnimation, rendingAnimationSt = phicore.settlementAnimationFrame, time.time()
-                        mixer.music.load("resources/Over.mp3")
+                        mixer.music.load("resources/Over.wav")
                         Thread(target=lambda: (time.sleep(0.25), mixer.music.play(-1)), daemon=True).start()
                 
                 if rendingAnimation is phicore.settlementAnimationFrame: # 不能用elif, 不然会少渲染一个帧
