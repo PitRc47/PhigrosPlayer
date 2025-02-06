@@ -105,6 +105,12 @@ if render_video and showfps:
     logging.warning("if use --render-video, you cannot use --showfps")
 
 combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
+from pydub import AudioSegment
+    if checksys.main == 'Android':
+        from jnius import autoclass #type: ignore
+        from pydub import receiveff
+        FFMPEG = autoclass('com.sahib.pyff.ffpy')
+        receiveff(FFMPEG)
 def main():
     import webcv
     import dxsound
@@ -131,12 +137,6 @@ def main():
     import requests
     from PIL import Image, ImageFilter, ImageEnhance
     
-    from pydub import AudioSegment
-    if checksys.main == 'Android':
-        from jnius import autoclass #type: ignore
-        from pydub import receiveff
-        FFMPEG = autoclass('com.sahib.pyff.ffpy')
-        receiveff(FFMPEG)
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
