@@ -1612,6 +1612,7 @@ def loadingAnimation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = 
     LoadSuccess.play()
     
     animation_st = time.time()
+    logging.info('render startup')
     while True:
         sec = time.time() - animation_st
         p = sec / animation_time
