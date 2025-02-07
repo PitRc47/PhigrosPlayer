@@ -87,10 +87,7 @@ class musicCls:
     def stop(self):
         if checksys.main == 'Android':
             if self.dxs:
-                try:
-                    self.dxs.stop()
-                except:
-                    pass
+                self.dxs.stop()
         self.buffer = None
         
     def pause(self):
