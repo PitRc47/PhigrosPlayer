@@ -70,7 +70,7 @@ class musicCls:
         self._paused = False
         
     def play(self, isloop: typing.Literal[0, -1] = 0):
-        self.lflag = 0 if isloop == 0 else 1
+        self.lflag = False if isloop == 0 else True
         if checksys.main != 'Android':
             
             if self.buffer is None:
@@ -120,28 +120,33 @@ class musicCls:
     @NoJoinThreadFunc
     def fadeout(self, t: int):
         if self._paused: return
-        
-        t /= 1000
+        t /= 1000.0
         st = time.time()
-        bufid = id(self.buffer)
+        if checksys.main != 'Android':
+            bufid = id(self.buffer)
         rvol = self.get_volume()
-        
-        while (
-            time.time() - st < t
-            and self.buffer is not None
-            and self.get_busy()
-        ):
-            if id(self.buffer) != bufid:
-                self.set_volume(rvol)
-                return
-                
-            p = (time.time() - st) / t
-            p = max(0.0, min(1.0, p))
-            self.set_volume(1.0 - p)
-            time.sleep(1 / 15)
-        
-        self.stop()
+        if checksys.main == 'Android':
+            while time.time() - st < t and self.get_busy():
+                p = (time.time() - st) / t
+                p = max(0.0, min(1.0, p))
+                self.set_volume(1.0 - p)
+                time.sleep(1 / 15)
+        else:
+            while (
+                time.time() - st < t
+                and self.buffer is not None
+                and self.get_busy()
+            ):
+                if id(self.buffer) != bufid:
+                    self.set_volume(rvol)
+                    return
+                    
+                p = (time.time() - st) / t
+                p = max(0.0, min(1.0, p))
+                self.set_volume(1.0 - p)
+                time.sleep(1 / 15)
         self.set_volume(rvol)
+        self.stop()
     
     def set_volume(self, volume: float):
         self._volume = volume
