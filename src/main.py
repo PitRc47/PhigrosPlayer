@@ -545,6 +545,8 @@ def main():
         logging.info('enter player start')
         
         Resource["Over"].stop()
+
+        logging.info('Over stop')
         
         phicore.loadingAnimation()
         phicore.lineOpenAnimation()
