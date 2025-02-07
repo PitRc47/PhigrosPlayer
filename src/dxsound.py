@@ -101,6 +101,11 @@ class directSoundAndroid:
         self._volume = 1.0  # 0.0 to 1.0
         self._media_player = None
         self._sdesc = None
+        fis = FileInputStream(self._file_path)
+        fd = cast(FileDescriptor, fis.getFD())
+        self._media_player.setDataSource(fd)
+        self._media_player.prepare()
+        fis.close()
     
     def getSampleRate(self):
         return self._sample_rate
@@ -112,6 +117,12 @@ class directSoundAndroid:
         return self._audio_format
     def set_volume(self, v: float):
         self._volume = max(0.0, min(1.0, v))
+        if self._media_player is None:
+            fis = FileInputStream(self._file_path)
+            fd = cast(FileDescriptor, fis.getFD())
+            self._media_player.setDataSource(fd)
+            self._media_player.prepare()
+            fis.close()
         self._media_player.setVolume(self._volume, self._volume)
     
     def play(self, wait: bool = False):
@@ -137,8 +148,9 @@ class directSoundAndroid:
         return (None, self._media_player)
 
     def stop(self):
-        self._media_player.stop()
-        self._media_player.prepare()
+        if self._media_player:
+            self._media_player.stop()
+            self._media_player.prepare()
     
     def release(self):
         if self._media_player is not None:
