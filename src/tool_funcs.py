@@ -5,7 +5,7 @@ import time
 import re
 from sys import argv
 from os import environ
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy
 import cv2
@@ -15,6 +15,7 @@ import const
 import rpe_easing
 import phira_resource_pack
 import tempdir
+import webcv
 from light_tool_funcs import *
 
 note_id = -1
@@ -35,6 +36,13 @@ def newRandomBlocks() -> tuple[tuple[float, float]]:
         (random.uniform(0.0, 360.0), random.uniform(-0.15, 0.3))
         for _ in range(random_block_num)
     )
+
+def createDownBlockImageGrd():
+    grd = Image.new("RGBA", (1, 5), (0, 0, 0, 0))
+    grd.putpixel((0, 4), (0, 0, 0, 204))
+    grd.putpixel((0, 3), (0, 0, 0, 128))
+    grd.putpixel((0, 2), (0, 0, 0, 64))
+    return grd
 
 bae_bs = 2.15
 class begin_animation_eases_class:
@@ -478,6 +486,8 @@ class PPLM_ProxyBase:
     
     def nproxy_get_pbadtime(self, n: typing.Any) -> float: ...
     def nproxy_set_pbadtime(self, n: typing.Any, time: float) -> None: ...
+    
+    def nproxy_posinjudge(self, n: typing.Any, x: float, y: float) -> bool: ...
 
 @dataclass
 class PPLM_PC_ClickEvent: time: float
@@ -491,10 +501,14 @@ class PPLM_MOB_Touch:
     y: float
     i: int
     
+    clickused: bool = False
+    released: bool = False
+    
     def update(self, t: float, x: float, y: float) -> list[tuple[float, float]]:
         self.x = x
         self.y = y
         ...
+        return []
 
 class PhigrosPlayLogicManager:
     def __init__(
@@ -520,6 +534,25 @@ class PhigrosPlayLogicManager:
         self.clickeffects: const.ClickEffectType = []
         self.badeffects: const.BadEffectType = []
         # self.misseffects: const.MissEffectType = []
+    
+    def bind_events(self, root: webcv.WebCanvas):
+        root.run_js_code("_PhigrosPlay_KeyDown = makePlayKeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
+        root.run_js_code("_PhigrosPlay_KeyUp = makePlayKeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000, e.key)}, false);")
+        root.run_js_code("_PhigrosPlay_TouchStart = (e) => pywebview.api.call_attr('PhigrosPlay_TouchStart', new Date().getTime() / 1000, ...fixEventPosition(e.changedTouches[0].clientX, e.changedTouches[0].clientY), e.changedTouches[0].identifier);")
+        root.run_js_code("_PhigrosPlay_TouchMove = (e) => pywebview.api.call_attr('PhigrosPlay_TouchMove', new Date().getTime() / 1000, ...fixEventPosition(e.changedTouches[0].clientX, e.changedTouches[0].clientY), e.changedTouches[0].identifier);")
+        root.run_js_code("_PhigrosPlay_TouchEnd = (e) => pywebview.api.call_attr('PhigrosPlay_TouchEnd', e.changedTouches[0].identifier);")
+        root.run_js_code("window.addEventListener('keydown', _PhigrosPlay_KeyDown);")
+        root.run_js_code("window.addEventListener('keyup', _PhigrosPlay_KeyUp);")
+        root.run_js_code("window.addEventListener('touchstart', _PhigrosPlay_TouchStart);")
+        root.run_js_code("window.addEventListener('touchmove', _PhigrosPlay_TouchMove);")
+        root.run_js_code("window.addEventListener('touchend', _PhigrosPlay_TouchEnd);")
+    
+    def unbind_events(self, root: webcv.WebCanvas):
+        root.run_js_code("window.removeEventListener('keydown', _PhigrosPlay_KeyDown);")
+        root.run_js_code("window.removeEventListener('keyup', _PhigrosPlay_KeyUp);")
+        root.run_js_code("window.removeEventListener('touchstart', _PhigrosPlay_TouchStart);")
+        root.run_js_code("window.removeEventListener('touchmove', _PhigrosPlay_TouchMove);")
+        root.run_js_code("window.removeEventListener('touchend', _PhigrosPlay_TouchEnd);")
     
     def pc_click(self, t: float, key: str) -> None:
         if not PPLM_vaildKey(key): return
@@ -724,6 +757,7 @@ class PhigrosPlayLogicManager:
         self.mob_touches.remove(touch)
     
     def mob_touchstart(self, t: float, x: float, y: float, i: int):
+        print(t, x, y, i)
         self.mob_touches.append(PPLM_MOB_Touch(t, x, y, i))
 
     def mob_touchmove(self, t: float, x: float, y: float, i: int):
@@ -733,7 +767,10 @@ class PhigrosPlayLogicManager:
         self.mob_flicks.extend(touch.update(t, x, y))
     
     def mob_touchend(self, i: int):
-        self._removemobt_byid(i)
+        touch = self._getmobt_byid(i)
+        if touch is None: return
+        
+        touch.released = True
     
     def mob_update(self, t: float):
         pnotes = self.pp.get_all_pnotes()

@@ -173,7 +173,6 @@ def Load_Resource():
     global note_max_width, note_max_height
     global note_max_size_half
     global ButtonWidth, ButtonHeight
-    global ClickEffectFrameCount
     global MainUIIconWidth, MainUIIconHeight
     global SettingUIOtherIconWidth, SettingUIOtherIconHeight
     global MessageButtonSize
@@ -191,7 +190,6 @@ def Load_Resource():
     
     phi_rpack = phira_resource_pack.PhiraResourcePack("resources/resource_packs/default")
     phi_rpack.setToGlobal()
-    ClickEffectFrameCount = phi_rpack.effectFrameCount
     
     Resource = {
         "levels":{
@@ -314,7 +312,7 @@ def Load_Resource():
     for k, v in Resource["Notes"].items():
         respacker.reg_img(Resource["Notes"][k], f"Note_{k}")
     
-    for i in range(ClickEffectFrameCount):
+    for i in range(phira_resource_pack.globalPack.effectFrameCount):
         respacker.reg_img(Resource["Note_Click_Effect"]["Perfect"][i], f"Note_Click_Effect_Perfect_{i + 1}")
         respacker.reg_img(Resource["Note_Click_Effect"]["Good"][i], f"Note_Click_Effect_Good_{i + 1}")
 
@@ -335,7 +333,6 @@ def Load_Resource():
     
     updateUserAvatar()
     root._regims.clear()
-    root.run_js_code(f"createChapterBlackGrd({h * (140 / 1080)}, {h * (1.0 - 140 / 1080)});")
     
     logging.info("Load Resource Successfully")
     return Resource
@@ -1946,8 +1943,7 @@ def settingRender():
                     p = p, rblocks = None,
                     perfect = True,
                     noteWidth = w * 0.1234375 * size,
-                    root = root,
-                    framecount = ClickEffectFrameCount
+                    root = root
                 )
         
         for t, p in CalibrationClickEffectLines: # vn, ? (time, mixer_pos)
@@ -3255,26 +3251,25 @@ def chartPlayerRender(
     
     respacker = webcv.PILResourcePacker(root)
     
-    root.run_js_code("delete background; delete begin_animation_image; delete finish_animation_image;")
+    root.run_js_code("delete background; delete chart_image; delete chart_image_gradientblack;")
     chart_image = Image.open(chartImage)
     background_image_blur = chart_image.resize((w, h)).filter(ImageFilter.GaussianBlur((w + h) / 50))
-    background_image = ImageEnhance.Brightness(background_image_blur).enhance(getUserData("setting-backgroundDim"))
-    respacker.reg_img(background_image, "background")
+    respacker.reg_img(background_image_blur, "background_blur")
     
-    finish_animation_image_mask = Image.new("RGBA", (1, 5), (0, 0, 0, 0))
-    finish_animation_image_mask.putpixel((0, 4), (0, 0, 0, 204))
-    finish_animation_image_mask.putpixel((0, 3), (0, 0, 0, 128))
-    finish_animation_image_mask.putpixel((0, 2), (0, 0, 0, 64))
+    chart_image_gradientblack_mask = Image.new("RGBA", (1, 5), (0, 0, 0, 0))
+    chart_image_gradientblack_mask.putpixel((0, 4), (0, 0, 0, 204))
+    chart_image_gradientblack_mask.putpixel((0, 3), (0, 0, 0, 128))
+    chart_image_gradientblack_mask.putpixel((0, 2), (0, 0, 0, 64))
     
     animation_image = chart_image.copy().convert("RGBA")
     tool_funcs.cutAnimationIllImage(animation_image)
     
-    finish_animation_image = chart_image.copy().convert("RGBA")
-    finish_animation_image_mask = finish_animation_image_mask.resize(finish_animation_image.size)
-    finish_animation_image.paste(finish_animation_image_mask, (0, 0), finish_animation_image_mask)
+    chart_image_gradientblack = chart_image.copy().convert("RGBA")
+    chart_image_gradientblack_mask = chart_image_gradientblack_mask.resize(chart_image_gradientblack.size)
+    chart_image_gradientblack.paste(chart_image_gradientblack_mask, (0, 0), chart_image_gradientblack_mask)
     
-    respacker.reg_img(chart_image, "begin_animation_image")
-    respacker.reg_img(finish_animation_image, "finish_animation_image")
+    respacker.reg_img(chart_image, "chart_image")
+    respacker.reg_img(chart_image_gradientblack, "chart_image_gradientblack")
     
     respacker.load(*respacker.pack())
     
@@ -3284,8 +3279,7 @@ def chartPlayerRender(
         root = root, w = w, h = h,
         chart_information = chart_information,
         chart_obj = chart_obj,
-        CHART_TYPE = CHART_TYPE, Resource = Resource,
-        ClickEffectFrameCount = ClickEffectFrameCount,
+        Resource = Resource, backgroundDim = 1.0 - getUserData("setting-backgroundDim"),
         globalNoteWidth = globalNoteWidth,
         note_max_size_half = note_max_size_half,
         audio_length = audio_length, raw_audio_length = raw_audio_length,
@@ -3325,10 +3319,10 @@ def chartPlayerRender(
         convertTime2Chart = lambda t: (t - globals().get("show_start_time", time.time())) - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
         root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t, key: pplm.pc_click(convertTime2Chart(t), key)) # 这里没写diswebview的判断, 希望别埋坑..
         root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t, key: pplm.pc_release(convertTime2Chart(t), key))
-        root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
-        root.run_js_code("_PhigrosPlay_KeyUp = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000, e.key)}, false);")
-        root.run_js_code("window.addEventListener('keydown', _PhigrosPlay_KeyDown);")
-        root.run_js_code("window.addEventListener('keyup', _PhigrosPlay_KeyUp);")
+        root.jsapi.set_attr("PhigrosPlay_TouchStart", lambda t, x, y, i: pplm.mob_touchstart(convertTime2Chart(t), x / w, y / h, i))
+        root.jsapi.set_attr("PhigrosPlay_TouchMove", lambda t, x, y, i: pplm.mob_touchmove(convertTime2Chart(t), x / w, y / h, i))
+        root.jsapi.set_attr("PhigrosPlay_TouchEnd", lambda i: pplm.mob_touchend(i))
+        pplm.bind_events(root)
     else:
         pplm = None
     
@@ -3562,8 +3556,7 @@ def chartPlayerRender(
         root.run_js_wait_code()
     
     if phicore.noautoplay:
-        root.run_js_code("window.removeEventListener('keydown', _PhigrosPlay_KeyDown);")
-        root.run_js_code("window.removeEventListener('keyup', _PhigrosPlay_KeyUp);")
+        pplm.unbind_events(root)
             
     mixer.music.set_volume(1.0)
     cksmanager.stop()

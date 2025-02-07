@@ -34,19 +34,21 @@ class PhiCoreConfig:
     SETTER: typing.Callable[[str, typing.Any], typing.Any]
     
     root: webcv.WebCanvas
-    w: int
-    h: int
+    w: int; h: int
+    
     chart_information: dict
     chart_obj: chartobj_phi.Phigros_Chart | chartobj_rpe.Rpe_Chart
-    CHART_TYPE: int
+    
     Resource: dict
-    ClickEffectFrameCount: int
+    backgroundDim: float
     globalNoteWidth: float
     note_max_size_half: float
     audio_length: float
     raw_audio_length: float
+    
     show_start_time: float
     chart_image: Image.Image
+    
     clickeffect_randomblock: bool
     clickeffect_randomblock_roundn: int
     LoadSuccess: musicCls
@@ -66,6 +68,12 @@ class PhiCoreConfig:
     clicksound_volume: float
     musicsound_volume: float
     enable_controls: bool
+    
+    def __post_init__(self):
+        if isinstance(self.chart_obj, chartobj_phi.Phigros_Chart):
+            self.CHART_TYPE = const.CHART_TYPE.PHI
+        elif isinstance(self.chart_obj, chartobj_rpe.Rpe_Chart):
+            self.CHART_TYPE = const.CHART_TYPE.RPE
 
 @dataclass
 class PhiCoreConfigEx:
@@ -88,8 +96,7 @@ def CoreConfigure(config: PhiCoreConfig):
     global SETTER
     global root, w, h, chart_information
     global chart_obj, CHART_TYPE
-    global Resource
-    global ClickEffectFrameCount
+    global Resource, backgroundDim
     global globalNoteWidth
     global note_max_size_half, audio_length
     global raw_audio_length, show_start_time
@@ -111,7 +118,7 @@ def CoreConfigure(config: PhiCoreConfig):
     chart_obj = config.chart_obj
     CHART_TYPE = config.CHART_TYPE
     Resource = config.Resource
-    ClickEffectFrameCount = config.ClickEffectFrameCount
+    backgroundDim = config.backgroundDim
     globalNoteWidth = config.globalNoteWidth
     note_max_size_half = config.note_max_size_half
     audio_length = config.audio_length
@@ -197,7 +204,6 @@ def processClickEffectBase(
     p: float, rblocks: tuple[tuple[float, float]]|None,
     perfect: bool, noteWidth: float,
     root: webcv.WebCanvas,
-    framecount: int,
     enable_rblocks: bool = True,
     rblocks_roundn: float = 0.0,
     caller: typing.Callable[[typing.Callable, typing.Any], typing.Any] = lambda f, *args, **kwargs: f(*args, **kwargs)
@@ -247,7 +253,7 @@ def processClickEffectBase(
     effectImageSize = effectSize * phira_resource_pack.globalPack.effectScale
     caller(
         drawAlphaImage,
-        f"{imn}_{int(p * (framecount - 1)) + 1}",
+        f"{imn}_{int(p * (phira_resource_pack.globalPack.effectFrameCount - 1)) + 1}",
         x - effectImageSize / 2, y - effectImageSize / 2,
         effectImageSize, effectImageSize, alpha,
         wait_execute = True
@@ -265,7 +271,6 @@ def processClickEffect(
         perfect = perfect,
         noteWidth = globalNoteWidth,
         root = root,
-        framecount = ClickEffectFrameCount,
         caller = caller,
         enable_rblocks = clickeffect_randomblock,
         rblocks_roundn = clickeffect_randomblock_roundn
@@ -325,20 +330,40 @@ def stringifyScore(score:float) -> str:
     score_integer = int(score + 0.5)
     return f"{score_integer:>7}".replace(" ","0")
 
+def drawDeepBgAndClipScreen():
+    root.run_js_code(
+        f"""ctx.outOfTransformDrawCoverFullscreenImage({root.get_img_jsvarname("background_blur")});""",
+        add_code_array = True
+    )
+    root.run_js_code(
+        f"""ctx.save(); ctx.rect(0, 0, {w}, {h}); ctx.clip();""",
+        add_code_array = True
+    )
+
+def undoClipScreen():
+    root.run_js_code("ctx.restore();", add_code_array = True)
+
 def drawBg():
-    drawImage("background", 0, 0, w, h, wait_execute=True)
+    drawImage("background_blur", 0, 0, w, h, wait_execute=True)
+    root.run_js_code(
+        f"""ctx.fillRectEx(\
+            0, 0, {w}, {h}, \
+            'rgba(0, 0, 0, {backgroundDim})'\
+        );""",
+        add_code_array = True
+    )
 
 # color 一定要传 rgba 的
 def draw_ui(
-    process:float = 0.0,
-    score:str = "0000000",
-    combo_state:bool = False,
-    combo:int = 0,
-    acc:str = "100.00%",
-    clear:bool = True,
-    background:bool = True,
-    animationing:bool = False,
-    dy:float = 0.0,
+    process: float = 0.0,
+    score: str = "0000000",
+    combo_state: bool = False,
+    combo: int = 0,
+    acc: str = "100.00%",
+    clear: bool = True,
+    background: bool = True,
+    animationing: bool = False,
+    dy: float = 0.0,
     
     combonumberUI_dx: float = 0.0,
     combonumberUI_dy: float = 0.0,
@@ -390,7 +415,8 @@ def draw_ui(
     barUI_rotate: float = 0.0
 ):
     if clear: clearCanvas(wait_execute = True)
-    if background: drawBg()
+    if background:
+        drawBg()
     
     pauseImgWidth = w * (32 / 1920)
     pauseImgHeight = pauseImgWidth / 35 * 41
@@ -560,6 +586,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
     Task = chartobj_phi.FrameRenderTask([], [])
     if clear: Task(clearCanvas, wait_execute = True)
     rrmStart(Task)
+    Task(drawDeepBgAndClipScreen)
     Task(drawBg)
     if noplaychart: Task.ExTask.append(("break", ))
         
@@ -567,6 +594,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
     noautoplay = pplm is not None # reset a global variable
     if noautoplay:
         pplm.pc_update(now_t)
+        pplm.mob_update(now_t)
     
     for lineIndex, line in enumerate(chart_obj.judgeLineList):
         lineBTime = now_t / line.T
@@ -871,6 +899,7 @@ def GetFrameRenderTask_Phi(now_t: float, clear: bool = True, rjc: bool = True, p
         clear = False,
         background = False
     )
+    Task(undoClipScreen)
     
     rrmEnd(Task)
     if rjc: Task(root.run_js_wait_code)
@@ -884,6 +913,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
     Task = chartobj_phi.FrameRenderTask([], [])
     if clear: Task(clearCanvas, wait_execute = True)
     rrmStart(Task)
+    Task(drawDeepBgAndClipScreen)
     Task(drawBg)
     if noplaychart: Task.ExTask.append(("break", ))
     
@@ -895,6 +925,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
     noautoplay = pplm is not None # reset a global variable
     if noautoplay:
         pplm.pc_update(now_t)
+        pplm.mob_update(now_t)
     
     nowLineColor = phira_resource_pack.globalPack.perfectRGB if not noautoplay else pplm.ppps.getLineColor()
     normalBeatTime = chart_obj.sec2beat(now_t, 1.0)
@@ -1257,6 +1288,7 @@ def GetFrameRenderTask_Rpe(now_t: float, clear: bool = True, rjc: bool = True, p
         background = False,
         **delDrawuiDefaultVals(attachUIData)
     )
+    Task(undoClipScreen)
     
     if chart_obj.extra is not None:
         extra_values = chart_obj.extra.getValues(now_t, True)
@@ -1548,13 +1580,13 @@ def loadingAnimationFrame(p: float, sec: float, clear: bool = True, fcb: typing.
     
     Task(
         root.run_js_code,
-        f"ctx.drawDiagonalRectangleClipImage(\
+        f"""ctx.drawDiagonalRectangleClipImage(\
             {w * 0.690625 - baimg_w / 2}, {h * (476 / 1080) - baimg_h / 2},\
             {w * 0.690625 + baimg_w / 2}, {h * (476 / 1080) + baimg_h / 2},\
-            {root.get_img_jsvarname('begin_animation_image')},\
+            {root.get_img_jsvarname("chart_image")},\
             {baimg_w / 2 - baimg_draww / 2}, {baimg_h / 2 - baimg_drawh / 2},\
             {baimg_draww}, {baimg_drawh}, {dpower}, 1.0\
-        );",
+        );""",
         add_code_array = True
     )
     
@@ -1753,7 +1785,7 @@ def settlementAnimationFrame(p: float, rjc: bool = True):
         f"""ctx.drawDiagonalRectangleClipImage(\
             {w * 0.315625 - baimg_w / 2 + im_ease_pos}, {h * (539 / 1080) - baimg_h / 2},\
             {w * 0.315625 + baimg_w / 2 + im_ease_pos}, {h * (539 / 1080) + baimg_h / 2},\
-            {root.get_img_jsvarname("finish_animation_image")},\
+            {root.get_img_jsvarname("chart_image_gradientblack")},\
             {baimg_w / 2 - baimg_draww / 2}, {baimg_h / 2 - baimg_drawh / 2},\
             {baimg_draww}, {baimg_drawh}, {dpower}, 1.0\
         );""",
