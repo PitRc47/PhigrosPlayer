@@ -544,16 +544,9 @@ def main():
         logging.info('enter player start')
         
         Resource["Over"].stop()
-
-        logging.info('Over stop')
         
-        try:
-            phicore.loadingAnimation()
-            logging.info('line open animation')
-            phicore.lineOpenAnimation()
-        except BaseException as e:
-            import traceback
-            logging.error(f'{traceback.format_exc()}')
+        phicore.loadingAnimation()
+        phicore.lineOpenAnimation()
         show_start_time = time.time() - skip_time
         PhiCoreConfigObject.show_start_time = show_start_time
 
