@@ -18,9 +18,12 @@ if checksys.main == 'Windows':
 
 if checksys.main == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
+    from android import activity # type: ignore
+    from jnius import autoclass # type: ignore
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
+    ActivityInfo = autoclass('android.content.pm.ActivityInfo')
     sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169']
 
 enable_clicksound = "--noclicksound" not in sys.argv
@@ -868,6 +871,7 @@ def main():
         
         if checksys.main == 'Android':
             time.sleep(0.1)
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
         if disengage_webview:
             socket_webviewbridge.hook(root)
 
