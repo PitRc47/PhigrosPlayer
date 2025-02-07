@@ -120,6 +120,7 @@ class directSoundAndroid:
         if self._media_player is None:
             fis = FileInputStream(self._file_path)
             fd = cast(FileDescriptor, fis.getFD())
+            self._media_player = MediaPlayer()
             self._media_player.setDataSource(fd)
             self._media_player.prepare()
             fis.close()
@@ -129,6 +130,7 @@ class directSoundAndroid:
         if self._media_player is None:
             fis = FileInputStream(self._file_path)
             fd = cast(FileDescriptor, fis.getFD())
+            self._media_player = MediaPlayer()
             self._media_player.setDataSource(fd)
             self._media_player.prepare()
             fis.close()
