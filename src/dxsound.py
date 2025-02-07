@@ -99,7 +99,7 @@ class directSoundAndroid:
         self._audio_format = 16
         self._enable_cache = enable_cache
         self._volume = 1.0  # 0.0 to 1.0
-        self._media_player = None
+        self._media_player = MediaPlayer()
         self._sdesc = None
         fis = FileInputStream(self._file_path)
         fd = cast(FileDescriptor, fis.getFD())
