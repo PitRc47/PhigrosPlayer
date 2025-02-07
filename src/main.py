@@ -549,6 +549,7 @@ def main():
         logging.info('Over stop')
         
         phicore.loadingAnimation()
+        logging.info('line open animation')
         phicore.lineOpenAnimation()
 
         show_start_time = time.time() - skip_time
