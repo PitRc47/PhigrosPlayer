@@ -273,6 +273,7 @@ def main():
     mixer.music.load(audio_fp)
     raw_audio_length = mixer.music.get_length()
     audio_length = raw_audio_length + (chart_obj.META.offset / 1000 if CHART_TYPE == const.CHART_TYPE.RPE else 0.0)
+    all_inforamtion = {}
     logging.info("Loading Chart Information...")
 
     ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}/info.csv", f"{temp_dir}/info.txt", f"{temp_dir}/info.yml"])
@@ -601,6 +602,8 @@ def main():
         def dle_warn(a: float):
             drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
         
+        logging.info('enter show start')
+        
         animationst = time.time()
         while time.time() - animationst < 1.0:
             clearCanvas(wait_execute=True)
@@ -608,6 +611,7 @@ def main():
             dle_warn(1.0 - (1.0 - tool_funcs.fixorp(p)) ** 4)
             root.run_js_wait_code()
         
+        logging.info('show start stage 2')
         time.sleep(0.35)
         
         animationst = time.time()
@@ -619,11 +623,19 @@ def main():
             dle_warn((tool_funcs.fixorp(p) - 1.0) ** 4)
             root.run_js_wait_code()
         
+        logging.info('show start stage 3')
         time.sleep(0.25)
         clearCanvas(wait_execute=True)
         phicore.drawBg()
+        p = (time.time() - animationst) / 1.0
+        dle_warn((tool_funcs.fixorp(p) - 1.0) ** 4)
         root.run_js_wait_code()
-        Thread(target=PlayerStart, daemon=True).start()
+    
+    time.sleep(0.25)
+    clearCanvas(wait_execute=True)
+    phicore.drawBg()
+    root.run_js_wait_code()
+    Thread(target=PlayerStart, daemon=True).start()
 
     def checkOffset(now_t: float):
         global show_start_time
