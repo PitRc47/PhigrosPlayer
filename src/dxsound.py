@@ -115,6 +115,12 @@ class directSoundAndroid:
         self._media_player.setVolume(self._volume, self._volume)
     
     def play(self, wait: bool = False):
+        if self._media_player is None:
+            fis = FileInputStream(self._file_path)
+            fd = cast(FileDescriptor, fis.getFD())
+            self._media_player.setDataSource(fd)
+            self._media_player.prepare()
+            fis.close()
         self._media_player.start()
         if wait:
             while self._media_player.isPlaying():
