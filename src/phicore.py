@@ -1608,6 +1608,7 @@ def loadingAnimation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = 
         chart_illustrator_text_font_size = chart_illustrator_text_font_size,
     ))
     
+    logging.info('LoadSuccess play')
     LoadSuccess.play()
     
     animation_st = time.time()
