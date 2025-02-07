@@ -99,7 +99,6 @@ def main():
     import phicore
     import tempdir
     import socket_webviewbridge
-    import wcv2matlike
     import needrelease
     from pydub import AudioSegment
     from dxsmixer import mixer
