@@ -147,7 +147,7 @@ class musicCls:
         self._volume = volume
         if checksys.main == 'Android':
             if self.dxs:
-                self.dxs.setVolume(volume, volume)
+                self.dxs.setVolume(float(volume), float(volume))
         else:
             self._setBufferVolume(volume)
         
