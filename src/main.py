@@ -548,10 +548,13 @@ def main():
 
         logging.info('Over stop')
         
-        phicore.loadingAnimation()
-        logging.info('line open animation')
-        phicore.lineOpenAnimation()
-
+        try:
+            phicore.loadingAnimation()
+            logging.info('line open animation')
+            phicore.lineOpenAnimation()
+        except BaseException as e:
+            import traceback
+            logging.error(f'{traceback.format_exc()}')
         show_start_time = time.time() - skip_time
         PhiCoreConfigObject.show_start_time = show_start_time
 
