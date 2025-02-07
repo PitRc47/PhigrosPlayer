@@ -1609,7 +1609,7 @@ def loadingAnimation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = 
     ))
     
     logging.info('LoadSuccess play')
-    LoadSuccess.play()
+    #LoadSuccess.play()
     
     animation_st = time.time()
     logging.info('render startup')
