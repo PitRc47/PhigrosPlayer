@@ -123,7 +123,6 @@ class musicCls:
             bufid = id(self.buffer)
         rvol = self.get_volume()
         if checksys.main == 'Android':
-            return
             while time.time() - st < t and self.get_busy():
                 p = (time.time() - st) / t
                 p = max(0.0, min(1.0, p))
