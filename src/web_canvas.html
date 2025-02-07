@@ -312,10 +312,6 @@ void main() {
             } else {
                 dy = (h - w / 16 * 9) / 2;
             }
-
-            // 浮点数误差我超死你全家。
-            [dx, dy] = [parseInt(dx), parseInt(dy)];
-
             canvasPosD = [dx, dy];
             ctx.translate(dx, dy);
             dialog_canvas_ctx.translate(dx, dy);
@@ -325,6 +321,10 @@ void main() {
     async function loadFont(family, url) {
         let font = new FontFace(family, `url(${url})`);
         document.fonts.add(await font.load());
+    }
+
+    async function async_sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function uploadFrame(url) {
@@ -340,12 +340,23 @@ void main() {
         }
     }
 
-    function makePlayKeyEvent(cb, rp) {
-        return function(e) {
+    function PhigrosPlay_KeyEvent(cb, rp) {
+        return async function(e) {
             if (e.isComposing || e.keyCode === 229) return;
             if (!rp && e.repeat) return;
-            return cb(e);
+            cb(e);
         }
+    }
+
+    function createChapterBlackGrd(y0, y1) {
+        blackgrd = ctx.createLinearGradient(
+            0, y0,
+            window.innerWidth / lowquality_scale, y1
+        );
+        blackgrd.addColorStop(0.0, "rgba(0, 0, 0, 0.5)");
+        blackgrd.addColorStop(0.15, "rgba(0, 0, 0, 0.0)");
+        blackgrd.addColorStop(0.85, "rgba(0, 0, 0, 0.0)");
+        blackgrd.addColorStop(1.0, "rgba(0, 0, 0, 0.5)");
     }
 
     async function loadrespackage(url, indexs) {
@@ -427,8 +438,7 @@ void main() {
         }
     }
 
-    async function connectToSocketBridge(e) {
-        if (!e.isTrusted) return;
+    async function connectToSocketBridge() {
         window.removeEventListener("touchstart", connectToSocketBridge);
         const addr = prompt("please input the server address: ");
         const port = 8080;
@@ -967,28 +977,6 @@ void main() {
         }
     }
 
-    CanvasRenderingContext2D.prototype.outOfTransformDrawCoverFullscreenImage = function (img) {
-        const [w, h] = [this.canvas.width, this.canvas.height];
-        let [imw, imh] = [img.width, img.height];
-        const ratio = w / h;
-        const imratio = imw / imh;
-
-        if (imratio > ratio) {
-            imh = w;
-            imw = imh * imratio;
-        } else {
-            imw = w;
-            imh = imw / imratio;
-        }
-
-        const [imx, imy] = [(w - imw) / 2, (h - imh) / 2];
-        this.save();
-        this.resetTransform();
-        this.drawImage(img, imx, imy, imw, imh);
-        this.fillRectEx(imx, imy, imw, imh, `rgba(0.1, 0.1, 0.1, 0.7)`);
-        this.restore();
-    }
-
     CanvasRenderingContext2D.prototype.clear = function() {
         this.save();
         this.setTransform(1, 0, 0, 1, 0, 0);
@@ -1000,7 +988,6 @@ void main() {
 
     const proxyTouchEvent = function (from, to) {
         window.addEventListener(from, (e) => {
-            if (!e.isTrusted) return;
             let touch = e.changedTouches[0];
             let mouseEvent = new MouseEvent(to, {
                 clientX: touch.clientX,
@@ -1009,30 +996,11 @@ void main() {
             });
             window.dispatchEvent(mouseEvent);
         });
-    };
+    }
     
     proxyTouchEvent("touchstart", "mousedown");
     proxyTouchEvent("touchmove", "mousemove");
     proxyTouchEvent("touchend", "mouseup");
-
-    const proxyMouseEvent = function (from, to) {
-        window.addEventListener(from, (e) => {
-            if (!e.isTrusted) return;
-            let touchEvent = new TouchEvent(to, {
-                changedTouches: [new Touch({
-                    target: e.target,
-                    identifier: 1,
-                    clientX: e.clientX,
-                    clientY: e.clientY
-                })]
-            });
-            window.dispatchEvent(touchEvent);
-        });
-    };
-
-    proxyMouseEvent("mousedown", "touchstart");
-    proxyMouseEvent("mousemove", "touchmove");
-    proxyMouseEvent("mouseup", "touchend");
 
     const fixEventPosition = (x, y) => [x * dpr - canvasPosD[0], y * dpr - canvasPosD[1]];
     const proxyNeedPositionEvent = function (from, to, cls) {
@@ -1059,12 +1027,20 @@ void main() {
     proxyNeedPositionEvent("mouseup", "mouseup-np", MouseEvent);
     proxyNeedPositionEvent("click", "click-np", MouseEvent);
 
-    // window.addEventListener("touchstart", (e) => {
-    //     try {pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
-    //     catch (e) {}
+    window.addEventListener("touchstart", (e) => {
+        try {pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
+        catch (e) {}
+    });
+    window.addEventListener("touchend", (e) => {
+        try {pywebview.api.call_attr("PhigrosPlay_KeyUp", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
+        catch (e) {}
+    });
+
+    // temp
+    // window.addEventListener("touchstart", () => {
+    //     pywebview.api.call_attr("PhigrosPlay_KeyDown", new Date().getTime() / 1000);
     // });
-    // window.addEventListener("touchend", (e) => {
-    //     try {pywebview.api.call_attr("PhigrosPlay_KeyUp", new Date().getTime() / 1000, letters[e.changedTouches[0].identifier % letters.length])}
-    //     catch (e) {}
+    // window.addEventListener("touchend", () => {
+    //     pywebview.api.call_attr("PhigrosPlay_KeyUp", new Date().getTime() / 1000);
     // });
 </script>

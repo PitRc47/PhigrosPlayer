@@ -131,6 +131,7 @@ def main():
 
     tempdir.clearTempDir()
     temp_dir = tempdir.createTempDir()
+
     mixer.init()
 
     if "--phira-chart" in sys.argv:
@@ -162,7 +163,7 @@ def main():
     cfrfp_procer: typing.Callable[[str], str] = lambda x: x.replace(f"{temp_dir}/", "")
 
     for item in tool_funcs.getAllFiles(temp_dir):
-        if item.endswith("info.txt") or item.endswith("info.csv") or item.endswith("info.yml") or item.endswith("extra.json") or item.endswith(".glsl"):
+        if item.endswith("info.txt") or item.endswith("info.csv") or item.endswith("info.yml") or item.endswith("extra.json"):
             continue
         
         item_rawname = cfrfp_procer(item)
@@ -192,7 +193,7 @@ def main():
 
     if not files_dict["images"]:
         logging.warning("No Image File Found")
-        files_dict["images"].append(["default", Image.new("RGB", (16, 9), "black")])
+        files_dict["images"].append(["default", Image.new("RGB", (16, 9), "#0078d7")])
 
     chart_fp: str
     chart_json: dict
@@ -273,7 +274,6 @@ def main():
     mixer.music.load(audio_fp)
     raw_audio_length = mixer.music.get_length()
     audio_length = raw_audio_length + (chart_obj.META.offset / 1000 if CHART_TYPE == const.CHART_TYPE.RPE else 0.0)
-    all_inforamtion = {}
     logging.info("Loading Chart Information...")
 
     ChartInfoLoader = info_loader.InfoLoader([f"{temp_dir}/info.csv", f"{temp_dir}/info.txt", f"{temp_dir}/info.yml"])
@@ -289,120 +289,6 @@ def main():
     logging.info("Informations: ")
     for k,v in chart_information.items():
         logging.info(f"              {k}: {v}")
-
-    def Load_Resource():
-        global globalNoteWidth
-        global note_max_width, note_max_height
-        global note_max_size_half
-        global animation_image
-        global WaitLoading, LoadSuccess
-        global chart_res
-        global cksmanager
-        
-        logging.info("Loading Resource...")
-        WaitLoading = mixer.Sound("./resources/WaitLoading.mp3")
-        LoadSuccess = mixer.Sound("./resources/LoadSuccess.wav")
-        Thread(target=WaitLoading_FadeIn, daemon = True).start()
-        LoadSuccess.set_volume(0.75)
-        WaitLoading.play(-1)
-        noteWidth_raw = (0.125 * w + 0.2 * h) / 2
-        globalNoteWidth = (noteWidth_raw) * (eval(sys.argv[sys.argv.index("--scale-note") + 1]) if "--scale-note" in sys.argv else 1.0)
-        
-        phi_rpack = phira_resource_pack.PhiraResourcePack(respath)
-        phi_rpack.setToGlobal()
-        
-        Resource = {
-            "levels":{
-                "AP": Image.open("./resources/levels/AP.png"),
-                "FC": Image.open("./resources/levels/FC.png"),
-                "V": Image.open("./resources/levels/V.png"),
-                "S": Image.open("./resources/levels/S.png"),
-                "A": Image.open("./resources/levels/A.png"),
-                "B": Image.open("./resources/levels/B.png"),
-                "C": Image.open("./resources/levels/C.png"),
-                "F": Image.open("./resources/levels/F.png")
-            },
-            "le_warn": Image.open("./resources/le_warn.png"),
-            "Retry": Image.open("./resources/Retry.png"),
-            "Arrow_Right": Image.open("./resources/Arrow_Right.png"),
-            "Over": mixer.Sound("./resources/Over.mp3"),
-            "Pause": mixer.Sound("./resources/Pause.wav"),
-            "PauseImg": Image.open("./resources/Pause.png"),
-            "ButtonLeftBlack": Image.open("./resources/Button_Left_Black.png"),
-            "ButtonRightBlack": None
-        }
-        
-        Resource.update(phi_rpack.createResourceDict())
-        
-        respacker = webcv.PILResourcePacker(root)
-        
-        background_image_blur = chart_image.resize((w, h)).filter(ImageFilter.GaussianBlur((w + h) / 50))
-        respacker.reg_img(background_image_blur, "background_blur")
-        
-        animation_image = chart_image.convert("RGBA")
-        tool_funcs.cutAnimationIllImage(animation_image)
-        
-        chart_image_gradientblack = animation_image.copy()
-        chart_image_gradient = tool_funcs.createDownBlockImageGrd().resize(chart_image_gradientblack.size)
-        chart_image_gradientblack.paste(chart_image_gradient, (0, 0), chart_image_gradient)
-        
-        Resource["ButtonRightBlack"] = Resource["ButtonLeftBlack"].transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.FLIP_TOP_BOTTOM)
-        const.set_NOTE_DUB_FIXSCALE(Resource["Notes"]["Hold_Body_dub"].width / Resource["Notes"]["Hold_Body"].width)
-        
-        for k, v in Resource["Notes"].items():
-            respacker.reg_img(Resource["Notes"][k], f"Note_{k}")
-        
-        for i in range(phira_resource_pack.globalPack.effectFrameCount): # reg click effect
-            respacker.reg_img(Resource["Note_Click_Effect"]["Perfect"][i], f"Note_Click_Effect_Perfect_{i + 1}")
-            respacker.reg_img(Resource["Note_Click_Effect"]["Good"][i], f"Note_Click_Effect_Good_{i + 1}")
-            
-            item_rawname = cfrfp_procer(item)
-            loadres = file_loader.loadfile(item)
-            
-        respacker.reg_img(Resource["le_warn"], "le_warn")
-        respacker.reg_img(chart_image, "chart_image")
-        respacker.reg_img(chart_image_gradientblack, "chart_image_gradientblack")
-        respacker.reg_img(Resource["Retry"], "Retry")
-        respacker.reg_img(Resource["Arrow_Right"], "Arrow_Right")
-        respacker.reg_img(Resource["PauseImg"], "PauseImg")
-        respacker.reg_img(Resource["ButtonLeftBlack"], "ButtonLeftBlack")
-        respacker.reg_img(Resource["ButtonRightBlack"], "ButtonRightBlack")
-        
-        chart_res = {}
-        
-        if CHART_TYPE == const.CHART_TYPE.RPE:
-            imfns: list[str] = list(map(lambda x: x[0], files_dict["images"]))
-            imobjs: list[Image.Image] = list(map(lambda x: x[1], files_dict["images"]))
-            
-            for line in chart_obj.judgeLineList:
-                if line.Texture == "line.png": continue
-                if not line.isGif:
-                    paths = [ # fuck charters
-                        f"{temp_dir}\\{line.Texture}",
-                        f"{temp_dir}\\{line.Texture}.png",
-                        f"{temp_dir}\\{line.Texture}.jpg",
-                        f"{temp_dir}\\{line.Texture}.jpeg"
-                    ]
-                    
-                    for p in paths:
-                        if tool_funcs.fileinlist(p, imfns):
-                            texture_index = tool_funcs.findfileinlist(p, imfns)
-                            texture: Image.Image = imobjs[texture_index]
-                            chart_res[line.Texture] = (texture.convert("RGBA"), texture.size)
-                            logging.info(f"Loaded line texture {line.Texture}")
-                            break
-                    else:
-                        logging.warning(f"Cannot find texture {line.Texture}")
-                        texture = Image.new("RGBA", (4, 4), (0, 0, 0, 0))
-                        chart_res[line.Texture] = (texture, texture.size)
-                        
-                    respacker.reg_img(chart_res[line.Texture][0], f"lineTexture_{chart_obj.judgeLineList.index(line)}")
-                else:
-                    mp4data, size = tool_funcs.gif2mp4(f"{temp_dir}\\{line.Texture}")
-                    chart_res[line.Texture] = (None, size)
-                    name = f"lineTexture_{chart_obj.judgeLineList.index(line)}"
-                    root.reg_res(mp4data, f"{name}.mp4")
-                    root.wait_jspromise(f"loadvideo(\"{root.get_resource_path(f"{name}.mp4")}\", '{name}_img');")
 
     def Load_Resource():
         global globalNoteWidth
@@ -627,15 +513,10 @@ def main():
         time.sleep(0.25)
         clearCanvas(wait_execute=True)
         phicore.drawBg()
-        p = (time.time() - animationst) / 1.0
-        dle_warn((tool_funcs.fixorp(p) - 1.0) ** 4)
+        phicore.draw_ui(animationing=True)
+        logging.info('show start stage 4')
         root.run_js_wait_code()
-    
-    time.sleep(0.25)
-    clearCanvas(wait_execute=True)
-    phicore.drawBg()
-    root.run_js_wait_code()
-    Thread(target=PlayerStart, daemon=True).start()
+        Thread(target=PlayerStart, daemon=True).start()
 
     def checkOffset(now_t: float):
         global show_start_time
@@ -660,14 +541,24 @@ def main():
 
     def PlayerStart():
         global show_start_time, cksmanager
+
+        logging.info('enter player start')
         
         Resource["Over"].stop()
-        
-        phicore.loadingAnimation()
-        phicore.lineOpenAnimation()
 
+        logging.info('Over stop')
+        
+        try:
+            phicore.loadingAnimation()
+            logging.info('line open animation')
+            phicore.lineOpenAnimation()
+        except BaseException as e:
+            import traceback
+            logging.error(f'{traceback.format_exc()}')
         show_start_time = time.time() - skip_time
         PhiCoreConfigObject.show_start_time = show_start_time
+
+        logging.info("updateCoreConfig")
         updateCoreConfig()
         now_t = 0
         
@@ -690,10 +581,10 @@ def main():
                 convertTime2Chart = lambda t: (t - show_start_time) * speed - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
                 root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t, key: pplm.pc_click(convertTime2Chart(t) if not disengage_webview else now_t, key))
                 root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t, key: pplm.pc_release(convertTime2Chart(t) if not disengage_webview else now_t, key))
-                root.jsapi.set_attr("PhigrosPlay_TouchStart", lambda t, x, y, i: pplm.mob_touchstart(convertTime2Chart(t), x / w, y / h, i))
-                root.jsapi.set_attr("PhigrosPlay_TouchMove", lambda t, x, y, i: pplm.mob_touchmove(convertTime2Chart(t), x / w, y / h, i))
-                root.jsapi.set_attr("PhigrosPlay_TouchEnd", lambda i: pplm.mob_touchend(i))
-                pplm.bind_events(root)
+                root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
+                root.run_js_code("_PhigrosPlay_KeyUp = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000, e.key)}, false);")
+                root.run_js_code("window.addEventListener('keydown', _PhigrosPlay_KeyDown);")
+                root.run_js_code("window.addEventListener('keyup', _PhigrosPlay_KeyUp);")
                 
             play_restart_flag = False
             pause_flag = False
@@ -744,7 +635,8 @@ def main():
                     break
             
             if noautoplay:
-                pplm.unbind_events(root)
+                root.run_js_code("window.removeEventListener('keydown', _PhigrosPlay_KeyDown);")
+                root.run_js_code("window.removeEventListener('keyup', _PhigrosPlay_KeyUp);")
             
             root.run_js_code("window.removeEventListener('keydown', _Noautoplay_Restart);")
             root.run_js_code("window.removeEventListener('keydown', _SpaceClicked);")
@@ -771,202 +663,35 @@ def main():
                     now_t = frame_count * frame_time
                     
                     if CHART_TYPE == const.CHART_TYPE.PHI:
-                        pplm_proxy = chartobj_phi.PPLMPHI_Proxy(chart_obj)
+                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Phi(now_t, None)})
                     elif CHART_TYPE == const.CHART_TYPE.RPE:
-                        pplm_proxy = chartobj_rpe.PPLMRPE_Proxy(chart_obj)
+                        lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Rpe(now_t, None)})
                     
-                    pppsm = tool_funcs.PhigrosPlayManager(chart_obj.note_num)
-                    pplm = tool_funcs.PhigrosPlayLogicManager(
-                        pplm_proxy, pppsm,
-                        enable_clicksound, lambda nt: Resource["Note_Click_Audio"][nt].play()
+                    frame_count += 1
+                    
+                    print(f"\rLoadFrameData: {frame_count} / {allframe_num}", end="")
+                
+                if "--lfdaot-file-savefp" in sys.argv:
+                    lfdaot_fp = sys.argv[sys.argv.index("--lfdaot-file-savefp") + 1]
+                    savelfdaot = True
+                else:
+                    lfdaot_fp = dialog.savefile(fn="Chart.lfdaot")
+                    savelfdaot = lfdaot_fp != "Chart.lfdaot"
+                
+                if savelfdaot:
+                    recorder = chartobj_phi.FrameTaskRecorder(
+                        meta = chartobj_phi.FrameTaskRecorder_Meta(
+                            frame_speed = frame_speed,
+                            frame_num = len(lfdaot_tasks),
+                            size = (w, h)
+                        ),
+                        data = lfdaot_tasks.values()
                     )
                     
-                    convertTime2Chart = lambda t: (t - show_start_time) * speed - (0.0 if CHART_TYPE == const.CHART_TYPE.PHI else chart_obj.META.offset / 1000)
-                    root.jsapi.set_attr("PhigrosPlay_KeyDown", lambda t, key: pplm.pc_click(convertTime2Chart(t) if not disengage_webview else now_t, key))
-                    root.jsapi.set_attr("PhigrosPlay_KeyUp", lambda t, key: pplm.pc_release(convertTime2Chart(t) if not disengage_webview else now_t, key))
-                    root.run_js_code("_PhigrosPlay_KeyDown = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyDown', new Date().getTime() / 1000, e.key)}, false);")
-                    root.run_js_code("_PhigrosPlay_KeyUp = PhigrosPlay_KeyEvent((e) => {pywebview.api.call_attr('PhigrosPlay_KeyUp', new Date().getTime() / 1000, e.key)}, false);")
-                    root.run_js_code("window.addEventListener('keydown', _PhigrosPlay_KeyDown);")
-                    root.run_js_code("window.addEventListener('keyup', _PhigrosPlay_KeyUp);")
-                    
-                play_restart_flag = False
-                pause_flag = False
-                pause_st = float("nan")
-                
-                def _f(): nonlocal play_restart_flag; play_restart_flag = True
-                
-                @tool_funcs.NoJoinThreadFunc
-                def space():
-                    global show_start_time
-                    nonlocal pause_flag, pause_st
-                    
-                    if not pause_flag:
-                        pause_flag = True
-                        mixer.music.pause()
-                        Resource["Pause"].play()
-                        pause_st = time.time()
-                    else:
-                        mixer.music.unpause()
-                        show_start_time += time.time() - pause_st
-                        pause_flag = False
+                    with open(lfdaot_fp, "w", encoding="utf-8") as f:
+                        recorder.stringify(f)
                         
-                root.jsapi.set_attr("Noautoplay_Restart", _f)
-                root.jsapi.set_attr("SpaceClicked", space)
-                root.run_js_code("_Noautoplay_Restart = (e) => {if (e.altKey && e.ctrlKey && e.repeat && e.key.toLowerCase() == 'r') pywebview.api.call_attr('Noautoplay_Restart');};") # && e.repeat 为了判定长按
-                root.run_js_code("_SpaceClicked = (e) => {if (e.key == ' ' && !e.repeat) pywebview.api.call_attr('SpaceClicked');};")
-                root.run_js_code("window.addEventListener('keydown', _Noautoplay_Restart);")
-                root.run_js_code("window.addEventListener('keydown', _SpaceClicked);")
-                
-                while True:
-                    while pause_flag: time.sleep(1 / 30)
-                    
-                    now_t = time.time() - show_start_time
-                    checkOffset(now_t - skip_time)
-                    if CHART_TYPE == const.CHART_TYPE.PHI:
-                        Task = phicore.GetFrameRenderTask_Phi(now_t, pplm = pplm if noautoplay else None)
-                    elif CHART_TYPE == const.CHART_TYPE.RPE:
-                        Task = phicore.GetFrameRenderTask_Rpe(now_t, pplm = pplm if noautoplay else None)
-                        
-                    Task.ExecTask()
-                    
-                    break_flag = phicore.processExTask(Task.ExTask)
-                    
-                    if break_flag:
-                        break
-                    
-                    if play_restart_flag:
-                        break
-                
-                if noautoplay:
-                    root.run_js_code("window.removeEventListener('keydown', _PhigrosPlay_KeyDown);")
-                    root.run_js_code("window.removeEventListener('keyup', _PhigrosPlay_KeyUp);")
-                
-                root.run_js_code("window.removeEventListener('keydown', _Noautoplay_Restart);")
-                root.run_js_code("window.removeEventListener('keydown', _SpaceClicked);")
-                
-                if play_restart_flag:
-                    mixer.music.fadeout(250)
-                    LoadChartObject()
-                    Thread(target=PlayerStart, daemon=True).start()
-                    return
-            elif lfdaot:
-                lfdaot_tasks: dict[int, chartobj_phi.FrameRenderTask] = {}
-                frame_speed = 60
-                if "--lfdaot-frame-speed" in sys.argv:
-                    frame_speed = eval(sys.argv[sys.argv.index("--lfdaot-frame-speed") + 1])
-                frame_count = lfdaot_start_frame_num
-                frame_time = 1 / frame_speed
-                allframe_num = int(audio_length / frame_time) + 1
-                
-                if lfdaot and not lfdoat_file: # eq if not lfdoat_file
-                    while True:
-                        if frame_count * frame_time > audio_length or frame_count - lfdaot_start_frame_num >= lfdaot_run_frame_num:
-                            break
-                        
-                        now_t = frame_count * frame_time
-                        
-                        if CHART_TYPE == const.CHART_TYPE.PHI:
-                            lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Phi(now_t, None)})
-                        elif CHART_TYPE == const.CHART_TYPE.RPE:
-                            lfdaot_tasks.update({frame_count: phicore.GetFrameRenderTask_Rpe(now_t, None)})
-                        
-                        frame_count += 1
-                        
-                        print(f"\rLoadFrameData: {frame_count} / {allframe_num}", end="")
-                    
-                    if "--lfdaot-file-savefp" in sys.argv:
-                        lfdaot_fp = sys.argv[sys.argv.index("--lfdaot-file-savefp") + 1]
-                        savelfdaot = True
-                    else:
-                        lfdaot_fp = dialog.savefile(fn="Chart.lfdaot")
-                        savelfdaot = lfdaot_fp != "Chart.lfdaot"
-                    
-                    if savelfdaot:
-                        recorder = chartobj_phi.FrameTaskRecorder(
-                            meta = chartobj_phi.FrameTaskRecorder_Meta(
-                                frame_speed = frame_speed,
-                                frame_num = len(lfdaot_tasks),
-                                size = (w, h)
-                            ),
-                            data = lfdaot_tasks.values()
-                        )
-                        
-                        with open(lfdaot_fp, "w", encoding="utf-8") as f:
-                            recorder.stringify(f)
-                            
-                    if "--lfdaot-file-output-autoexit" in sys.argv:
-                        root.destroy()
-                        return
-                    
-                else: #--lfdaot-file
-                    fp = sys.argv[sys.argv.index("--lfdaot-file") + 1]
-                    with open(fp,"r",encoding="utf-8") as f:
-                        data = json.load(f)
-                    frame_speed = data["meta"]["frame_speed"]
-                    frame_time = 1 / frame_speed
-                    allframe_num = data["meta"]["frame_num"]
-                    
-                    funcmap = getLfdaotFuncs()
-                    
-                    for index,Task_data in enumerate(data["data"]):
-                        lfdaot_tasks.update({
-                            index: chartobj_phi.FrameRenderTask(
-                                RenderTasks = [
-                                    chartobj_phi.RenderTask(
-                                        func = funcmap[render_task_data["func_name"]],
-                                        args = tuple(render_task_data["args"]),
-                                        kwargs = render_task_data["kwargs"]
-                                    )
-                                    for render_task_data in Task_data["render"]
-                                ],
-                                ExTask = tuple(Task_data["ex"])
-                            )
-                        })
-                    if data["meta"]["size"] != [w, h]:
-                        logging.warning("The size of the lfdaot file is not the same as the size of the window")
-                
-                mixer.music.play()
-                while not mixer.music.get_busy(): pass
-                
-                totm: tool_funcs.TimeoutTaskManager[chartobj_phi.FrameRenderTask] = tool_funcs.TimeoutTaskManager()
-                totm.valid = lambda x: bool(x)
-                
-                for fc, task in lfdaot_tasks.items():
-                    totm.add_task(fc, task.ExTask)
-                
-                pst = time.time()
-                
-                while True:
-                    now_t = time.time() - pst
-                    music_play_fcount = int(now_t / frame_time)
-                    
-                    try:
-                        Task: chartobj_phi.FrameRenderTask = lfdaot_tasks[music_play_fcount]
-                    except KeyError:
-                        continue
-                    
-                    Task.ExecTask(clear=False)
-                    extasks = totm.get_task(music_play_fcount)
-                    
-                    break_flag_oside = False
-                    
-                    for extask in extasks:
-                        break_flag = phicore.processExTask(extask)
-                        
-                        if break_flag:
-                            break_flag_oside = True
-                            break
-                    
-                    if break_flag_oside:
-                        break
-                    
-                    pst += tool_funcs.checkOffset(now_t, raw_audio_length, mixer)
-            elif render_video:
-                video_fp = sys.argv[sys.argv.index("--render-video-savefp") + 1] if "--render-video-savefp" in sys.argv else dialog.savefile(
-                    fn = "render_video.mp4"
-                )
-                
-                if "--render-video-savefp" not in sys.argv and video_fp == "render_video.mp4":
+                if "--lfdaot-file-output-autoexit" in sys.argv:
                     root.destroy()
                     return
                 
@@ -1033,6 +758,78 @@ def main():
                     break
                 
                 pst += tool_funcs.checkOffset(now_t, raw_audio_length, mixer)
+        elif render_video:
+            video_fp = sys.argv[sys.argv.index("--render-video-savefp") + 1] if "--render-video-savefp" in sys.argv else dialog.savefile(
+                fn = "render_video.mp4"
+            )
+            
+            if "--render-video-savefp" not in sys.argv and video_fp == "render_video.mp4":
+                root.destroy()
+                return
+            
+        else: #--lfdaot-file
+            fp = sys.argv[sys.argv.index("--lfdaot-file") + 1]
+            with open(fp,"r",encoding="utf-8") as f:
+                data = json.load(f)
+            frame_speed = data["meta"]["frame_speed"]
+            frame_time = 1 / frame_speed
+            allframe_num = data["meta"]["frame_num"]
+            
+            funcmap = getLfdaotFuncs()
+            
+            for index,Task_data in enumerate(data["data"]):
+                lfdaot_tasks.update({
+                    index: chartobj_phi.FrameRenderTask(
+                        RenderTasks = [
+                            chartobj_phi.RenderTask(
+                                func = funcmap[render_task_data["func_name"]],
+                                args = tuple(render_task_data["args"]),
+                                kwargs = render_task_data["kwargs"]
+                            )
+                            for render_task_data in Task_data["render"]
+                        ],
+                        ExTask = tuple(Task_data["ex"])
+                    )
+                })
+            if data["meta"]["size"] != [w, h]:
+                logging.warning("The size of the lfdaot file is not the same as the size of the window")
+        
+        mixer.music.play()
+        while not mixer.music.get_busy(): pass
+        
+        totm: tool_funcs.TimeoutTaskManager[chartobj_phi.FrameRenderTask] = tool_funcs.TimeoutTaskManager()
+        totm.valid = lambda x: bool(x)
+        
+        for fc, task in lfdaot_tasks.items():
+            totm.add_task(fc, task.ExTask)
+        
+        pst = time.time()
+        
+        while True:
+            now_t = time.time() - pst
+            music_play_fcount = int(now_t / frame_time)
+            
+            try:
+                Task: chartobj_phi.FrameRenderTask = lfdaot_tasks[music_play_fcount]
+            except KeyError:
+                continue
+            
+            Task.ExecTask(clear=False)
+            extasks = totm.get_task(music_play_fcount)
+            
+            break_flag_oside = False
+            
+            for extask in extasks:
+                break_flag = phicore.processExTask(extask)
+                
+                if break_flag:
+                    break_flag_oside = True
+                    break
+            
+            if break_flag_oside:
+                break
+            
+            pst += tool_funcs.checkOffset(now_t, raw_audio_length, mixer)
     
     
     def updateCoreConfig():
@@ -1042,8 +839,9 @@ def main():
             SETTER = lambda vn, vv: globals().update({vn: vv}),
             root = root, w = w, h = h,
             chart_information = chart_information,
-            chart_obj = chart_obj,
-            Resource = Resource, backgroundDim = chart_information["BackgroundDim"],
+            chart_obj = chart_obj, CHART_TYPE = CHART_TYPE,
+            Resource = Resource,
+            ClickEffectFrameCount = ClickEffectFrameCount,
             globalNoteWidth = globalNoteWidth,
             note_max_size_half = note_max_size_half, audio_length = audio_length,
             raw_audio_length = raw_audio_length, show_start_time = float("nan"),
@@ -1062,6 +860,11 @@ def main():
             enable_controls = enable_controls
         )
         phicore.CoreConfigure(PhiCoreConfigObject)
+
+    def atexit_run():
+        tempdir.clearTempDir()
+        needrelease.run()
+        sys.exit(0)
 
     def init():
         global disengage_webview
@@ -1160,10 +963,6 @@ def main():
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
     atexit_run()
-    def atexit_run():
-        tempdir.clearTempDir()
-        needrelease.run()
-        sys.exit(0)
 
 try:
     logger = logging.getLogger()
