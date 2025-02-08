@@ -235,6 +235,8 @@ class WebCanvas:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
                     time.sleep(0.01)
                 self.web.set_title(title)
+                self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+                self._raevent.set()
             else:
                 while True:
                     time.sleep(0.05)
@@ -248,9 +250,6 @@ class WebCanvas:
             self.web.events.closed += self._destroyed.set
         else:
             self.web_hwnd = -1
-        
-        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-        self._raevent.set()
         logging.info('Webview start')
         graplib_webview.root = self
     
