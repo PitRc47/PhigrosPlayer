@@ -36,7 +36,6 @@ import phira_resource_pack
 import tempdir
 import socket_webviewbridge
 from dxsmixer import mixer
-from exitfunc import exitfunc
 from graplib_webview import *
     
 if not exists("phigros_assets") or not all([
