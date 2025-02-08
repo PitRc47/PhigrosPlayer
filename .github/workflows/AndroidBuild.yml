@@ -8,6 +8,7 @@ on:
 
 jobs:
   Buildv8a:
+    name: "[Android] Build arm64-v8a"
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
@@ -24,6 +25,7 @@ jobs:
           path: .buildozer/android/platform/build-arm64-v8a/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
   
   Buildv7a:
+    name: "[Android] Build armeabi-v7a"
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
@@ -40,6 +42,7 @@ jobs:
           path: .buildozer/android/platform/build-armeabi-v7a/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
   
   Buildx64:
+    name: "[Android] Build x86_64"
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
@@ -55,5 +58,20 @@ jobs:
           name: PhigrosPlayer-x86_64
           path: .buildozer/android/platform/build-x86_64/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
   
-  
+  Buildx86:
+    name: "[Android] Build x86"
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Build Android for X86
+        uses: ./.github/actions/build/
+        with:
+          build_type: "x86"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: PhigrosPlayer-x86
+          path: .buildozer/android/platform/build-x86/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
     
