@@ -23,7 +23,7 @@ from PIL import Image
 import graplib_webview
 import tool_funcs
 
-if not disengage_webview:
+if not disengage_webview and checksys.main == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
