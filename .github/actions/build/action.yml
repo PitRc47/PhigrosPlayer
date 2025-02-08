@@ -9,6 +9,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+        build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev \
+        openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev \
+        zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev \
+        libncurses5-dev libncursesw5-dev libtinfo5 cmake libssl-dev
+      shell: bash
+    
     - name: Cache Buildozer
       uses: actions/cache@v4
       with:
@@ -19,6 +29,7 @@ runs:
           ~/.gradle
         key: ${{ runner.os }}-buildozer
         restore-keys: ${{ runner.os }}-buildozer
+      shell: bash
     
     - name: Cache Python
       uses: actions/cache@v4
@@ -28,38 +39,34 @@ runs:
           ~/.cache/pip
         key: ${{ runner.os }}-python
         restore-keys: ${{ runner.os }}-python
-
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-        build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev \
-        openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev \
-        zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev \
-        libncurses5-dev libncursesw5-dev libtinfo5 cmake libssl-dev
+      shell: bash
 
     - name: Set Up JDK 17
       uses: actions/setup-java@v4.6.0
       with:
         distribution: 'temurin'
         java-version: '17'
+      shell: bash
 
     - name: Set Up Python
       uses: actions/setup-python@v5.3.0
       with:
         python-version: '3.11.5'
+      shell: bash
 
     - name: Setup Build Environment
       run: |
         pip3 install --upgrade pip
         pip3 install --user virtualenv
         export PATH="$PATH:$HOME/.local/bin"
+      shell: bash
 
     - name: Create Venvironment
       run: |
         if [ ! -d "venv" ]; then
           python3 -m virtualenv venv
         fi
+      shell: bash
 
     - name: Build Android
       run: |
@@ -67,3 +74,4 @@ runs:
         pip3 install -q Cython==0.29.33 buildozer wheel setuptools
         sed -i 's/android.archs = arm64-v8a/android.archs = ${{ inputs.build_type }}/' buildozer.spec
         buildozer android debug
+      shell: bash
