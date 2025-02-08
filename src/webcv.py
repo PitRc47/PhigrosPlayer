@@ -241,7 +241,7 @@ class WebCanvas:
                 while True:
                     time.sleep(0.05)
                     try:
-                        #self.web.native.webview.setWebContentsDebuggingEnabled(True)
+                        self.web.native.webview.setWebContentsDebuggingEnabled(True)
                         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
                         self._raevent.set()
                     except:
