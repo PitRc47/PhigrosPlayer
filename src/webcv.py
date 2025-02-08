@@ -250,6 +250,7 @@ class WebCanvas:
     def move(self, x: int, y:int): self.web.move(x, y)
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
+        logging.debug(f'[Start]RUN JS CODE: {code}')
         if self.jslog and not code.endswith(";"): code += ";"
         
         if order is None:
@@ -258,6 +259,7 @@ class WebCanvas:
         if order not in self._jscode_orders:
             self._jscode_orders[order] = []
         self._jscode_orders[order].append((code, add_code_array))
+        logging.debug(f'[Finished]RUN JS CODE: {code}')
     
     def _rjwc(self, codes: list[str]):
         framerate: int|float = self.run_js_code(f"{codes}.forEach(r2eval);\nframerate;")
