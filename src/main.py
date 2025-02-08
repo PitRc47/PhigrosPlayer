@@ -6,10 +6,6 @@ import time
 import logging
 import typing
 
-import load_extended as _
-
-from graplib_webview import *
-
 from threading import Thread
 from os.path import exists, basename, abspath
 
@@ -23,7 +19,11 @@ if checksys.main == 'Android':
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
-    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169', '--disengage_webview']
+    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169', '--disengage-webview']
+
+import load_extended as _
+
+from graplib_webview import *
 
 enable_clicksound = "--noclicksound" not in sys.argv
 debug = "--debug" in sys.argv
