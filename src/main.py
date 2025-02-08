@@ -19,7 +19,7 @@ if checksys.main == 'Android':
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
-    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169', '--disengage-webview']
+    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169']
 
 import load_extended as _
 
