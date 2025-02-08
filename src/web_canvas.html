@@ -446,17 +446,6 @@ void main() {
         const socket = new WebSocket(`ws://${addr}:${port}`);
         const split_magic = "\x00";
 
-        try {
-            await document.body.requestFullscreen();
-        } catch (e) {
-            const reqfs = document.body.requestFullscreen || document.body.webkitRequestFullscreen || document.body.mozRequestFullscreen || document.body.msRequestFullscreen;
-            const callback = () => {
-                reqfs.call(document.body);
-                window.removeEventListener("touchstart", callback);
-            };
-            window.addEventListener("touchend", callback);
-        }
-
         window.pywebview = {
             api: {
                 call_attr: (attr, ...args) => {
