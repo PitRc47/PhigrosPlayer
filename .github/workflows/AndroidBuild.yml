@@ -57,21 +57,4 @@ jobs:
         with:
           name: PhigrosPlayer-x86_64
           path: .buildozer/android/platform/build-x86_64/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
-  
-  Buildx86:
-    name: "[Android] Build x86"
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: Build Android for X86
-        uses: ./.github/actions/build/
-        with:
-          build_type: "x86"
-      - name: Upload APK
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: PhigrosPlayer-x86
-          path: .buildozer/android/platform/build-x86/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
     
