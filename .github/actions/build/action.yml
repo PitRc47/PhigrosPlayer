@@ -29,7 +29,6 @@ runs:
           ~/.gradle
         key: ${{ runner.os }}-buildozer
         restore-keys: ${{ runner.os }}-buildozer
-      shell: bash
     
     - name: Cache Python
       uses: actions/cache@v4
@@ -39,20 +38,17 @@ runs:
           ~/.cache/pip
         key: ${{ runner.os }}-python
         restore-keys: ${{ runner.os }}-python
-      shell: bash
 
     - name: Set Up JDK 17
       uses: actions/setup-java@v4.6.0
       with:
         distribution: 'temurin'
         java-version: '17'
-      shell: bash
 
     - name: Set Up Python
       uses: actions/setup-python@v5.3.0
       with:
         python-version: '3.11.5'
-      shell: bash
 
     - name: Setup Build Environment
       run: |
