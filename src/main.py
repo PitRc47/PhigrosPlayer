@@ -868,7 +868,7 @@ def main():
         
         if checksys.main == 'Android':
             time.sleep(1)
-        if disengage_webview:
+        if disengage_webview or checksys.main == 'Android':
             root.web.evaluate_js('connectToSocketBridge();')
             socket_webviewbridge.hook(root)
 
