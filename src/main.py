@@ -103,7 +103,6 @@ def main():
     from pydub import AudioSegment
     from dxsmixer import mixer
     
-    import cv2
     import requests
     from PIL import Image, ImageFilter, ImageEnhance
     
