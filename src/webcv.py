@@ -217,7 +217,7 @@ class WebCanvas:
             js_api = self.jsapi,
             frameless = frameless,
             hidden = hidden
-        ) if not disengage_webview else None
+        )
         self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
