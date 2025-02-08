@@ -958,13 +958,21 @@ def main():
     logging.info('main.py at exit')
     atexit_run()
 
-try:
-    logger = logging.getLogger()
-    main()
-except SystemExit:
-    sys.exit(0)
-except KeyboardInterrupt:
-    sys.exit(0)
-except BaseException as e:
-    import traceback
-    logging.error(f'{traceback.format_exc()}')
+if checksys.main != 'Android':
+    try:
+        logger = logging.getLogger('main.py')
+        main()
+    except SystemExit:
+        sys.exit(0)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except BaseException as e:
+        import traceback
+        logging.error(f'{traceback.format_exc()}')
+else:
+    try:
+        logger = logging.getLogger('main.py')
+        main()
+    except Exception as e:
+        import traceback
+        logging.error(f'{traceback.format_exc()}')

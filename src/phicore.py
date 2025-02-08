@@ -1616,7 +1616,6 @@ def loadingAnimation(clear: bool = True, fcb: typing.Callable[[], typing.Any] = 
     while True:
         sec = time.time() - animation_st
         p = sec / animation_time
-        logging.info(f'loading animation frame at time{p}')
         if p > 1.0:
             break
         
