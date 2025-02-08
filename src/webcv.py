@@ -330,6 +330,8 @@ class WebCanvas:
         while not self._destroyed.wait(0.1):
             pass
         logging.info('Webview closed')
+        if checksys.main == 'Android':
+            time.sleep(5)
         if self.jslog:
             self.jslog_f.write(f"\n\n// Webview closed.\n")
             self.jslog_f.flush()
