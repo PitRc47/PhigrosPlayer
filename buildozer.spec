@@ -302,7 +302,7 @@ android.allow_backup = True
 #android.manifest_placeholders = 
 
 # (bool) Skip byte compile for .py files
-android.no-byte-compile-python = True
+android.no-byte-compile-python = False
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
 # android.release_artifact = aab
