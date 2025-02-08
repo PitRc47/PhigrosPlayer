@@ -61,9 +61,14 @@ def start_server(window: webcv.WebCanvas, addr: str, port: int):
     
     while True:
         try:
+            try: loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
             server = websockets.serve(main_logic, addr, port)
-            asyncio.get_event_loop().run_until_complete(server)
-            threading.Thread(target=asyncio.get_event_loop().run_forever, daemon=True).start()
+            loop.run_until_complete(server)
+            threading.Thread(target=loop.run_forever, daemon=True).start()
         except Exception as e:
             logging.error(f"start server({addr}) on port {port} failed: {repr(e)}")
             if port > 65535:
@@ -75,8 +80,4 @@ def start_server(window: webcv.WebCanvas, addr: str, port: int):
     return evaljs
 
 def hook(window: webcv.WebCanvas):
-    try: asyncio.get_event_loop()
-    except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        
     window.evaljs = start_server(window, "", 8080)
