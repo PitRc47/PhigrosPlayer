@@ -68,8 +68,6 @@ runs:
       run: |
         source venv/bin/activate
         pip3 install -q Cython==0.29.33 buildozer wheel setuptools
-        export CFLAGS="$CFLAGS -Wno-unknown-warning-option"
-        export CXXFLAGS="$CXXFLAGS -Wno-unknown-warning-option"
         sed -i 's/android.archs = arm64-v8a/android.archs = ${{ inputs.build_type }}/' buildozer.spec
         buildozer android debug
       shell: bash

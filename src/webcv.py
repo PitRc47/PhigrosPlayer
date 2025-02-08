@@ -266,7 +266,6 @@ class WebCanvas:
     def fullscreen(self): self.web.toggle_fullscreen() if not disengage_webview else None
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
-        logging.debug(f'[Start]RUN JS CODE: {code}')
         if self.jslog and not code.endswith(";"): code += ";"
         
         if order is None:
@@ -275,7 +274,6 @@ class WebCanvas:
         if order not in self._jscode_orders:
             self._jscode_orders[order] = []
         self._jscode_orders[order].append((code, add_code_array))
-        logging.debug(f'[Finished]RUN JS CODE: {code}')
     
     def _rjwc(self, codes: list[str]):
         try:
