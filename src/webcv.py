@@ -329,6 +329,7 @@ class WebCanvas:
     def wait_for_close(self) -> None:
         while not self._destroyed.wait(0.1):
             pass
+        logging.info('Webview closed')
         if self.jslog:
             self.jslog_f.write(f"\n\n// Webview closed.\n")
             self.jslog_f.flush()
