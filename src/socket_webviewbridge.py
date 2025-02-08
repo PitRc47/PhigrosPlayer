@@ -66,7 +66,7 @@ def start_server(window: webcv.WebCanvas, addr: str, port: int):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 
-            server = websockets.serve(main_logic, addr, port)
+            server = websockets.serve(main_logic, addr, port, loop=loop)
             loop.run_until_complete(server)
             threading.Thread(target=loop.run_forever, daemon=True).start()
         except Exception as e:
