@@ -273,6 +273,8 @@ class MidiFile:
                 msg["global_sec_delta"] = msg["sec_time"] - sorted_msgs[i - 1]["sec_time"]
             else:
                 msg["global_sec_delta"] = msg["sec_time"]
+        
+        self.second_length = sorted_msgs[-1]["sec_time"]
                     
     @staticmethod
     def second2tick(t: int|float, track: Track, tick_per_quarter_note: int) -> float:
@@ -339,8 +341,8 @@ if __name__ == "__main__":
     for msg in mid.play():
         dt = msg["global_sec_delta"] - more_delta
         time.sleep(max(dt, 0.0))
-        
         t = time.perf_counter()
+        print(f"\rnow time: {msg["sec_time"]:.2f}s / {mid.second_length:.2f}s", end="")
         
         match msg["type"]:
             case "program_change":
