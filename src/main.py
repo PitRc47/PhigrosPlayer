@@ -954,6 +954,7 @@ def main():
     )
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
+    logging.info('main.py at exit')
     atexit_run()
 
 try:
