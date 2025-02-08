@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import typing
 import random
 import logging
 import time
 import re
+import socket
 from sys import argv
 from os import environ
 from dataclasses import dataclass, field
@@ -35,6 +38,24 @@ def newRandomBlocks() -> tuple[tuple[float, float]]:
         (random.uniform(0.0, 360.0), random.uniform(-0.15, 0.3))
         for _ in range(random_block_num)
     )
+
+def createDownBlockImageGrd():
+    grd = Image.new("RGBA", (1, 5), (0, 0, 0, 0))
+    grd.putpixel((0, 4), (0, 0, 0, 204))
+    grd.putpixel((0, 3), (0, 0, 0, 128))
+    grd.putpixel((0, 2), (0, 0, 0, 64))
+    return grd
+
+def getNewPort():
+    port = const.BASE_PORT
+    while True:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind(("", port))
+            s.close()
+            return port
+        except OSError:
+            port += 1
 
 bae_bs = 2.15
 class begin_animation_eases_class:

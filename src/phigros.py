@@ -12,6 +12,7 @@ import sys
 import time
 import math
 import logging
+import platform
 from io import BytesIO
 from threading import Thread
 from os import system
@@ -35,6 +36,7 @@ import phira_resource_pack
 import tempdir
 import socket_webviewbridge
 from dxsmixer import mixer
+from exitfunc import exitfunc
 from graplib_webview import *
     
 if not exists("phigros_assets") or not all([
@@ -3844,21 +3846,19 @@ def init():
     global w, h
     global Resource, eventManager
     
-    disengage_webview = "--disengage-webview" in sys.argv
-    
-    if disengage_webview:
+    if webcv.disengage_webview:
         socket_webviewbridge.hook(root)
         
     webdpr = root.run_js_code("window.devicePixelRatio;")
     root.run_js_code(f"lowquality_scale = {1.0 / webdpr};")
 
-    if disengage_webview:
+    if webcv.disengage_webview:
         w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
     else:
         if "--fullscreen" in sys.argv:
             w, h = root.winfo_screenwidth(), root.winfo_screenheight()
             root.resize(w, h)
-            root.web.toggle_fullscreen()
+            root.fullscreen()
             dw_legacy, dh_legacy = 0, 0
         else:
             if "--size" not in sys.argv:

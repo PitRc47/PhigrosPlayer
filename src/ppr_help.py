@@ -2,7 +2,6 @@ HELP_ZH = '''\
 使用: main <谱面文件> [<参数>...] [<关键字参数>...]
 
 <参数>
-  --hideconsole: 隐藏控制台窗口
   --debug: 显示webview调试窗口, 并显示判定线位置点
   --fullscreen: 使窗口全屏
   --loop: 自动循环谱面

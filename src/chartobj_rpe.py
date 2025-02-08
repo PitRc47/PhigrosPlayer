@@ -603,7 +603,7 @@ class Rpe_Chart:
             
         beat = 0.0
         for i, e in enumerate(BPMList):
-            bpmv = e.bpm * bpmfactor
+            bpmv = e.bpm / bpmfactor
             if i != len(BPMList) - 1:
                 et_beat = BPMList[i + 1].startTime.value - e.startTime.value
                 et_sec = et_beat * (60 / bpmv)
@@ -624,7 +624,7 @@ class Rpe_Chart:
             
         sec = 0.0
         for i, e in enumerate(BPMList):
-            bpmv = e.bpm * bpmfactor
+            bpmv = e.bpm / bpmfactor
             if i != len(BPMList) - 1:
                 et_beat = BPMList[i + 1].startTime.value - e.startTime.value
                 

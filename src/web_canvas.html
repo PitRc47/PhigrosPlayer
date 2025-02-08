@@ -430,6 +430,7 @@ void main() {
         try {
             return eval(c);
         } catch (e) {
+            alert(`has error: \n${e.msg}\n\n${e.stack}`);
             console.log({
                 code: c,
                 err: e
@@ -478,12 +479,20 @@ void main() {
                 let data = JSON.parse(rawdata);
                 switch (data.type) {
                     case "evaljs": {
-                        const result = r2eval(data.code);
-                        socket.send(JSON.stringify({
-                            type: "evaljs_result",
-                            result: result,
-                            tid: data.tid
-                        }) + split_magic);
+                        try {
+                            const result = r2eval(data.code);
+                            socket.send(JSON.stringify({
+                                type: "evaljs_result",
+                                result: result,
+                                tid: data.tid
+                            }) + split_magic);
+                        } catch (e) {
+                            socket.send(JSON.stringify({
+                                type: "jsapi_callback",
+                                name: "_socket_bridge_error",
+                                args: [data.code, e.msg + "\n" + e.stack]
+                            }));
+                        }
                     }
                 }
             }

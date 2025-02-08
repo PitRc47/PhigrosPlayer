@@ -6,6 +6,8 @@ import logging
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import tool_funcs
+
 callback: typing.Callable[[bytes], typing.Any] = lambda x: None
 
 class ArrayBufferHandler(BaseHTTPRequestHandler):
@@ -23,16 +25,9 @@ class ArrayBufferHandler(BaseHTTPRequestHandler):
     def log_request(self, *args, **kwargs) -> None: ...
     
 def createServer():
-    port = 16384
-    
-    while True:
-        try:
-            server_address = ("", port)
-            httpd = HTTPServer(server_address, ArrayBufferHandler)
-            threading.Thread(target=httpd.serve_forever, daemon=True).start()
-        except Exception:
-            port += 1
-            continue
-        break
+    port = tool_funcs.getNewPort()
+    server_address = ("", port)
+    httpd = HTTPServer(server_address, ArrayBufferHandler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
     
     return httpd, port

@@ -23,7 +23,7 @@ if checksys.main == 'Android':
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
-    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169']
+    sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169', '--disengage_webview']
 
 enable_clicksound = "--noclicksound" not in sys.argv
 debug = "--debug" in sys.argv
@@ -869,6 +869,7 @@ def main():
         if checksys.main == 'Android':
             time.sleep(1)
         if disengage_webview:
+            root.web.evaluate_js('connectToSocketBridge();')
             socket_webviewbridge.hook(root)
 
         webdpr = float(root.run_js_code("window.devicePixelRatio;"))

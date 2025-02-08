@@ -112,7 +112,6 @@ file_input_filedialog_button = tkinter.ttk.Button(root, text="选择", command=l
 file_input_filedialog_button.grid(row=0, column=202, sticky="w")
 
 arg_setting = [
-    ("隐藏控制台窗口", "hideconsole"),
     ("调试", "debug"),
     ("全屏", "fullscreen"),
     ("自动循环", "loop"),

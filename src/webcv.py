@@ -11,14 +11,24 @@ import time
 import socket
 import sys
 import logging
-
 from os.path import abspath
 from random import randint
 
-import webview
+
+disengage_webview = "--disengage-webview" in sys.argv
+
+if not disengage_webview: import webview
 from PIL import Image
 
 import graplib_webview
+import tool_funcs
+
+if not disengage_webview:
+    from ctypes import windll
+    screen_width = windll.user32.GetSystemMetrics(0)
+    screen_height = windll.user32.GetSystemMetrics(1)
+else:
+    screen_width, screen_height = -1, -1
 
 screen_width = None
 screen_height = None
@@ -32,6 +42,9 @@ elif checksys.main == 'Android':
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
     screen_height = metrics.heightPixels
+current_thread = threading.current_thread
+host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
+logging.info(f"server host: {host}")
 
 framerate_counter = '''\
 (() => {
@@ -84,6 +97,10 @@ class JsApi:
         except AttributeError:
             return logging.warning(f"JsApi: No such attribute '{name}'")
         return func(*args, **kwargs)
+    
+    @staticmethod
+    def _socket_bridge_error(code: str, err: dict):
+        raise Exception(f"SocketBridge: {err}")
 
 class PILResourcePacker:
     def __init__(self, cv: WebCanvas):
@@ -200,54 +217,54 @@ class WebCanvas:
             js_api = self.jsapi,
             frameless = frameless,
             hidden = hidden
-        )
-        self.evaljs = lambda x, *args, **kwargs: self.web.evaluate_js(x)
+        ) if not disengage_webview else None
+        self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug=debug)
-
+        self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
+    
     def _init(self, width: int, height: int, x: int, y: int):
-        self.web.events.closed += self._destroyed.set
-        
-        if checksys.main != 'Android':
-            self.web.resize(width, height)
-            self.web.move(x, y)
-            self.web.resize(width, height)
-            self.web.move(x, y)
-            title = self.web.title
-            temp_title = self.web.title + " " * randint(0, 4096)
-            self.web.set_title(temp_title)
-            
-            self.web_hwnd = None
-            if checksys.main == "Windows":
+        if not disengage_webview:
+            self.web_hwnd = 0
+            if checksys.main != 'Android':
+                self.web.resize(width, height)
+                self.web.move(x, y)
+                title = self.web.title
+                temp_title = self.web.title + " " * randint(0, 4096)
+                self.web.set_title(temp_title)
                 while not self.web_hwnd:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
+                    time.sleep(0.01)
+                self.web.set_title(title)
+            else:
+                while True:
                     time.sleep(0.05)
-            self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-            self._raevent.set()
-            self.web.set_title(title)
+                    try:
+                        self.web.native.webview.setWebContentsDebuggingEnabled(True)
+                        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+                        self._raevent.set()
+                    except:
+                        continue
+                    break
+            self.web.events.closed += self._destroyed.set
         else:
-            while True:
-                time.sleep(0.05)
-                try:
-                    self.web.native.webview.setWebContentsDebuggingEnabled(True)
-                    self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-                    self._raevent.set()
-                except:
-                    continue
-                break
+            self.web_hwnd = -1
+        
+        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+        self._raevent.set()
         logging.info('Webview start')
         graplib_webview.root = self
     
-    def title(self, title: str) -> str: self.web.set_title(title)
+    def title(self, title: str) -> str: self.web.set_title(title) if not disengage_webview else None
     def winfo_screenwidth(self) -> int: return screen_width
     def winfo_screenheight(self) -> int: return screen_height
     def winfo_hwnd(self) -> int: return self.web_hwnd if checksys.main != 'Android' else None
     def winfo_legacywindowwidth(self) -> int: return self.run_js_code("window.innerWidth;")
     def winfo_legacywindowheight(self) -> int: return self.run_js_code("window.innerHeight;")
 
-    def destroy(self): self.web.destroy()
-    def resize(self, width: int, height: int): self.web.resize(width, height)
-    def move(self, x: int, y:int): self.web.move(x, y)
+    def destroy(self): self.web.destroy() if not disengage_webview else None
+    def resize(self, width: int, height: int): self.web.resize(width, height) if not disengage_webview else None
+    def move(self, x: int, y:int): self.web.move(x, y) if not disengage_webview else None
+    def fullscreen(self): self.web.toggle_fullscreen() if not disengage_webview else None
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
         logging.debug(f'[Start]RUN JS CODE: {code}')
@@ -262,7 +279,11 @@ class WebCanvas:
         logging.debug(f'[Finished]RUN JS CODE: {code}')
     
     def _rjwc(self, codes: list[str]):
-        framerate: int|float = self.run_js_code(f"{codes}.forEach(r2eval);\nframerate;")
+        try:
+            framerate: int|float = self.run_js_code(f"{codes}.forEach(r2eval);\nframerate;")
+        except Exception as e:
+            logging.error(f"has error in javascript code.")
+            time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
         
         if self.renderdemand:
             self._rdevent.wait()
@@ -326,6 +347,7 @@ class WebCanvas:
             time.sleep(0.01)
     
     def reg_event(self, name: str, callback: typing.Callable) -> None:
+        if disengage_webview: return
         setattr(self.web.events, name, getattr(self.web.events, name) + callback)
     
     def wait_for_close(self) -> None:

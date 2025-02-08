@@ -1,12 +1,8 @@
-import fix_midireadmsg as _
-
 import json
 from sys import argv
 
-import mido
-import mido.messages
-
 import const
+import midi_parse
 
 if len(argv) < 3:
     print("Usage: tool-midi2phi-nur <midiFile> <outputFile> [default_note_length=0.1]")
@@ -19,16 +15,16 @@ class MidiNoteBin:
         self.bin: dict[int, tuple[float, int]] = {}
         self.result: list[tuple[float, float, int]] = []
     
-    def add(self, msg: mido.messages.Message, t: float):
-        msghash = hash((msg.channel, msg.note))
+    def add(self, msg: dict, t: float):
+        msghash = hash((msg["channel"], msg["note"]))
         if msghash in self.bin:
             ont, note = self.bin.pop(msghash)
             self.result.append((ont, ont + DEFAULT_NOTELENGTH, note))
 
-        self.bin[msghash] = (t, msg.note)
+        self.bin[msghash] = (t, msg["note"])
     
-    def off(self, msg: mido.messages.Message, t: float):
-        msghash = hash((msg.channel, msg.note))
+    def off(self, msg: dict, t: float):
+        msghash = hash((msg["channel"], msg["note"]))
         if msghash not in self.bin: return
         
         ont, note = self.bin.pop(msghash)
@@ -39,24 +35,13 @@ class MidiNoteBin:
             self.result.append((ont, ont + DEFAULT_NOTELENGTH, note))
         self.bin.clear()
 
-mid = mido.MidiFile(argv[1])
+mid = midi_parse.MidiFile(open(argv[1], "rb").read())
 notebin = MidiNoteBin()
-tempo = 500000
 
 for track in mid.tracks:
-    cumulative_time = 0.0
     for msg in track:
-        cumulative_time += mido.tick2second(msg.time, mid.ticks_per_beat, tempo=tempo)
-        
-        match msg.type:
-            case "set_tempo":
-                tempo = msg.tempo
-                
-            case "note_on":
-                notebin.add(msg, cumulative_time)
-            
-            case "note_off":
-                notebin.off(msg, cumulative_time)
+        if msg["type"] == "note_on": notebin.add(msg, msg["sec_time"])
+        elif msg["type"] == "note_off": notebin.off(msg, msg["sec_time"])
 
 notebin.flush()
 notebin.result.sort(key=lambda x: x[0])

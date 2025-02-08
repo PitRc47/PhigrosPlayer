@@ -1,27 +1,17 @@
-import fix_midireadmsg as _
-
 import json
 from sys import argv
 
-import mido
-import mido.messages
-
 import const
+import midi_parse
 
 if len(argv) < 3:
     print("Usage: tool-midi2phi <midiFile> <outputFile>")
     raise SystemExit
 
-mid = mido.MidiFile(argv[1])
+mid = midi_parse.MidiFile(open(argv[1], "rb").read())
 
 def pcs():
-    onmsgs = []
-    
-    t = 0.0
-    for msg in mid:
-        t += msg.time
-        if msg.type == "note_on":
-            onmsgs.append((t, msg.note))
+    onmsgs = [(msg["sec_time"], msg["note"]) for track in mid.tracks for msg in track if msg["type"] == "note_on"]
     
     onmsgs.sort(key = lambda x: x[0])
     min_note, max_note = min(onmsgs, key=lambda x: x[1])[1], max(onmsgs, key=lambda x: x[1])[1]
