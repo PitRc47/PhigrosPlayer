@@ -937,6 +937,7 @@ def main():
 
             Thread(target=Show_Start, daemon=True).start()
             root.wait_for_close()
+            logging.info('main.py at exit 2')
             atexit_run()
 
     logging.info("Loading Window...")
