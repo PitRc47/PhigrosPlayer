@@ -16,7 +16,7 @@ runs:
         build-essential liblzma-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev \
         openssl libgdbm-dev libgdbm-compat-dev libreadline-dev libffi-dev uuid-dev \
         zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev \
-        libncurses5-dev libncursesw5-dev libtinfo5 cmake libssl-dev libogg
+        libncurses5-dev libncursesw5-dev libtinfo5 cmake libssl-dev libogg0
       shell: bash
     
     - name: Cache Buildozer
