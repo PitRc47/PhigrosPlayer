@@ -38,3 +38,22 @@ jobs:
         with:
           name: PhigrosPlayer-armeabi-v7a
           path: .buildozer/android/platform/build-armeabi-v7a/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
+  
+  Buildx64:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Build Android for X86_64
+        uses: ./.github/actions/build/
+        with:
+          build_type: "x86_64"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: PhigrosPlayer-x86_64
+          path: .buildozer/android/platform/build-x86_64/dists/PhigrosPlayer/build/outputs/apk/debug/PhigrosPlayer-debug.apk
+  
+  
+    
