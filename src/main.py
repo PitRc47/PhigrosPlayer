@@ -898,12 +898,12 @@ def main():
         
         if disengage_webview:
             def socketcct(): 
-                time.sleep(2)
+                time.sleep(1)
                 root.web.evaluate_js('connectToSocketBridge();')
             Thread(target=socketcct, daemon=True).start()
-            Thread(target=socket_webviewbridge.hook, args=(root,),daemon=True).start()
-            time.sleep(5)
+            socket_webviewbridge.hook(root)
 
+        logging.info('pppp')
         webdpr = float(root.run_js_code("window.devicePixelRatio;"))
         if webdpr != 1.0:
             lowquality = True
