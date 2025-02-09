@@ -331,7 +331,7 @@ if __name__ == "__main__":
     
     mid = MidiFile(open(input("your midi file: "), "rb").read())
     sf2 = input("your sf2 file: ") if "--sf" not in sys.argv else sys.argv[sys.argv.index("--sf") + 1]
-    synth = tinysoundfont.Synth(-7)
+    synth = tinysoundfont.Synth(-12)
     sfid = synth.sfload(sf2)
     synth.program_select(0, sfid, 0, 0)
     synth.start()
@@ -367,3 +367,4 @@ if __name__ == "__main__":
     
     time.sleep(5.0)
     synth.stop()
+    
