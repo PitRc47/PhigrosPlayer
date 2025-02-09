@@ -322,7 +322,7 @@ class WebCanvas:
             ete.set()
             
         self.jsapi.set_attr(ecbname, _callback)
-        self.run_js_code(f"eval({self.string2sctring_hqm(code)}).then((result) => pywebview.api.call_attr('{ecbname}', result));")
+        self.run_js_code(f"eval({self.string2sctring_hqm(code)}).then((result) => pywebview.api.call_attr('{ecbname}', result));", needresult=False)
         ete.wait()
         delattr(self.jsapi, ecbname)
         return result
