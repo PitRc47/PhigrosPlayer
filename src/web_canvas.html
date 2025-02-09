@@ -441,7 +441,7 @@ void main() {
 
     async function connectToSocketBridge() {
         window.removeEventListener("touchstart", connectToSocketBridge);
-        const addr = '127.0.0.1';
+        const addr = prompt("please input the server address: ");
         const port = 8080;
         const socket = new WebSocket(`ws://${addr}:${port}`);
         const split_magic = "\x00";
