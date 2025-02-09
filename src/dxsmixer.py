@@ -8,8 +8,6 @@ from sys import argv
 import checksys
 from tool_funcs import NoJoinThreadFunc
 
-import dxsound
-
 if checksys.main == 'Android':
     from jnius import autoclass  # type: ignore
     MediaPlayer = autoclass('android.media.MediaPlayer')
@@ -59,6 +57,7 @@ class musicCls:
             self.dxs.setDataSource(fp)
             self.dxs.prepare()
         else:
+            import dxsound
             self.dxs = dxsound.directSound(fp, enable_cache=False)
         
     def unload(self):

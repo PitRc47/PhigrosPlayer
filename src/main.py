@@ -99,6 +99,10 @@ def main():
     import phicore
     import tempdir
     import socket_webviewbridge
+    import wcv2matlike
+
+    import cv2
+
     from pydub import AudioSegment
     from dxsmixer import mixer
     
@@ -752,7 +756,6 @@ def main():
                 (w, h),
                 True
             )
-            needrelease.add(writer.release)
             
             def writeFrame(data: bytes):
                 matlike = tool_funcs.bytes2matlike(data, w, h)
@@ -774,7 +777,6 @@ def main():
             
             httpd.shutdown()
             writer.release()
-            needrelease.remove(writer.release)
                     
             if "--render-video-autoexit" in sys.argv:
                 root.destroy()
