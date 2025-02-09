@@ -10,9 +10,9 @@ from sys import argv
 from os import environ
 from dataclasses import dataclass, field
 
-import numba
 import numpy
 import cv2
+
 from PIL import Image, ImageDraw
 
 import const
@@ -20,6 +20,12 @@ import rpe_easing
 import phira_resource_pack
 import tempdir
 from light_tool_funcs import *
+
+if checksys.main == 'Android':
+    def njit(func):
+        return func
+else:
+    from numba import njit
 
 note_id = -1
 random_block_num = eval(argv[argv.index("--random-block-num") + 1]) if "--random-block-num" in argv else 4
@@ -207,29 +213,29 @@ def easeAlpha(p: float):
     else:
         return (2.0 - 2.0 * ((p - 0.8) * (0.5 / 0.2) + 0.5)) ** 2
 
-@numba.njit
+@njit
 def fixorp(p: float):
     return max(0.0, min(1.0, p))
 
-@numba.njit
+@njit
 def PhigrosChapterNameAlphaValueTransfrom(p: float):
     if p >= 0.4:
         return 1.0
     return p / 0.4
 
-@numba.njit
+@njit
 def PhigrosChapterPlayButtonAlphaValueTransfrom(p: float):
     if p <= 0.6:
         return 0.0
     return (p - 0.6) / 0.4
 
-@numba.njit
+@njit
 def PhigrosChapterDataAlphaValueTransfrom(p: float):
     if p <= 0.6:
         return 0.0
     return (p - 0.6) / 0.4
 
-@numba.njit
+@njit
 def rect2drect_l(rect: tuple[float], deg: float):
     dpower = getDPower(*getSizeByRect(rect), deg)
     w = rect[2] - rect[0]
@@ -241,7 +247,7 @@ def rect2drect_l(rect: tuple[float], deg: float):
         (rect[0] + w * dpower, rect[1])
     )
 
-@numba.njit
+@njit
 def rect2drect(rect: tuple[float], deg: float):
     dpower = getDPower(*getSizeByRect(rect), deg)
     w = rect[2] - rect[0]
@@ -253,7 +259,7 @@ def rect2drect(rect: tuple[float], deg: float):
         (rect[0] + w * dpower, rect[1])
     )
 
-@numba.njit
+@njit
 def sliderValueP(value: float, values: tuple[tuple[float, float]]):
     ranges = [(values[i - 1][0], values[i][0], values[i - 1][1], values[i][1]) for i in range(len(values)) if i != 0]
     for r in ranges:
@@ -261,7 +267,7 @@ def sliderValueP(value: float, values: tuple[tuple[float, float]]):
             return (value - r[2]) / (r[3] - r[2]) * (r[1] - r[0]) + r[0]
     return 0.0 if value < values[0][1] else 1.0
 
-@numba.njit
+@njit
 def sliderValueValue(p: float, values: tuple[tuple[float, float]]):
     ranges = [(values[i - 1][0], values[i][0], values[i - 1][1], values[i][1]) for i in range(len(values)) if i != 0]
     for r in ranges:
@@ -817,7 +823,7 @@ class TimeoutTaskManager(typing.Generic[_TimeoutTaskManagerT]):
 logging.info('Jit Enabling')
 efs = rpe_easing.ease_funcs.copy()
 rpe_easing.ease_funcs.clear()
-rpe_easing.ease_funcs.extend(map(numba.jit, efs))
+rpe_easing.ease_funcs.extend(map(njit, efs))
 (*map(lambda x: x(random.uniform(0.0, 1.0)), rpe_easing.ease_funcs), )
 
 rotate_point(0.0, 0.0, 90, 1.145)
