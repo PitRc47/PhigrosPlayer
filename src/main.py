@@ -13,7 +13,7 @@ if checksys.main == 'Windows':
     from ctypes import windll
 
 if checksys.main == 'Android':
-    from android import request_permissions, Permission # type: ignore
+    from android.permissions import request_permissions, Permission # type: ignore
     from jnius import autoclass # type: ignore
     from kivy.config import Config
     Config.set('graphics', 'fullscreen', 'auto')
