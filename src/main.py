@@ -14,18 +14,6 @@ if checksys.main == 'Windows':
 
 if checksys.main == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
-    from jnius import autoclass # type: ignore
-    from kivy.config import Config
-    Config.set('graphics', 'fullscreen', 'auto')
-    PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    View = autoclass('android.view.View')
-    activity = PythonActivity.mActivity
-    decor_view = activity.getWindow().getDecorView()
-    decor_view.setSystemUiVisibility(
-        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-        View.SYSTEM_UI_FLAG_FULLSCREEN |
-        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-    )
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
