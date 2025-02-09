@@ -903,7 +903,6 @@ def main():
             Thread(target=socketcct, daemon=True).start()
             socket_webviewbridge.hook(root)
 
-        logging.info('pppp')
         webdpr = float(root.run_js_code("window.devicePixelRatio;"))
         if webdpr != 1.0:
             lowquality = True
