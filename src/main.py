@@ -596,6 +596,7 @@ def main():
             root.run_js_code("window.addEventListener('keydown', _Noautoplay_Restart);")
             root.run_js_code("window.addEventListener('keydown', _SpaceClicked);")
             
+            pt = time.time()
             while True:
                 while pause_flag: time.sleep(1 / 30)
                 
@@ -615,6 +616,9 @@ def main():
                 
                 if play_restart_flag:
                     break
+
+                logging.info('frame_time: {:.2f}'.format(time.time() - pt))
+                pt = time.time()
             
             if noautoplay:
                 pplm.unbind_events(root)
