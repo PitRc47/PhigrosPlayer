@@ -83,7 +83,7 @@ if render_video and showfps:
 combotips = ("AUTOPLAY" if not noautoplay else "COMBO") if "--combotips" not in sys.argv else sys.argv[sys.argv.index("--combotips") + 1]
 def main():
     import webcv
-    import dxsound
+    
     import chartobj_phi
     import chartobj_rpe
     import chartfuncs_phi
@@ -120,7 +120,7 @@ def main():
 
     if len(sys.argv) == 1:
         print(ppr_help.HELP_ZH)
-        raise SystemExit
+        sys.exit(0)
     
     if "--clickeffect-easing" in sys.argv:
         phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
@@ -447,6 +447,7 @@ def main():
                 for note in line.notes:
                     if note.hitsound_reskey not in Resource["Note_Click_Audio"]:
                         try:
+                            import dxsound
                             Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}/{note.hitsound}")
                             logging.info(f"Loaded note hitsound {note.hitsound}")
                         except Exception as e:

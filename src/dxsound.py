@@ -98,7 +98,7 @@ class directSoundAndroid:
         self._sample_rate = 44100
         self._audio_format = 16
         self._enable_cache = enable_cache
-        self._volume = 1.0  # 0.0 to 1.0
+        self._volume = 1.0
         self._media_player = MediaPlayer()
         self._sdesc = None
         fis = FileInputStream(self._file_path)
@@ -115,6 +115,7 @@ class directSoundAndroid:
 
     def getAudioFormat(self):
         return self._audio_format
+    
     def set_volume(self, v: float):
         self._volume = max(0.0, min(1.0, v))
         if self._media_player is None:
@@ -139,6 +140,7 @@ class directSoundAndroid:
             while self._media_player.isPlaying():
                 pass
         return self._media_player
+    
     def create(self, playMethod: typing.Literal[0, 1] = 0):
         if self._media_player is None:
             self._media_player = MediaPlayer()
