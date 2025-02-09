@@ -954,23 +954,23 @@ def main():
                         root.resize(winw + dw_legacy, winh + dh_legacy)
                         root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
 
-            w *= webdpr; h *= webdpr; w = int(w); h = int(h)
+        w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 
-            root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
-            root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
-            root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
-            root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
-            root.run_js_code(f"resizeCanvas({w}, {h});")
-            Resource = Load_Resource()
+        root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
+        root.run_js_code(f"lowquality_imjs_maxsize = {lowquality_imjs_maxsize};")
+        root.run_js_code(f"enable_jscanvas_bitmap = {enable_jscanvas_bitmap};")
+        root.run_js_code(f"RPEVersion = {chart_obj.META.RPEVersion if CHART_TYPE == const.CHART_TYPE.RPE else -1};")
+        root.run_js_code(f"resizeCanvas({w}, {h});")
+        Resource = Load_Resource()
 
-            if wl_more_chinese:
-                root.run_js_code("setWlMoreChinese();")
+        if wl_more_chinese:
+            root.run_js_code("setWlMoreChinese();")
 
-            updateCoreConfig()
+        updateCoreConfig()
 
-            Thread(target=Show_Start, daemon=True).start()
-            root.wait_for_close()
-            atexit_run()
+        Thread(target=Show_Start, daemon=True).start()
+        root.wait_for_close()
+        atexit_run()
 
     logging.info("Loading Window...")
     root = webcv.WebCanvas(
