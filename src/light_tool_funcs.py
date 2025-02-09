@@ -13,6 +13,7 @@ if checksys.main == 'Android':
     def njit(func):
         return func
 else:
+    logging.info('Jit Enabling')
     from numba import njit
 
 @njit

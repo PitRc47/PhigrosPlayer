@@ -25,6 +25,7 @@ if checksys.main == 'Android':
     def njit(func):
         return func
 else:
+    logging.info('Jit Enabling')
     from numba import njit
 
 note_id = -1
@@ -820,7 +821,6 @@ class TimeoutTaskManager(typing.Generic[_TimeoutTaskManagerT]):
             
         return result
 
-logging.info('Jit Enabling')
 efs = rpe_easing.ease_funcs.copy()
 rpe_easing.ease_funcs.clear()
 rpe_easing.ease_funcs.extend(map(njit, efs))
