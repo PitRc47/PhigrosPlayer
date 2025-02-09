@@ -14,8 +14,8 @@ if checksys.main == 'Windows':
 
 if checksys.main == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
-    from android import activity # type: ignore
-    from jnius import autoclass # type: ignore
+    from kivy.config import Config
+    Config.set('graphics', 'fullscreen', 'auto')
     def _androidPermissionwait(permissions, grant_results):
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
