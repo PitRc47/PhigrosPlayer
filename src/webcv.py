@@ -46,6 +46,36 @@ current_thread = threading.current_thread
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
 logging.info(f"server host: {host}")
 
+framerate_counter = '''\
+(() => {
+
+_frame_count = 0;
+_frame_lastreftime = performance.now();
+_framerate_ckeck_limit = 25;
+framerate = -1;
+
+_frame_counter = () => {
+    _frame_count++;
+    
+    if (_frame_count >= _framerate_ckeck_limit) {
+        const uset = performance.now() - _frame_lastreftime;
+        framerate = uset != 0.0 ? _frame_count / (uset / 1000) : Infinity;
+        _frame_count = 0;
+        _frame_lastreftime = performance.now();
+        
+        if (framerate != Infinity) {
+            _framerate_ckeck_limit = framerate * 0.25;
+        }
+    }
+    
+    requestAnimationFrame(_frame_counter);
+}
+
+requestAnimationFrame(_frame_counter);
+
+})();
+'''
+
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
@@ -271,6 +301,9 @@ class WebCanvas:
         
     def run_js_wait_code(self):
         if self._jscode_orders: self.run_jscode_orders() # not to create a new pyframe
+        self.run_js_code("requestAnimationFrame(() => pywebview.api.call_attr('_rdcallback'));", add_code_array=True)
+        self.run_js_code("if (!('_frame_counter' in window)) {&FRAMERATE_CODE&};".replace("&FRAMERATE_CODE&", framerate_counter), add_code_array=True)
+        
         codes = self._jscodes.copy()
         self._jscodes.clear()
         
