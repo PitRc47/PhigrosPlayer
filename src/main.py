@@ -54,7 +54,7 @@ wl_more_chinese = "--wl-more-chinese" in sys.argv
 skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
-disengage_webview = "--disengage-webview" in sys.argv if checksys.main != 'Android' else True
+disengage_webview = "--disengage-webview" in sys.argv
 usu169 = "--usu169" in sys.argv
 render_video = "--render-video" in sys.argv
 render_video_fps = float(sys.argv[sys.argv.index("--render-video-fps") + 1]) if "--render-video-fps" in sys.argv else 60.0
