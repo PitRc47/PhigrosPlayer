@@ -9,14 +9,19 @@ from os.path import isfile, abspath
 
 import const
 
+import numba
+
+@numba.njit
 def rotate_point(x, y, θ, r) -> tuple[float, float]:
     xo = r * math.cos(math.radians(θ))
     yo = r * math.sin(math.radians(θ))
     return x + xo, y + yo
 
+@numba.njit
 def unpack_pos(number: int) -> tuple[int, int]:
     return (number - number % 1000) // 1000, number % 1000
 
+@numba.njit
 def linear_interpolation(
     t: float,
     st: float, et: float,
@@ -34,6 +39,7 @@ def easing_interpolation(
     if t == st: return sv
     return f((t - st) / (et - st)) * (ev - sv) + sv
 
+@numba.njit
 def is_intersect(
     line_1: tuple[
         tuple[float, float],
@@ -148,6 +154,7 @@ def TextureLine_CanRender(
     
     return polygonInScreen(w, h, [lt, rt, rb, lb])
     
+@numba.njit
 def pointInScreen(point: tuple[float, float], w: int, h: int) -> bool:
     return 0 <= point[0] <= w and 0 <= point[1] <= h
 
@@ -198,12 +205,14 @@ def NoJoinThreadFunc(f):
         t.start()
     return wrapper
 
+@numba.njit
 def conrpepos(x: float, y: float):
     return (
         (x + const.RPE_WIDTH / 2) / const.RPE_WIDTH,
         1.0 - (y + const.RPE_HEIGHT / 2) / const.RPE_HEIGHT
     )
 
+@numba.njit
 def aconrpepos(x: float, y: float):
     return (
         x * const.RPE_WIDTH - const.RPE_WIDTH / 2,
@@ -216,10 +225,12 @@ def Format_Time(t: int|float) -> str:
     m, s = int(m), int(s)
     return f"{m}:{s:>2}".replace(" ", "0")
 
+@numba.njit
 def inDiagonalRectangle(x0: float, y0: float, x1: float, y1: float, power: float, x: float, y: float):
     x += (y - y0) / (y1 - y0) * (x1 - x0) * power
     return x0 + (x1 - x0) * power <= x <= x1 and y0 <= y <= y1
 
+@numba.njit
 def compute_intersection(
     x0: float, y0: float,
     x1: float, y1: float,
@@ -232,22 +243,26 @@ def compute_intersection(
     a2 = y3 - y2
     b2 = x2 - x3
     c2 = x3 * y2 - x2 * y3
-    try:
-        return (b2 * c1 - b1 * c2) / (a1 * b2 - a2 * b1), (a1 * c2 - a2 * c1) / (a1 * b2 - a2 * b1)
-    except ZeroDivisionError:
-        return x0, y0
 
+    denominator = a1 * b2 - a2 * b1
+    if denominator == 0:
+        return (x0, y0)
+    x = (b2 * c1 - b1 * c2) / denominator
+    y = (a1 * c2 - a2 * c1) / denominator
+    return (x, y)
+
+@numba.njit
 def getDPower(width: float, height: float, deg: float):
     l1 = 0, 0, width, 0
     l2 = 0, height, *rotate_point(0, height, deg, (width ** 2 + height ** 2) ** 0.5)
-    try:
-        return compute_intersection(*l1, *l2)[0] / width
-    except ZeroDivisionError:
-        return 1.0
+    if width == 0: return 1.0
+    return compute_intersection(*l1, *l2)[0] / width
 
+@numba.njit
 def getSizeByRect(rect: tuple[float, float, float, float]):
     return rect[2] - rect[0], rect[3] - rect[1]
 
+@numba.njit
 def getCenterPointByRect(rect: tuple[float, float, float, float]):
     return (rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2
     
@@ -264,6 +279,7 @@ def getAllFiles(path: str) -> list[str]:
             files.extend(getAllFiles(f"{path}/{item}"))
     return files
 
+@numba.njit
 def getLineLength(x0: float, y0: float, x1: float, y1: float):
     return ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
 
@@ -272,9 +288,11 @@ def gtpresp(p: str):
     while "//" in result: result = result.replace("//", "/")
     return result
 
+@numba.njit
 def inrect(x: float, y: float, rect: tuple[float, float, float, float]) -> bool:
     return rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3]
 
+@numba.njit
 def indrect(x: float, y: float, rect: tuple[float, float, float, float], dpower: float):
     x += (1.0 - (y - rect[1]) / (rect[3] - rect[1])) * (dpower * (rect[2] - rect[0]))
     return inrect(x, y, rect)

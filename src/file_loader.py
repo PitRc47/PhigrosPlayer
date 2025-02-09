@@ -35,7 +35,6 @@ def loadfile(fp: str):
         mixer.music.load(fp)
         return LoadResult(FILE_TYPE.SONG, None, None)
     except Exception as e:
-        logging.warning(f"Load song failed: {repr(e)}")
         errs.append(e)
     
     try:

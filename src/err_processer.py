@@ -9,8 +9,6 @@ if checksys.main != 'Android':
 
     def excepthook(etype, value, tb):
         try:
-            import needrelease
-            needrelease.run()
             
             if isinstance(etype, KeyboardInterrupt) or KeyboardInterrupt in etype.mro():
                 print("^C")

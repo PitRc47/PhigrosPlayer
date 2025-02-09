@@ -10,6 +10,7 @@ from sys import argv
 from os import environ
 from dataclasses import dataclass, field
 
+import numba
 import numpy
 import cv2
 from PIL import Image, ImageDraw
@@ -206,24 +207,29 @@ def easeAlpha(p: float):
     else:
         return (2.0 - 2.0 * ((p - 0.8) * (0.5 / 0.2) + 0.5)) ** 2
 
+@numba.njit
 def fixorp(p: float):
     return max(0.0, min(1.0, p))
 
+@numba.njit
 def PhigrosChapterNameAlphaValueTransfrom(p: float):
     if p >= 0.4:
         return 1.0
     return p / 0.4
 
+@numba.njit
 def PhigrosChapterPlayButtonAlphaValueTransfrom(p: float):
     if p <= 0.6:
         return 0.0
     return (p - 0.6) / 0.4
 
+@numba.njit
 def PhigrosChapterDataAlphaValueTransfrom(p: float):
     if p <= 0.6:
         return 0.0
     return (p - 0.6) / 0.4
 
+@numba.njit
 def rect2drect_l(rect: tuple[float], deg: float):
     dpower = getDPower(*getSizeByRect(rect), deg)
     w = rect[2] - rect[0]
@@ -235,6 +241,7 @@ def rect2drect_l(rect: tuple[float], deg: float):
         (rect[0] + w * dpower, rect[1])
     )
 
+@numba.njit
 def rect2drect(rect: tuple[float], deg: float):
     dpower = getDPower(*getSizeByRect(rect), deg)
     w = rect[2] - rect[0]
@@ -246,6 +253,7 @@ def rect2drect(rect: tuple[float], deg: float):
         (rect[0] + w * dpower, rect[1])
     )
 
+@numba.njit
 def sliderValueP(value: float, values: tuple[tuple[float, float]]):
     ranges = [(values[i - 1][0], values[i][0], values[i - 1][1], values[i][1]) for i in range(len(values)) if i != 0]
     for r in ranges:
@@ -253,12 +261,14 @@ def sliderValueP(value: float, values: tuple[tuple[float, float]]):
             return (value - r[2]) / (r[3] - r[2]) * (r[1] - r[0]) + r[0]
     return 0.0 if value < values[0][1] else 1.0
 
+@numba.njit
 def sliderValueValue(p: float, values: tuple[tuple[float, float]]):
     ranges = [(values[i - 1][0], values[i][0], values[i - 1][1], values[i][1]) for i in range(len(values)) if i != 0]
     for r in ranges:
         if r[0] <= p <= r[1]:
             return (p - r[0]) / (r[1] - r[0]) * (r[3] - r[2]) + r[2]
     return ranges[0][2] if p < ranges[0][0] else ranges[-1][3]
+
 
 def cutAnimationIllImage(im: Image.Image):
     imdraw = ImageDraw.Draw(im)
@@ -804,54 +814,27 @@ class TimeoutTaskManager(typing.Generic[_TimeoutTaskManagerT]):
             
         return result
 
-if environ.get("ENABLE_JIT", "0") == "1":
-    import numba
-    
-    numbajit_funcs = [
-        rotate_point,
-        unpack_pos,
-        linear_interpolation,
-        is_intersect,
-        pointInScreen,
-        conrpepos,
-        aconrpepos,
-        inrect,
-        inDiagonalRectangle,
-        compute_intersection,
-        fixorp,
-        PhigrosChapterNameAlphaValueTransfrom,
-        PhigrosChapterPlayButtonAlphaValueTransfrom,
-        PhigrosChapterDataAlphaValueTransfrom,
-        getDPower,
-        getSizeByRect,
-        getCenterPointByRect,
-        getLineLength,
-        indrect
-    ]
+logging.info('Jit Enabling')
+efs = rpe_easing.ease_funcs.copy()
+rpe_easing.ease_funcs.clear()
+rpe_easing.ease_funcs.extend(map(numba.jit, efs))
+(*map(lambda x: x(random.uniform(0.0, 1.0)), rpe_easing.ease_funcs), )
 
-    for f in numbajit_funcs:
-        globals()[f.__name__] = numba.jit(f)
-    efs = rpe_easing.ease_funcs.copy()
-    rpe_easing.ease_funcs.clear()
-    rpe_easing.ease_funcs.extend(map(numba.jit, efs))
-    (*map(lambda x: x(random.uniform(0.0, 1.0)), rpe_easing.ease_funcs), )
-
-    rotate_point(0.0, 0.0, 90, 1.145)
-    unpack_pos(1000 * 11 + 45)
-    linear_interpolation(0.5, 0.0, 1.0, 0.0, 1.0)
-    is_intersect(((0.0, 0.1), (0.0, 0.2)), ((-0.1, 0.1), (0.0, 0.4)))
-    pointInScreen((204.2, 1.3), 1920, 1080)
-    aconrpepos(*conrpepos(102.4, 30.3))
-    inrect(1.3, 13.4, (0.2, 3.1, 0.4, 1.4))
-    inDiagonalRectangle(0.0, 0.0, 123.3, 32.2, 3.2, 0.2, 0.4)
-    compute_intersection(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
-    fixorp(2.3)
-    PhigrosChapterNameAlphaValueTransfrom(0.7)
-    PhigrosChapterPlayButtonAlphaValueTransfrom(0.5)
-    PhigrosChapterDataAlphaValueTransfrom(0.1)
-    getDPower(24, 42, 75)
-    getSizeByRect((0.0, 0.0, 1.0, 4.0))
-    getCenterPointByRect((0.0, 0.0, 1.0, 1.0))
-    getLineLength(0.0, 0.0, 1.0, 1.0)
-    indrect(0.0, 3.0, (0.0, 0.0, 1.0, 4.5), 5.3)
-    
+rotate_point(0.0, 0.0, 90, 1.145)
+unpack_pos(1000 * 11 + 45)
+linear_interpolation(0.5, 0.0, 1.0, 0.0, 1.0)
+is_intersect(((0.0, 0.1), (0.0, 0.2)), ((-0.1, 0.1), (0.0, 0.4)))
+pointInScreen((204.2, 1.3), 1920, 1080)
+aconrpepos(*conrpepos(102.4, 30.3))
+inrect(1.3, 13.4, (0.2, 3.1, 0.4, 1.4))
+inDiagonalRectangle(0.0, 0.0, 123.3, 32.2, 3.2, 0.2, 0.4)
+compute_intersection(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+fixorp(2.3)
+PhigrosChapterNameAlphaValueTransfrom(0.7)
+PhigrosChapterPlayButtonAlphaValueTransfrom(0.5)
+PhigrosChapterDataAlphaValueTransfrom(0.1)
+getDPower(24, 42, 75)
+getSizeByRect((0.0, 0.0, 1.0, 4.0))
+getCenterPointByRect((0.0, 0.0, 1.0, 1.0))
+getLineLength(0.0, 0.0, 1.0, 1.0)
+indrect(0.0, 3.0, (0.0, 0.0, 1.0, 4.5), 5.3)

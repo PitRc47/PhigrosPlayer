@@ -99,16 +99,12 @@ def main():
     import phicore
     import tempdir
     import socket_webviewbridge
-    import needrelease
     from pydub import AudioSegment
     from dxsmixer import mixer
     
     import requests
     from PIL import Image, ImageFilter, ImageEnhance
     
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
     mixer.init()
 
     if "--clickeffect-easing" in sys.argv:
@@ -486,8 +482,6 @@ def main():
         def dle_warn(a: float):
             drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
         
-        logging.info('enter show start')
-        
         animationst = time.time()
         while time.time() - animationst < 1.0:
             clearCanvas(wait_execute=True)
@@ -495,7 +489,6 @@ def main():
             dle_warn(1.0 - (1.0 - tool_funcs.fixorp(p)) ** 4)
             root.run_js_wait_code()
         
-        logging.info('show start stage 2')
         time.sleep(0.35)
         
         animationst = time.time()
@@ -507,12 +500,10 @@ def main():
             dle_warn((tool_funcs.fixorp(p) - 1.0) ** 4)
             root.run_js_wait_code()
         
-        logging.info('show start stage 3')
         time.sleep(0.25)
         clearCanvas(wait_execute=True)
         phicore.drawBg()
         phicore.draw_ui(animationing=True)
-        logging.info('show start stage 4')
         root.run_js_wait_code()
         Thread(target=PlayerStart, daemon=True).start()
 
@@ -539,8 +530,6 @@ def main():
 
     def PlayerStart():
         global show_start_time, cksmanager
-
-        logging.info('enter player start')
         
         Resource["Over"].stop()
         
@@ -549,7 +538,6 @@ def main():
         show_start_time = time.time() - skip_time
         PhiCoreConfigObject.show_start_time = show_start_time
 
-        logging.info("updateCoreConfig")
         updateCoreConfig()
         now_t = 0
         
@@ -853,8 +841,6 @@ def main():
         phicore.CoreConfigure(PhiCoreConfigObject)
 
     def atexit_run():
-        tempdir.clearTempDir()
-        needrelease.run()
         sys.exit(0)
 
     def init():
@@ -937,7 +923,6 @@ def main():
 
             Thread(target=Show_Start, daemon=True).start()
             root.wait_for_close()
-            logging.info('main.py at exit 2')
             atexit_run()
 
     logging.info("Loading Window...")
@@ -955,12 +940,10 @@ def main():
     )
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
-    logging.info('main.py at exit')
     atexit_run()
 
 if checksys.main != 'Android':
     try:
-        logger = logging.getLogger('main.py')
         main()
     except SystemExit:
         sys.exit(0)
@@ -971,7 +954,6 @@ if checksys.main != 'Android':
         logging.error(f'{traceback.format_exc()}')
 else:
     try:
-        logger = logging.getLogger('main.py')
         main()
     except Exception as e:
         import traceback

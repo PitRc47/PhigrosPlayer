@@ -58,7 +58,4 @@ HELP_ZH = '''\
   --render-video-fps <数字>: 设置渲染视频的帧率, 默认 = 60.0 (前置参数: --render-video)
   --render-video-fourcc <字符串>: 设置生成视频编码 默认 = mp4v (前置参数: --render-video)
   --render-video-savefp <文件路径字符串>: 设置渲染视频的保存路径 (前置参数: --render-video)
-
-<环境变量>
-  ENABLE_JIT: 启用 JIT, 警告: 这会使启动慢 (默认: 0, 环境变量值: ["0", "1"])
 '''

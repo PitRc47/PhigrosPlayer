@@ -167,7 +167,6 @@ class WebCanvas:
         self._regres: dict[str, bytes] = {}
         self._is_loadimg: dict[str, bool] = {}
         self._jscodes: list[str] = []
-        self._framerate: int|float = -1
         self._jscode_orders: dict[int, list[tuple[str, bool]]] = {}
         
         self._rdevent = threading.Event()
@@ -246,17 +245,11 @@ class WebCanvas:
         self._jscode_orders[order].append((code, add_code_array))
     
     def _rjwc(self, codes: list[str]):
-        try:
-            framerate: int|float = self.run_js_code(f"{codes}.forEach(r2eval);\nframerate;")
-        except Exception as e:
-            logging.error(f"has error in javascript code.")
-            time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
+        self.run_js_code(f"{codes}.forEach(r2eval);")
         
         if self.renderdemand:
             self._rdevent.wait()
             self._rdevent.clear()
-        
-        self._framerate = framerate
         
         if self.renderasync:
             self._raevent.set()
@@ -288,7 +281,6 @@ class WebCanvas:
     
     def string2cstring(self, code: str): return code.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"").replace("`", "\\`").replace("\n", "\\n")
     def string2sctring_hqm(self, code: str): return f"'{self.string2cstring(code)}'"
-    def get_framerate(self) -> int|float: return self._framerate
     
     def get_img_jsvarname(self, imname: str):
         return f"{imname}_img"
@@ -317,13 +309,6 @@ class WebCanvas:
     def wait_for_close(self) -> None:
         while not self._destroyed.wait(0.1):
             pass
-        logging.info('Webview closed')
-        if checksys.main == 'Android':
-            time.sleep(5)
-        if self.jslog:
-            self.jslog_f.write(f"\n\n// Webview closed.\n")
-            self.jslog_f.flush()
-            self.jslog_f.close()
 
     def wait_jspromise(self, code: str) -> None:
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"

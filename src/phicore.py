@@ -399,9 +399,7 @@ def draw_ui(
     pauseImgHeight *= pauseUI_scaleY
     
     pauseImgRGBA = list(map(float, pauseUI_color.replace(" ", "").replace("rgba", "").replace("(", "").replace(")", "").split(",")))
-    fps = mainFramerateCalculator.framerate
-    reqaf_fps = root.get_framerate()
-    
+
     uidata = [
         {
             "type": "call",
@@ -481,15 +479,6 @@ def draw_ui(
             "sx": levelUI_scaleX, "sy": levelUI_scaleY,
             "color": levelUI_color, "rotate": levelUI_rotate
         },
-        {
-            "type": "text",
-            "text": f"fps {fps:.0f} - reqaf fps {reqaf_fps:.0f}", "fontsize": (w + h) / 275 / 0.75,
-            "textBaseline": "bottom", "textAlign": "center",
-            "x": w * 0.5, "y": h * 0.975,
-            "dx": 0.0, "dy": 0.0,
-            "sx": 1.0, "sy": 1.0,
-            "color": "rgba(255, 255, 255, 0.5)", "rotate": 0.0
-        } if showfps else None,
         {
             "type": "text",
             "text": "PhigrosPlayer - by qaqFei - github.com/qaqFei/PhigrosPlayer - MIT License",
