@@ -219,7 +219,8 @@ class WebCanvas:
                         webSettings.setDatabaseEnabled(True)
                         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
                         self._raevent.set()
-                    except:
+                    except Exception as e:
+                        logging.error(e)
                         continue
                     break
             self.web.events.closed += self._destroyed.set
