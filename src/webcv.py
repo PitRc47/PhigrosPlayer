@@ -14,7 +14,6 @@ import logging
 from os.path import abspath
 from random import randint
 
-
 disengage_webview = "--disengage-webview" in sys.argv
 
 if not disengage_webview: import webview
@@ -38,6 +37,8 @@ if checksys.main == "Windows":
     screen_height = windll.user32.GetSystemMetrics(1)
 elif checksys.main == 'Android':
     from jnius import autoclass # type: ignore
+    View = autoclass('android.view.View')
+    WebSettings = autoclass('android.webkit.WebSettings')
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
@@ -211,6 +212,11 @@ class WebCanvas:
                     time.sleep(0.05)
                     try:
                         self.web.native.webview.setWebContentsDebuggingEnabled(True)
+                        self.web.native.webview.setLayerType(View.LAYER_TYPE_HARDWARE, None)
+                        webSettings = self.web.native.webview.getSettings()
+                        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK)
+                        webSettings.setAppCacheEnabled(True)
+                        webSettings.setDatabaseEnabled(True)
                         self.jsapi.set_attr("_rdcallback", self._rdevent.set)
                         self._raevent.set()
                     except:
