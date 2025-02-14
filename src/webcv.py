@@ -12,40 +12,32 @@ import sys
 import logging
 from os.path import abspath
 from random import randint
+from PIL import Image
 
 from checksys import checksys
 
-disengage_webview = "--disengage-webview" in sys.argv
-
-if not disengage_webview: import webview
-from PIL import Image
-
 import graplib_webview
 
-if not disengage_webview and checksys == "Windows":
-    from ctypes import windll
-    screen_width = windll.user32.GetSystemMetrics(0)
-    screen_height = windll.user32.GetSystemMetrics(1)
+disengage_webview = "--disengage-webview" in sys.argv
+
+if not disengage_webview:
+    import webview
+    if checksys == "Windows":
+        from ctypes import windll
+        screen_width = windll.user32.GetSystemMetrics(0)
+        screen_height = windll.user32.GetSystemMetrics(1)
+    if checksys == "Android":
+        from jnius import autoclass # type: ignore
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
+        screen_width = metrics.widthPixels
+        screen_height = metrics.heightPixels
 else:
     screen_width, screen_height = -1, -1
 
-screen_width = None
-screen_height = None
-if checksys == "Windows":
-    from ctypes import windll
-    screen_width = windll.user32.GetSystemMetrics(0)
-    screen_height = windll.user32.GetSystemMetrics(1)
-elif checksys == 'Android':
-    from jnius import autoclass # type: ignore
-    
-    WebSettings = autoclass('android.webkit.WebSettings')
-    PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
-    screen_width = metrics.widthPixels
-    screen_height = metrics.heightPixels
-current_thread = threading.current_thread
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
-logging.info(f"server host: {host}")
+logging.debug(f"server host: {host}")
+
 
 class JsApi:
     def __init__(self) -> None:

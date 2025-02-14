@@ -26,14 +26,14 @@ if checksys == 'Android':
             session.open(runtime)
             activity.setContentView(webview)
             webview.setSession(session)
-            session.loadUrl('https://bing.com')
+            import logging
+            logging.info('webview created')
+            session.loadUrl('https://baidu.com')
 
     class ServiceApp(App):
         def build(self):                                                                            
             return Wv()
-
-    if __name__ == '__main__':
-        ServiceApp().run()
+    ServiceApp().run()
 import zipfile
 import json
 import sys
@@ -44,6 +44,9 @@ import typing
 from threading import Thread
 from os.path import exists, basename, abspath
 
+import load_extended as _
+from graplib_webview import *
+
 if checksys == 'Windows':
     from ctypes import windll
 
@@ -53,10 +56,6 @@ if checksys == 'Android':
         pass
     request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE], _androidPermissionwait)
     sys.argv = ['main.py', 'Re_NascencePsystyleVer.Rinth_live.0-IN.pez', "--fullscreen", '--usu169']
-
-import load_extended as _
-
-from graplib_webview import *
 
 enable_clicksound = "--noclicksound" not in sys.argv
 debug = "--debug" in sys.argv
