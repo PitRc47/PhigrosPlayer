@@ -1,7 +1,6 @@
 from jnius import autoclass, PythonJavaClass, java_method # type: ignore
 from kivy.uix.androidwidget import AndroidWidget # type: ignore
 from kivy.app import App
-
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
@@ -30,6 +29,8 @@ class GeckoViewWidget(AndroidWidget):
         super().__init__(**kwargs)
         context = autoclass('org.kivy.android.PythonActivity').mActivity
         self.gecko_view = GeckoView(context)
+        params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        self.gecko_view.setLayoutParams(params)
         self.add_android_view(self.gecko_view)
 
 class ButtonWidget(AndroidWidget):
@@ -38,6 +39,8 @@ class ButtonWidget(AndroidWidget):
         context = autoclass('org.kivy.android.PythonActivity').mActivity
         self.button = Button(context)
         self.button.setText(text)
+        params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        self.button.setLayoutParams(params)
         self.button.setOnClickListener(callback)
         self.add_android_view(self.button)
 
@@ -61,15 +64,17 @@ class PortDelegate(PythonJavaClass):
 
 class MessageDelegate(PythonJavaClass):
     __javainterfaces__ = ['org/mozilla/geckoview/WebExtension$MessageDelegate']
-    
-    def __init__(self, port_delegate):
+
+    def __init__(self, container):
         super().__init__()
-        self.port_delegate = port_delegate
-    
+        self.container = container
+
     @java_method('(Lorg/mozilla/geckoview/WebExtension$Port;)V')
     def onConnect(self, port):
         print("Extension connected")
-        port.setDelegate(self.port_delegate)
+        self.container.port = port
+        port_delegate = PortDelegate(self.container.show_toast)
+        port.setDelegate(port_delegate)
 
 class GeckoViewContainer(BoxLayout):
     gecko_view = ObjectProperty(None)
@@ -95,14 +100,6 @@ class GeckoViewContainer(BoxLayout):
         
         # Initialize Gecko
         self.init_gecko()
-        self.evaluate_javascript("""
-            window.appMessage = function(message) {
-                window.postMessage({
-                    action: "JSBridge",
-                    data: message
-                }, "*");
-            }
-        """)
     
     def init_gecko(self):
         context = autoclass('org.kivy.android.PythonActivity').mActivity
@@ -119,34 +116,32 @@ class GeckoViewContainer(BoxLayout):
     def install_extension(self):
         controller = self.runtime.getWebExtensionController()
         extension = WebExtension("resource://android/assets/messaging/", "messaging@example.com")
-        
+
         class InstallCallback(PythonJavaClass):
             __javainterfaces__ = ['org/mozilla/geckoview/WebExtension$InstallCallback']
-            
+
+            def __init__(self, outer):
+                super().__init__()
+                self.outer = outer
+
             @java_method('(Lorg/mozilla/geckoview/WebExtension;)V')
             def onSuccess(self, extension):
                 print("Extension installed")
+                port_delegate = PortDelegate(self.outer.show_toast)
                 extension.setMessageDelegate(
-                    MessageDelegate(PortDelegate(self.show_toast)),
+                    MessageDelegate(port_delegate),
                     "browser"
                 )
-            
+
             @java_method('(Ljava/lang/Throwable;)V')
             def onError(self, error):
                 print("Extension install error:", error)
-        
-        controller.ensureBuiltIn(extension, InstallCallback())
+
+        controller.ensureBuiltIn(extension, InstallCallback(self))
     
     def evaluate_javascript(self, script):
-        if self.port:
-            try:
-                msg = JSONObject()
-                msg.put("action", "evalJavascript")
-                msg.put("data", script)
-                msg.put("id", str(System.currentTimeMillis())) 
-                self.port.postMessage(msg)
-            except Exception as e:
-                print("Error sending message:", e)
+        if self.session:
+            self.session.evaluateJavaScript(script, None)
     
     def show_toast(self, message):
         context = autoclass('org.kivy.android.PythonActivity').mActivity
