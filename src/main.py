@@ -1,5 +1,7 @@
 from jnius import autoclass, PythonJavaClass, java_method # type: ignore
+from kivy.uix.androidwidget import AndroidWidget # type: ignore
 from kivy.app import App
+
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
@@ -22,6 +24,22 @@ Builder.load_string('''
 <GeckoViewContainer>:
     orientation: 'vertical'
 ''')
+
+class GeckoViewWidget(AndroidWidget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        context = autoclass('org.kivy.android.PythonActivity').mActivity
+        self.gecko_view = GeckoView(context)
+        self.add_android_view(self.gecko_view)
+
+class ButtonWidget(AndroidWidget):
+    def __init__(self, text, callback, **kwargs):
+        super().__init__(**kwargs)
+        context = autoclass('org.kivy.android.PythonActivity').mActivity
+        self.button = Button(context)
+        self.button.setText(text)
+        self.button.setOnClickListener(callback)
+        self.add_android_view(self.button)
 
 class PortDelegate(PythonJavaClass):
     __javainterfaces__ = ['org/mozilla/geckoview/WebExtension$PortDelegate']
@@ -63,17 +81,17 @@ class GeckoViewContainer(BoxLayout):
         self.runtime = None
         self.session = None
         self.port = None
+        self.count = 0
         
-        # Setup GeckoView
-        context = autoclass('org.kivy.android.PythonActivity').mActivity
-        self.gecko_view = GeckoView(context)
-        self.add_widget(self.gecko_view)
+        self.gecko_widget = GeckoViewWidget()
+        self.add_widget(self.gecko_widget)
         
-        # Setup Button
-        self.button = Button(context)
-        self.button.setText("Test Evaluate Javascript")
-        self.button.setOnClickListener(ButtonClickListener(self))
-        self.add_widget(self.button)
+        # 添加ButtonWidget
+        self.button_widget = ButtonWidget(
+            "Test Evaluate Javascript",
+            ButtonClickListener(self)
+        )
+        self.add_widget(self.button_widget)
         
         # Initialize Gecko
         self.init_gecko()
