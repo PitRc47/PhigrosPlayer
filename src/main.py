@@ -24,6 +24,7 @@ class Wv(Widget):
         session = GeckoSession()
         session.open(runtime)
         activity.setContentView(webview)
+        webview.setSession(session)
         session.loadUrl('https://bing.com')
                                             
 class ServiceApp(App):
