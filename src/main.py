@@ -55,9 +55,9 @@ class PortDelegate(PythonJavaClass):
     def onPortMessage(self, message, port):
         try:
             if isinstance(message, JSONObject):
-                action = message.getString("action")
+                action = message.optString("action")
                 if action == "JSBridge":
-                    data = message.getString("data")
+                    data = message.optString("data")
                     self.callback(data)
         except Exception as e:
             print("Error handling message:", e)
@@ -149,17 +149,16 @@ class GeckoViewContainer(BoxLayout):
 
 class ButtonClickListener(PythonJavaClass):
     __javainterfaces__ = ['android/view/View$OnClickListener']
-    
+
     def __init__(self, container):
         super().__init__()
         self.container = container
-    
+
     @java_method('(Landroid/view/View;)V')
     def onClick(self, view):
         self.container.count += 1
-        self.container.evaluate_javascript(
-            f"window.appMessage('app button click {self.container.count}')"
-        )
+        script = f"window.appMessage('app button click {self.container.count}')"
+        self.container.evaluate_javascript(script)
 
 class GeckoApp(App):
     def build(self):
