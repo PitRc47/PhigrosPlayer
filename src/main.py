@@ -21,8 +21,10 @@ class Wv(Widget):
         settings = runtime.getSettings()
         webview = GeckoView(activity)
         settings.setJavaScriptEnabled(True)
+        session = GeckoSession()
+        session.open(runtime)
         activity.setContentView(webview)
-        webview.loadUrl('https://bing.com')
+        session.loadUrl('https://bing.com')
                                             
 class ServiceApp(App):
     def build(self):                                                                            
