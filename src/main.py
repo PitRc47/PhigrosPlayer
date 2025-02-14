@@ -28,7 +28,7 @@ if checksys == 'Android':
             webview.setSession(session)
             import logging
             logging.info('webview created')
-            session.loadUrl('https://baidu.com')
+            session.loadUrl('about:buildconfig')
 
     class ServiceApp(App):
         def build(self):                                                                            
