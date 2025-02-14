@@ -3,7 +3,6 @@ from __future__ import annotations
 import fix_workpath as _
 import imageload_hook as _
 import init_logging as _
-import checksys
 import threading
 import typing
 import io
@@ -14,15 +13,16 @@ import logging
 from os.path import abspath
 from random import randint
 
+from checksys import checksys
+
 disengage_webview = "--disengage-webview" in sys.argv
 
 if not disengage_webview: import webview
 from PIL import Image
 
 import graplib_webview
-import tool_funcs
 
-if not disengage_webview and checksys.main == "Windows":
+if not disengage_webview and checksys == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
@@ -31,11 +31,11 @@ else:
 
 screen_width = None
 screen_height = None
-if checksys.main == "Windows":
+if checksys == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
-elif checksys.main == 'Android':
+elif checksys == 'Android':
     from jnius import autoclass # type: ignore
     
     WebSettings = autoclass('android.webkit.WebSettings')
@@ -195,7 +195,7 @@ class WebCanvas:
     def _init(self, width: int, height: int, x: int, y: int):
         if not disengage_webview:
             self.web_hwnd = 0
-            if checksys.main != 'Android':
+            if checksys != 'Android':
                 self.web.resize(width, height)
                 self.web.move(x, y)
                 title = self.web.title
@@ -227,7 +227,7 @@ class WebCanvas:
     def title(self, title: str) -> str: self.web.set_title(title) if not disengage_webview else None
     def winfo_screenwidth(self) -> int: return screen_width
     def winfo_screenheight(self) -> int: return screen_height
-    def winfo_hwnd(self) -> int: return self.web_hwnd if checksys.main != 'Android' else None
+    def winfo_hwnd(self) -> int: return self.web_hwnd if checksys != 'Android' else None
     def winfo_legacywindowwidth(self) -> int: return self.run_js_code("window.innerWidth;")
     def winfo_legacywindowheight(self) -> int: return self.run_js_code("window.innerHeight;")
 

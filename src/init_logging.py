@@ -1,6 +1,6 @@
-import checksys
+from checksys import checksys
 
-if checksys.main != 'Android':
+if checksys != 'Android':
     import logging
 
     import webview.http

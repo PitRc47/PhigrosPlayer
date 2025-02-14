@@ -3,12 +3,11 @@ import init_logging as _
 
 
 import logging
-import checksys
+from checksys import checksys
 import subprocess
 
-if checksys.main != 'Android':
+if checksys != 'Android':
     import tkinter.messagebox
-    from os import system
     import webview.platforms.winforms
     if webview.platforms.winforms.renderer != "edgechromium":
         logging.info("Edge WebView2 Runtime is not installed")

@@ -1,6 +1,6 @@
-import checksys
+from checksys import checksys
 
-if checksys.main == 'Windows':
+if checksys == 'Windows':
     from ctypes import windll
 
     ConsoleWindowHwnd = windll.kernel32.GetConsoleWindow()

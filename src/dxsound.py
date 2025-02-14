@@ -12,9 +12,9 @@ import os
 from io import BytesIO
 from pydub import AudioSegment
 
-import checksys
+from checksys import checksys
 
-if checksys.main == 'Android':
+if checksys == 'Android':
     from jnius import autoclass  # type: ignore
     from jnius import cast  # type: ignore
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
@@ -34,11 +34,11 @@ RING_BUFFER = True
 _WAV_HEADER = "<4sl4s4slhhllhh4sl"
 _WAV_HEADER_LENGTH = struct.calcsize(_WAV_HEADER)
 
-if checksys.main == 'Windows':
+if checksys == 'Windows':
     dxs = ds.DirectSoundCreate(None, None)
     dxs.SetCooperativeLevel(None, ds.DSSCL_NORMAL)
 
-if checksys.main == 'Windows':
+if checksys == 'Windows':
     def _wav2wfx(data: bytes):
         (
             format,
@@ -168,7 +168,7 @@ class directSoundAndroid:
 
 class directSound:
     def __new__(cls, data: bytes | str, enable_cache: bool = True):
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             return directSoundAndroid(data, enable_cache)
         else:
             instance = super().__new__(cls)

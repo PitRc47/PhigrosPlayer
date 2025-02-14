@@ -1,15 +1,16 @@
 # this module loads quickly
-
-import checksys
+import logging
 import math
 import typing
 from threading import Thread
 from os import listdir
 from os.path import isfile, abspath
 
+
+from checksys import checksys
 import const
 
-if checksys.main == 'Android':
+if checksys == 'Android':
     def njit(func):
         return func
 else:
@@ -273,7 +274,7 @@ def getCenterPointByRect(rect: tuple[float, float, float, float]):
     
 def getAllFiles(path: str) -> list[str]:
     files = []
-    if checksys.main != 'Android':
+    if checksys != 'Android':
         if path[-1] == "/" or path[:-1] == "\\":
             path = path[:-1]
         path = path.replace("/", "\\")

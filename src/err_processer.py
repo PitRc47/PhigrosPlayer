@@ -1,11 +1,9 @@
-import checksys
+from checksys import checksys
 
-if checksys.main != 'Android':
+if checksys != 'Android':
     import sys
     import threading
     import traceback
-    import time
-    import os.path
 
     def excepthook(etype, value, tb):
         try:

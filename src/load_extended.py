@@ -1,6 +1,6 @@
-import checksys
+from checksys import checksys
 
-if checksys.main == 'Windows':
+if checksys == 'Windows':
     import importlib.util
     from ctypes import windll
     from sys import argv

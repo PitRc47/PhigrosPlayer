@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import logging
 import typing
 import time
 from sys import argv
 
-import checksys
+from checksys import checksys
 from tool_funcs import NoJoinThreadFunc
 
-if checksys.main == 'Android':
+if checksys == 'Android':
     from jnius import autoclass  # type: ignore
     MediaPlayer = autoclass('android.media.MediaPlayer')
 
@@ -23,26 +22,26 @@ class musicCls:
         self._paused = False
         self._pause_pos = 0
         self._pause_volume = 0.0
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             self.dxs = MediaPlayer()
     
     def _setBufferVolume(self, v: float):
         if self.buffer is None: return
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             pass
         else:
             self.buffer.SetVolume(self.dxs.transform_volume(v))
      
     def _getBufferPosition(self) -> int:
         if self.buffer is None: return 0
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             pass
         else:
             return self.buffer.GetCurrentPosition()[1]
     
     def _setBufferPosition(self, v: int):
         if self.buffer is None: return
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             pass
         else:
             minv = 0
@@ -51,7 +50,7 @@ class musicCls:
     
     def load(self, fp: str):
         self.unload()
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if not self.dxs:
                 self.dxs = MediaPlayer()
             self.dxs.setDataSource(fp)
@@ -61,7 +60,7 @@ class musicCls:
             self.dxs = dxsound.directSound(fp, enable_cache=False)
         
     def unload(self):
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.release()
         self.dxs = None
@@ -70,7 +69,7 @@ class musicCls:
         
     def play(self, isloop: typing.Literal[0, -1] = 0):
         self.lflag = False if isloop == 0 else True
-        if checksys.main != 'Android':
+        if checksys != 'Android':
             
             if self.buffer is None:
                 _, self.buffer = self.dxs.create(self.lflag)
@@ -84,7 +83,7 @@ class musicCls:
             self.dxs.start()
         
     def stop(self):
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.stop()
         self.buffer = None
@@ -93,7 +92,7 @@ class musicCls:
         if self._paused: return
         self._paused = True
         
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.pause()
         else:
@@ -105,7 +104,7 @@ class musicCls:
         if not self._paused: return
         self._paused = False
         
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.start()
         else:
@@ -118,10 +117,10 @@ class musicCls:
         if self._paused: return
         t /= 1000.0
         st = time.time()
-        if checksys.main != 'Android':
+        if checksys != 'Android':
             bufid = id(self.buffer)
         rvol = self.get_volume()
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             while time.time() - st < t and self.get_busy():
                 p = (time.time() - st) / t
                 p = max(0.0, min(1.0, p))
@@ -146,7 +145,7 @@ class musicCls:
     
     def set_volume(self, volume: float):
         self._volume = volume
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.setVolume(float(volume), float(volume))
         else:
@@ -156,7 +155,7 @@ class musicCls:
         return self._volume
     
     def get_busy(self) -> bool:
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 return self.dxs.isPlaying()
             return False
@@ -166,21 +165,21 @@ class musicCls:
             return self.buffer.GetStatus() != 0 and not self._paused
     
     def set_pos(self, pos: float):
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 self.dxs.seekTo(int(pos * 1000))
         else:
             self._setBufferPosition(int(pos * self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec))
         
     def get_pos(self) -> float:
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 return self.dxs.getCurrentPosition() / 1000.0
         else:
             return self._getBufferPosition() / self.dxs._sdesc.lpwfxFormat.nAvgBytesPerSec
     
     def get_length(self) -> float:
-        if checksys.main == 'Android':
+        if checksys == 'Android':
             if self.dxs:
                 return self.dxs.getDuration() / 1000.0
         else:
@@ -223,7 +222,7 @@ def toDowngradeAPI():
     
 mixer = mixerCls()
 
-if "--soundapi-downgrade" in argv and checksys.main != 'Android':
+if "--soundapi-downgrade" in argv and checksys != 'Android':
     toDowngradeAPI()
 
 if __name__ == "__main__":

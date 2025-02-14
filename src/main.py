@@ -1,38 +1,39 @@
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.clock import Clock
-from jnius import autoclass  # type: ignore
-from android.runnable import run_on_ui_thread  # type: ignore
+from checksys import checksys
+if checksys == 'Android':
+    from kivy.app import App
+    from kivy.uix.widget import Widget
+    from kivy.clock import Clock
+    from jnius import autoclass  # type: ignore
+    from android.runnable import run_on_ui_thread  # type: ignore
 
-GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
-GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
-GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
-activity = autoclass('org.kivy.android.PythonActivity').mActivity
+    GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
+    GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
+    GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
+    activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-class Wv(Widget):
-    def __init__(self, **kwargs):
-        super(Wv, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: run_on_ui_thread(self.create_webview), 0)
+    class Wv(Widget):
+        def __init__(self, **kwargs):
+            super(Wv, self).__init__(**kwargs)
+            Clock.schedule_once(lambda dt: run_on_ui_thread(self.create_webview), 0)
 
-    @run_on_ui_thread
-    def create_webview(self, *args):
-        runtime = GeckoRuntime.create(activity)
-        settings = runtime.getSettings()
-        webview = GeckoView(activity)
-        settings.setJavaScriptEnabled(True)
-        session = GeckoSession()
-        session.open(runtime)
-        activity.setContentView(webview)
-        webview.setSession(session)
-        session.loadUrl('https://bing.com')
+        @run_on_ui_thread
+        def create_webview(self, *args):
+            runtime = GeckoRuntime.create(activity)
+            settings = runtime.getSettings()
+            webview = GeckoView(activity)
+            settings.setJavaScriptEnabled(True)
+            session = GeckoSession()
+            session.open(runtime)
+            activity.setContentView(webview)
+            webview.setSession(session)
+            session.loadUrl('https://bing.com')
 
-class ServiceApp(App):
-    def build(self):                                                                            
-        return Wv()
+    class ServiceApp(App):
+        def build(self):                                                                            
+            return Wv()
 
-if __name__ == '__main__':
-    ServiceApp().run()
-import checksys
+    if __name__ == '__main__':
+        ServiceApp().run()
 import zipfile
 import json
 import sys
@@ -43,10 +44,10 @@ import typing
 from threading import Thread
 from os.path import exists, basename, abspath
 
-if checksys.main == 'Windows':
+if checksys == 'Windows':
     from ctypes import windll
 
-if checksys.main == 'Android':
+if checksys == 'Android':
     from android.permissions import request_permissions, Permission # type: ignore
     def _androidPermissionwait(permissions, grant_results):
         pass
@@ -86,7 +87,7 @@ wl_more_chinese = "--wl-more-chinese" in sys.argv
 skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
-disengage_webview = "--disengage-webview" in sys.argv if checksys.main != 'Android' else True
+disengage_webview = "--disengage-webview" in sys.argv if checksys != 'Android' else True
 usu169 = "--usu169" in sys.argv
 render_video = "--render-video" in sys.argv
 render_video_fps = float(sys.argv[sys.argv.index("--render-video-fps") + 1]) if "--render-video-fps" in sys.argv else 60.0
@@ -146,7 +147,7 @@ def main():
     if "--clickeffect-easing" in sys.argv:
         phicore.clickEffectEasingType = int(sys.argv[sys.argv.index("--clickeffect-easing") + 1])
 
-    if checksys.main == 'Windows':
+    if checksys == 'Windows':
         from os import add_dll_directory
         add_dll_directory(abspath('../lib'))
 
@@ -952,7 +953,7 @@ def main():
         if disengage_webview:
             w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
         else:
-            if "--window-host" in sys.argv and checksys.main == 'Windows':
+            if "--window-host" in sys.argv and checksys == 'Windows':
                 windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
             if "--fullscreen" in sys.argv:
                 w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
@@ -960,13 +961,13 @@ def main():
             if disengage_webview:
                 w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
             else:
-                if "--window-host" in sys.argv and checksys.main == 'Windows':
+                if "--window-host" in sys.argv and checksys == 'Windows':
                     windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
                 if "--fullscreen" in sys.argv:
                     w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
                     root.web.toggle_fullscreen()
                 else:
-                    if checksys.main != 'Android':
+                    if checksys != 'Android':
                         if "--size" not in sys.argv:
                             w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
                         else:
@@ -1026,7 +1027,7 @@ def main():
     root.start()
     atexit_run()
 
-if checksys.main != 'Android':
+if checksys != 'Android':
     try:
         main()
     except SystemExit:

@@ -21,7 +21,7 @@ import phira_resource_pack
 import tempdir
 from light_tool_funcs import *
 
-if checksys.main == 'Android':
+if checksys == 'Android':
     def njit(func):
         return func
 else:

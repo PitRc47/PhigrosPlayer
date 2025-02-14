@@ -3889,7 +3889,7 @@ def init():
         root.run_js_code("usu169 = true;")
     root.run_js_code(f"resizeCanvas({rw}, {rh});")
 
-    if "--window-host" in sys.argv and checksys.main == 'Windows':
+    if "--window-host" in sys.argv and checksys == 'Windows':
         from ctypes import windll
         windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
 
