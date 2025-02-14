@@ -13,7 +13,7 @@ activity = autoclass('org.kivy.android.PythonActivity').mActivity
 class Wv(Widget):
     def __init__(self, **kwargs):
         super(Wv, self).__init__(**kwargs)
-        Clock.schedule_once(self.create_webview, 0)
+        Clock.schedule_once(lambda dt: run_ui_thread(self.create_webview), 0)
 
     @run_on_ui_thread
     def create_webview(self, *args):
