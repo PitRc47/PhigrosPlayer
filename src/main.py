@@ -1,8 +1,8 @@
-from kivy.app import App                                                                                                                  
-from kivy.uix.widget import Widget                                                 
-from kivy.clock import Clock                                 
-from jnius import autoclass  # type: ignore                                                             
-from android.runnable import run_on_ui_thread # type: ignore                                                
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.clock import Clock
+from jnius import autoclass  # type: ignore
+from android.runnable import run_on_ui_thread  # type: ignore
 
 GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
 GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
@@ -25,7 +25,7 @@ class Wv(Widget):
         activity.setContentView(webview)
         webview.setSession(session)
         session.loadUrl('https://bing.com')
-                                            
+
 class ServiceApp(App):
     def build(self):                                                                            
         return Wv()
