@@ -940,7 +940,7 @@ def main():
                 del w_legacy, h_legacy
                 root.resize(winw + dw_legacy, winh + dh_legacy)
                 root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
-
+        logging.info(f'w: {w},  h: {h}')
         w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 
         root.run_js_code(f"lowquality_imjscvscale_x = {lowquality_imjscvscale_x};")
