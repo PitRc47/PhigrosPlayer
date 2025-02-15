@@ -299,15 +299,15 @@ void main() {
     const mainShaderLoader = new ShaderLoader();
 
     function resizeCanvas(w, h) {
-        w = (w || window.innerWidth) * dpr;
-        h = (h || window.innerHeight) * dpr;
-        
+        if (w === undefined || h === undefined) {
+            w = window.innerWidth;
+            h = window.innerHeight;
+        }
+
         canvas_ele.width = w;
         canvas_ele.height = h;
-        canvas_ele.style.width = `${w/dpr}px`;
-        canvas_ele.style.height = `${h/dpr}px`;
-        dialog_canvas_ele.width = `${w/dpr}px`;
-        dialog_canvas_ele.height = `${h/dpr}px`;
+        dialog_canvas_ele.width = w;
+        dialog_canvas_ele.height = h;
         ctx.reset();
         dialog_canvas_ctx.reset();
 
