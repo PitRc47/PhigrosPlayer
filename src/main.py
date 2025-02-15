@@ -34,7 +34,7 @@ if checksys == 'Android':
             self.session = GeckoSession()
             self.session.open(self.runtime)
             logging.info('set content view')
-            self.activity.setContentView(self.webview)
+            activity.setContentView(self.webview)
             self.webview.setSession(self.session)
             logging.info('webview created')
             self.session.loadUrl('https://bing.com')
