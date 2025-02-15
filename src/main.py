@@ -13,8 +13,8 @@ if checksys == 'Android':
     from kivy.app import App
     from kivy.uix.widget import Widget
     from kivy.clock import Clock
-    from jnius import autoclass  # type: ignore
-    from android.runnable import run_on_ui_thread  # type: ignore
+    from jnius import autoclass
+    from android.runnable import run_on_ui_thread
 
     GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
     GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
@@ -24,32 +24,24 @@ if checksys == 'Android':
     class Wv(Widget):
         def __init__(self, **kwargs):
             super(Wv, self).__init__(**kwargs)
-            Clock.schedule_once(lambda dt: run_on_ui_thread(self.create_webview), 0)
+            Clock.schedule_once(lambda dt: self.create_webview(), 0)
 
-        def init_webview(self):
-            while not self.runtime or not self.webview: time.sleep(0.01)
-            logging.info('init_webview start')
-            self.settings = self.runtime.getSettings()
-            self.settings.setJavaScriptEnabled(True)
-            self.session = GeckoSession()
-            self.session.open(self.runtime)
-            logging.info('set content view')
-            activity.setContentView(self.webview)
-            self.webview.setSession(self.session)
-            logging.info('webview created')
-            self.session.loadUrl('https://bing.com')
-        
         @run_on_ui_thread
         def create_webview(self, *args):
-            self.runtime = None
-            self.webview = None
-            Thread(target=self.init_webview,daemon=True).start()
             self.runtime = GeckoRuntime.create(activity)
             self.webview = GeckoView(activity)
             
+            self.session = GeckoSession()
+            self.session.open(self.runtime)
+            self.webview.setSession(self.session)
+            self.session.loadUri('https://bing.com')
+            
+            activity.setContentView(self.webview)
+
     class ServiceApp(App):
-        def build(self):                                                                            
+        def build(self):
             return Wv()
+
     ServiceApp().run()
 
 from graplib_webview import *
