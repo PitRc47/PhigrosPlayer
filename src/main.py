@@ -9,41 +9,6 @@ from threading import Thread
 from os.path import exists, basename, abspath
 
 from checksys import checksys
-if checksys == 'Android':
-    from kivy.app import App
-    from kivy.uix.widget import Widget
-    from kivy.clock import Clock
-    from jnius import autoclass
-    from android.runnable import run_on_ui_thread
-
-    GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
-    GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
-    GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
-    activity = autoclass('org.kivy.android.PythonActivity').mActivity
-
-    class Wv(Widget):
-        def __init__(self, **kwargs):
-            super(Wv, self).__init__(**kwargs)
-            Clock.schedule_once(lambda dt: self.create_webview(), 0)
-
-        @run_on_ui_thread
-        def create_webview(self, *args):
-            self.runtime = GeckoRuntime.create(activity)
-            self.webview = GeckoView(activity)
-            
-            self.session = GeckoSession()
-            self.session.open(self.runtime)
-            self.webview.setSession(self.session)
-            self.session.loadUri('https://bing.com')
-            
-            activity.setContentView(self.webview)
-
-    class ServiceApp(App):
-        def build(self):
-            return Wv()
-
-    ServiceApp().run()
-
 from graplib_webview import *
 import load_extended as _
 if checksys == 'Windows':
@@ -85,7 +50,7 @@ wl_more_chinese = "--wl-more-chinese" in sys.argv
 skip_time = float(sys.argv[sys.argv.index("--skip-time") + 1]) if "--skip-time" in sys.argv else 0.0
 enable_jscanvas_bitmap = "--enable-jscanvas-bitmap" in sys.argv
 respath = sys.argv[sys.argv.index("--res") + 1] if "--res" in sys.argv else "resources/resource_packs/default"
-disengage_webview = "--disengage-webview" in sys.argv if checksys != 'Android' else True
+disengage_webview = True
 usu169 = "--usu169" in sys.argv
 render_video = "--render-video" in sys.argv
 render_video_fps = float(sys.argv[sys.argv.index("--render-video-fps") + 1]) if "--render-video-fps" in sys.argv else 60.0
@@ -934,10 +899,6 @@ def main():
         global errFlag
         
         if disengage_webview:
-            def socketcct(): 
-                time.sleep(1)
-                root.web.evaluate_js('connectToSocketBridge();')
-            Thread(target=socketcct, daemon=True).start()
             socket_webviewbridge.hook(root)
 
         webdpr = float(root.run_js_code("window.devicePixelRatio;"))
@@ -948,47 +909,41 @@ def main():
         if lowquality:
             root.run_js_code(f"lowquality_scale = {lowquality_scale};")
 
-        if disengage_webview:
+        if "--window-host" in sys.argv and checksys == 'Windows':
+            windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
+        if "--fullscreen" in sys.argv:
             w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
+            if checksys != 'Android': root.web.toggle_fullscreen()
+        if "--window-host" in sys.argv and checksys == 'Windows':
+            windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
+        if "--fullscreen" in sys.argv:
+            w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
+            if checksys != 'Android': root.web.toggle_fullscreen()
         else:
-            if "--window-host" in sys.argv and checksys == 'Windows':
-                windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
-            if "--fullscreen" in sys.argv:
-                w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
-                root.web.toggle_fullscreen()
-            if disengage_webview:
-                w, h = root.run_js_code("window.innerWidth;"), root.run_js_code("window.innerHeight;")
-            else:
-                if "--window-host" in sys.argv and checksys == 'Windows':
-                    windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
-                if "--fullscreen" in sys.argv:
-                    w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
-                    root.web.toggle_fullscreen()
+            if checksys != 'Android':
+                if "--size" not in sys.argv:
+                    w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
                 else:
-                    if checksys != 'Android':
-                        if "--size" not in sys.argv:
-                            w, h = int(root.winfo_screenwidth() * 0.6), int(root.winfo_screenheight() * 0.6)
-                        else:
-                            w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
-                            
-                        winw, winh = (
-                            w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
-                            h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
-                        )
-                        root.resize(winw, winh)
-                        w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
-                        logging.info(f'w_legacy {w_legacy}, h_legacy {h_legacy}')
-                        logging.info(f'winw {winw},  winh {winh}')
-                        winw = int(winw)
-                        winh = int(winh)
-                        w_legacy = int(w_legacy)
-                        h_legacy = int(h_legacy)
-                        dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
-                        dw_legacy *= webdpr; dh_legacy *= webdpr
-                        dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
-                        del w_legacy, h_legacy
-                        root.resize(winw + dw_legacy, winh + dh_legacy)
-                        root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
+                    w, h = int(eval(sys.argv[sys.argv.index("--size") + 1])), int(eval(sys.argv[sys.argv.index("--size") + 2]))
+                    
+                winw, winh = (
+                    w if w <= root.winfo_screenwidth() else int(root.winfo_screenwidth() * 0.75),
+                    h if h <= root.winfo_screenheight() else int(root.winfo_screenheight() * 0.75)
+                )
+                root.resize(winw, winh)
+                w_legacy, h_legacy = root.winfo_legacywindowwidth(), root.winfo_legacywindowheight()
+                logging.info(f'w_legacy {w_legacy}, h_legacy {h_legacy}')
+                logging.info(f'winw {winw},  winh {winh}')
+                winw = int(winw)
+                winh = int(winh)
+                w_legacy = int(w_legacy)
+                h_legacy = int(h_legacy)
+                dw_legacy, dh_legacy = winw - w_legacy, winh - h_legacy
+                dw_legacy *= webdpr; dh_legacy *= webdpr
+                dw_legacy, dh_legacy = int(dw_legacy), int(dh_legacy)
+                del w_legacy, h_legacy
+                root.resize(winw + dw_legacy, winh + dh_legacy)
+                root.move(int(root.winfo_screenwidth() / 2 - (winw + dw_legacy) / webdpr / 2), int(root.winfo_screenheight() / 2 - (winh + dh_legacy) / webdpr / 2))
 
         w *= webdpr; h *= webdpr; w = int(w); h = int(h)
 

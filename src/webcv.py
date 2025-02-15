@@ -21,7 +21,7 @@ import graplib_webview
 disengage_webview = "--disengage-webview" in sys.argv
 
 if not disengage_webview:
-    import webview
+    if checksys != 'Android': import webview
     if checksys == "Windows":
         from ctypes import windll
         screen_width = windll.user32.GetSystemMetrics(0)
@@ -38,6 +38,38 @@ else:
 host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
 logging.debug(f"server host: {host}")
 
+if checksys == 'Android':
+    from kivy.app import App
+    from kivy.uix.widget import Widget
+    from kivy.clock import Clock
+    from jnius import autoclass # type: ignore
+    from android.runnable import run_on_ui_thread # type: ignore
+
+    GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
+    GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
+    GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
+    activity = autoclass('org.kivy.android.PythonActivity').mActivity
+
+    class GeckoViewWv(Widget):
+        def __init__(self, **kwargs):
+            super(GeckoViewWv, self).__init__(**kwargs)
+            Clock.schedule_once(lambda dt: self.create_webview(), 0)
+
+        @run_on_ui_thread
+        def create_webview(self, *args):
+            self.runtime = GeckoRuntime.create(activity)
+            self.webview = GeckoView(activity)
+            
+            self.session = GeckoSession()
+            self.session.open(self.runtime)
+            self.webview.setSession(self.session)
+            self.session.loadUri('file:///web_canvas.html')
+            
+            activity.setContentView(self.webview)
+
+    class GeckoView(App):
+        def build(self):
+            return GeckoViewWv()
 
 class JsApi:
     def __init__(self) -> None:
@@ -172,22 +204,29 @@ class WebCanvas:
         self.jslog_f = open(jslog_path, "w", encoding="utf-8") if self.jslog else None
         
         html_path = abspath(html_path)
-        self.web = webview.create_window(
-            title = title,
-            url = html_path,
-            resizable = resizable,
-            js_api = self.jsapi,
-            frameless = frameless,
-            hidden = hidden
-        ) if not disengage_webview else None
-        self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
+        if checksys != 'Android':
+            self.web = webview.create_window(
+                title = title,
+                url = html_path,
+                resizable = resizable,
+                js_api = self.jsapi,
+                frameless = frameless,
+                hidden = hidden
+            ) if not disengage_webview else None
+            self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
+        self.start = self.geckoview_start if checksys == 'Android' else self.start
+
+    def geckoview_start(self):
+        logging.info('Initializing Geckoview')
+        GeckoView().run()
+        
     
     def _init(self, width: int, height: int, x: int, y: int):
         if not disengage_webview:
             self.web_hwnd = 0
-            if checksys != 'Android':
+            if checksys == 'Windows':
                 self.web.resize(width, height)
                 self.web.move(x, y)
                 title = self.web.title
@@ -197,36 +236,41 @@ class WebCanvas:
                     self.web_hwnd = windll.user32.FindWindowW(None, temp_title)
                     time.sleep(0.01)
                 self.web.set_title(title)
-                self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-                self._raevent.set()
-            else:
-                while True:
-                    time.sleep(0.05)
-                    try:
-                        self.web.native.webview.setWebContentsDebuggingEnabled(True)
-                        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
-                        self._raevent.set()
-                    except Exception as e:
-                        logging.error(e)
-                        continue
-                    break
-            self.web.events.closed += self._destroyed.set
+                self.web.events.closed += self._destroyed.set
         else:
             self.web_hwnd = -1
+        self.jsapi.set_attr("_rdcallback", self._rdevent.set)
+        self._raevent.set()
         logging.info('Webview start')
         graplib_webview.root = self
     
-    def title(self, title: str) -> str: self.web.set_title(title) if not disengage_webview else None
+    def title(self, title: str) -> str:
+        if checksys == 'Android': return
+        self.web.set_title(title) if not disengage_webview else None
+    
     def winfo_screenwidth(self) -> int: return screen_width
+
     def winfo_screenheight(self) -> int: return screen_height
-    def winfo_hwnd(self) -> int: return self.web_hwnd if checksys != 'Android' else None
+
+    def winfo_hwnd(self) -> int: return self.web_hwnd
     def winfo_legacywindowwidth(self) -> int: return self.run_js_code("window.innerWidth;")
     def winfo_legacywindowheight(self) -> int: return self.run_js_code("window.innerHeight;")
 
-    def destroy(self): self.web.destroy() if not disengage_webview else None
-    def resize(self, width: int, height: int): self.web.resize(width, height) if not disengage_webview else None
-    def move(self, x: int, y:int): self.web.move(x, y) if not disengage_webview else None
-    def fullscreen(self): self.web.toggle_fullscreen() if not disengage_webview else None
+    def destroy(self):
+        if checksys == 'Android': return
+        self.web.destroy() if not disengage_webview else None
+    
+    def resize(self, width: int, height: int):
+        if checksys == 'Android': return
+        self.web.resize(width, height) if not disengage_webview else None
+    
+    def move(self, x: int, y:int):
+        if checksys == 'Android': return
+        self.web.move(x, y) if not disengage_webview else None
+    
+    def fullscreen(self):
+        if checksys == 'Android': return
+        self.web.toggle_fullscreen() if not disengage_webview else None
     
     def run_js_code(self, code: str, add_code_array: bool = False, order: int|None = None, needresult: bool = True):
         if self.jslog and not code.endswith(";"): code += ";"
@@ -297,7 +341,7 @@ class WebCanvas:
             time.sleep(0.01)
     
     def reg_event(self, name: str, callback: typing.Callable) -> None:
-        if disengage_webview: return
+        if disengage_webview or checksys == 'Android': return
         setattr(self.web.events, name, getattr(self.web.events, name) + callback)
     
     def wait_for_close(self) -> None:

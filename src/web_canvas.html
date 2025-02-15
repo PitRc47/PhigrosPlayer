@@ -440,11 +440,20 @@ void main() {
     }
 
     async function connectToSocketBridge() {
-        //window.removeEventListener("touchstart", connectToSocketBridge);
         const addr = '127.0.0.1';
         const port = 8080;
-        const socket = new WebSocket(`ws://${addr}:${port}`);
+        let socket;
+        let connected = false;
         const split_magic = "\x00";
+        while (!connected) {
+            try {
+                socket = new WebSocket(`ws://${addr}:${port}`);
+                connected = true;
+            } catch (error) {
+                console.error('Error connecting to WebSocket:', error);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
 
         window.pywebview = {
             api: {
@@ -457,11 +466,9 @@ void main() {
                 }
             }
         }
-
         socket.onopen = () => {
             console.log("Connected to server");
         };
-
         socket.onmessage = async (event) => {
             for (let rawdata of event.data.split(split_magic)) {
                 if (!rawdata) continue;
@@ -982,8 +989,6 @@ void main() {
         this.restore();
     }
 
-    //window.addEventListener("touchstart", connectToSocketBridge);
-
     const proxyTouchEvent = function (from, to) {
         window.addEventListener(from, (e) => {
             let touch = e.changedTouches[0];
@@ -1041,4 +1046,5 @@ void main() {
     // window.addEventListener("touchend", () => {
     //     pywebview.api.call_attr("PhigrosPlay_KeyUp", new Date().getTime() / 1000);
     // });
+    connectToSocketBridge()
 </script>
