@@ -168,7 +168,12 @@ void main() {
             cv.height = im.height;
             gl.viewport(0, 0, im.width, im.height);
             gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+            if (!im._texture || im._texture.width !== im.width) {
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+                im._texture = { width: im.width, height: im.height };
+            } else {
+                gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, im);
+            }
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             return cv;
         };
@@ -231,7 +236,9 @@ void main() {
         "P", "Q", "R", "S", "T",
         "U", "V", "W", "X", "Y", "Z"
     ]
-    const dpr = window.devicePixelRatio || 1;
+    const maxDpr = window.performance ? Math.min(2, window.devicePixelRatio) : 1;
+    const renderScale = Math.min(1, 720 / Math.min(window.innerWidth, window.innerHeight));
+    const dpr = renderScale * maxDpr;
 
     const None = null;
     const True = true;
