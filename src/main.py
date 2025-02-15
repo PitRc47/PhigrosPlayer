@@ -1,4 +1,16 @@
+import zipfile
+import json
+import sys
+import time
+import logging
+import typing
+
+from threading import Thread
+from os.path import exists, basename, abspath
+
 from checksys import checksys
+from graplib_webview import *
+import load_extended as _
 if checksys == 'Android':
     from kivy.app import App
     from kivy.uix.widget import Widget
@@ -16,36 +28,29 @@ if checksys == 'Android':
             super(Wv, self).__init__(**kwargs)
             Clock.schedule_once(lambda dt: run_on_ui_thread(self.create_webview), 0)
 
+        def init_webview(self):
+            while not self.runtime or not self.webview: time.sleep(0.01) 
+            self.settings = self.runtime.getSettings()
+            self.settings.setJavaScriptEnabled(True)
+            self.session = GeckoSession()
+            self.session.open(self.runtime)
+            self.activity.setContentView(self.webview)
+            self.webview.setSession(self.session)
+            logging.info('webview created')
+            self.session.loadUrl('https://bing.com')
+        
         @run_on_ui_thread
         def create_webview(self, *args):
-            runtime = GeckoRuntime.create(activity)
-            settings = runtime.getSettings()
-            webview = GeckoView(activity)
-            settings.setJavaScriptEnabled(True)
-            session = GeckoSession()
-            session.open(runtime)
-            activity.setContentView(webview)
-            webview.setSession(session)
-            import logging
-            logging.info('webview created')
-            session.loadUrl('about:buildconfig')
-
+            self.runtime = None
+            self.webview = None
+            Thread(target=self.init_webview,daemon=True).start()
+            self.runtime = GeckoRuntime.create(activity)
+            self.webview = GeckoView(activity)
+            
     class ServiceApp(App):
         def build(self):                                                                            
             return Wv()
     ServiceApp().run()
-import zipfile
-import json
-import sys
-import time
-import logging
-import typing
-
-from threading import Thread
-from os.path import exists, basename, abspath
-
-import load_extended as _
-from graplib_webview import *
 
 if checksys == 'Windows':
     from ctypes import windll
