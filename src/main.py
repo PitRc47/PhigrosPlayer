@@ -9,8 +9,6 @@ from threading import Thread
 from os.path import exists, basename, abspath
 
 from checksys import checksys
-from graplib_webview import *
-import load_extended as _
 if checksys == 'Android':
     from kivy.app import App
     from kivy.uix.widget import Widget
@@ -52,6 +50,8 @@ if checksys == 'Android':
             return Wv()
     ServiceApp().run()
 
+from graplib_webview import *
+import load_extended as _
 if checksys == 'Windows':
     from ctypes import windll
 
