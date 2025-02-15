@@ -27,7 +27,8 @@ if checksys == 'Android':
             Clock.schedule_once(lambda dt: run_on_ui_thread(self.create_webview), 0)
 
         def init_webview(self):
-            while not self.runtime or not self.webview: time.sleep(0.01) 
+            while not self.runtime or not self.webview: time.sleep(0.01)
+            logging.info('init_webview start')
             self.settings = self.runtime.getSettings()
             self.settings.setJavaScriptEnabled(True)
             self.session = GeckoSession()
