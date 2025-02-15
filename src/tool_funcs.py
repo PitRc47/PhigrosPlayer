@@ -822,10 +822,17 @@ class TimeoutTaskManager(typing.Generic[_TimeoutTaskManagerT]):
             
         return result
 
+logging.info('Warming Up rpe_easing funcs')
 efs = rpe_easing.ease_funcs.copy()
 rpe_easing.ease_funcs.clear()
 rpe_easing.ease_funcs.extend(map(njit, efs))
 (*map(lambda x: x(random.uniform(0.0, 1.0)), rpe_easing.ease_funcs), )
+for func in rpe_easing.ease_funcs:
+    for _ in range(3):
+        func(0.0)
+        func(1.0)
+        func(0.5)
+        func(random.uniform(0.0, 1.0))
 
 logging.info('Warming Up tool funcs')
 rotate_point(0.0, 0.0, 90, 1.145)
