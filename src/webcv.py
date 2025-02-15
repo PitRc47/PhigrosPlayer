@@ -5,6 +5,7 @@ import imageload_hook as _
 import init_logging as _
 import threading
 import typing
+import os
 import io
 import time
 import socket
