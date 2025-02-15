@@ -910,7 +910,6 @@ def main():
             windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
         if "--fullscreen" in sys.argv:
             w, h = int(root.winfo_screenwidth()), int(root.winfo_screenheight())
-            if checksys != 'Android': root.web.toggle_fullscreen()
         if "--window-host" in sys.argv and checksys == 'Windows':
             windll.user32.SetParent(root.winfo_hwnd(), eval(sys.argv[sys.argv.index("--window-host") + 1]))
         if "--fullscreen" in sys.argv:
