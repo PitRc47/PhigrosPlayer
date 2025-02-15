@@ -67,7 +67,7 @@ if checksys == 'Android':
             
             activity.setContentView(self.webview)
 
-    class GeckoView(App):
+    class GeckoViewApp(App):
         def build(self):
             return GeckoViewWv()
 
@@ -220,7 +220,7 @@ class WebCanvas:
 
     def geckoview_start(self):
         logging.info('Initializing Geckoview')
-        GeckoView().run()
+        GeckoViewApp().run()
         
     
     def _init(self, width: int, height: int, x: int, y: int):
@@ -347,6 +347,7 @@ class WebCanvas:
     def wait_for_close(self) -> None:
         while not self._destroyed.wait(0.1):
             pass
+        sys.exit(0)
 
     def wait_jspromise(self, code: str) -> None:
         eid = f"wait_jspromise_{randint(0, 2 << 31)}"

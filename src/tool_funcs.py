@@ -27,7 +27,7 @@ if checksys == 'Android':
 else:
     logging.info('Jit Enabling')
     from numba import njit
-    njit = njit(cache=True)
+    njit = njit(cache=True, nogil=True)
 
 note_id = -1
 random_block_num = eval(argv[argv.index("--random-block-num") + 1]) if "--random-block-num" in argv else 4
@@ -827,6 +827,7 @@ rpe_easing.ease_funcs.clear()
 rpe_easing.ease_funcs.extend(map(njit, efs))
 (*map(lambda x: x(random.uniform(0.0, 1.0)), rpe_easing.ease_funcs), )
 
+'''
 rotate_point(0.0, 0.0, 90, 1.145)
 unpack_pos(1000 * 11 + 45)
 linear_interpolation(0.5, 0.0, 1.0, 0.0, 1.0)
@@ -845,3 +846,5 @@ getSizeByRect((0.0, 0.0, 1.0, 4.0))
 getCenterPointByRect((0.0, 0.0, 1.0, 1.0))
 getLineLength(0.0, 0.0, 1.0, 1.0)
 indrect(0.0, 3.0, (0.0, 0.0, 1.0, 4.5), 5.3)
+rect2drect((0.0,0.0,0.0,0.0), 0.0)
+'''

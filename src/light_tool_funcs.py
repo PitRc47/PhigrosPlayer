@@ -16,7 +16,7 @@ if checksys == 'Android':
 else:
     logging.info('Jit Enabling')
     from numba import njit
-    njit = njit(cache=True)
+    njit = njit(cache=True, nogil=True)
 
 @njit
 def rotate_point(x, y, θ, r) -> tuple[float, float]:
@@ -576,3 +576,12 @@ def findfileinlist(fn: str, lst: list[str]):
 
 def fileinlist(fn: str, lst: list[str]):
     return findfileinlist(fn, lst) is not None
+
+'''
+getSizeByRect((0.0,0.0,0.0,0.0))
+compute_intersection(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)
+getDPower(0.0,0.0,0.0)
+rotate_point(0,0,0,0)
+rotate_point(0.0,0.0,0.0,0.0)
+is_intersect(((0.0,0.0),(0.0,0.0)),((0.0,0.0),(0.0,0.0)))
+'''
