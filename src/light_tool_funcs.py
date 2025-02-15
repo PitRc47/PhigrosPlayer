@@ -16,6 +16,7 @@ if checksys == 'Android':
 else:
     logging.info('Jit Enabling')
     from numba import njit
+    njit = njit(cache=True)
 
 @njit
 def rotate_point(x, y, θ, r) -> tuple[float, float]:

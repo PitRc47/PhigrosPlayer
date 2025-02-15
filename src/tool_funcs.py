@@ -27,6 +27,7 @@ if checksys == 'Android':
 else:
     logging.info('Jit Enabling')
     from numba import njit
+    njit = njit(cache=True)
 
 note_id = -1
 random_block_num = eval(argv[argv.index("--random-block-num") + 1]) if "--random-block-num" in argv else 4
