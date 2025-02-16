@@ -61,6 +61,7 @@ if checksys == 'Android':
             self.runtime = GeckoRuntime.create(activity)
             self.settings = self.runtime.getSettings()
             self.settings.setRemoteDebuggingEnabled(True)
+            self.settings.setConsoleOutputEnabled(True)
             self.webview = GeckoView(activity)
             
             self.session = GeckoSession()
