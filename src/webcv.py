@@ -59,6 +59,8 @@ if checksys == 'Android':
         @run_on_ui_thread
         def create_webview(self, *args):
             self.runtime = GeckoRuntime.create(activity)
+            self.settings = self.runtime.getSettings()
+            self.settings.setRemoteDebuggingEnabled(True)
             self.webview = GeckoView(activity)
             
             self.session = GeckoSession()
