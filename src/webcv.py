@@ -62,6 +62,8 @@ if checksys == 'Android':
             self.settings = self.runtime.getSettings()
             self.settings.setRemoteDebuggingEnabled(True)
             self.settings.setConsoleOutputEnabled(True)
+            self.settings.setGlMsaaLevel(0) # disable MSAA
+            
             self.webview = GeckoView(activity)
             
             self.session = GeckoSession()
