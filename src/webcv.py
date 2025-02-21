@@ -28,7 +28,6 @@ if checksys == "Windows":
     screen_height = windll.user32.GetSystemMetrics(1)
 if checksys == "Android":
     from jnius import autoclass # type: ignore
-    from kivy.uix.floatlayout import FloatLayout
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
@@ -49,16 +48,13 @@ if checksys == 'Android':
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
     activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-    class GeckoViewWv(FloatLayout):
+    class GeckoViewWv(Widget):
         def __init__(self, **kwargs):
             super(GeckoViewWv, self).__init__(**kwargs)
-            self.size_hint = (1, 1)
             Clock.schedule_once(lambda dt: self.create_webview(), 0)
 
         @run_on_ui_thread
         def create_webview(self, *args):
-            root_container = PythonActivity.mActivity.getWindow().getDecorView().getRootView()
-
             self.runtime = GeckoRuntime.create(activity)
             self.settings = self.runtime.getSettings()
             self.settings.setRemoteDebuggingEnabled(True)
@@ -73,12 +69,8 @@ if checksys == 'Android':
             self.session.open(self.runtime)
             self.webview.setSession(self.session)
             self.session.loadUri(os.path.abspath('web_canvas.html'))
-
-            LayoutParams = autoclass('android.view.ViewGroup$LayoutParams')
-            params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            root_container.addView(self.webview, params)
-    
-            #activity.setContentView(self.webview)
+            
+            activity.setContentView(self.webview)
 
     class GeckoViewApp(App):
         def build(self):
