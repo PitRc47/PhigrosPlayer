@@ -246,6 +246,12 @@ prefs:
   gfx.webrender.fallback.software: false
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
+  gfx.canvas.accelerated.workers.enabled: true
+  canvas.workers.enabled: true
+  canvas.offscreencreators.enabled: true
+  dom.webgpu.enabled: true
+  dom.webgpu.workers.enabled: true
+  gfx.webgpu.ignore-blocklist: true
   
 """)
         logging.info('Initializing Geckoview')
