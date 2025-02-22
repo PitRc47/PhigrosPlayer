@@ -256,12 +256,7 @@ prefs:
   gfx.webrender.multithreading: true
   gfx.blocklist.all: false
   gfx.canvas.accelerated: true
-  gfx.canvas.accelerated.cache-items: 8192
-  gfx.canvas.accelerated.cache-size: 256
   gfx.canvas.accelerated.force-enabled: true
-  gfx.canvas.accelerated.workers.enabled: true
-  canvas.workers.enabled: true
-  canvas.offscreencreators.enabled: true
   
 """)
         logging.info('Initializing Geckoview')
