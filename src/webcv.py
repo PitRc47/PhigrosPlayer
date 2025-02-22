@@ -77,13 +77,8 @@ if checksys == 'Android':
             self.webview.setSession(self.session)
             self.session.loadUri(os.path.abspath('web_canvas.html'))
             
-            activity.addContentView(
-                self.webview,
-                autoclass('android.view.ViewGroup$LayoutParams')(
-                    screen_width, 
-                    screen_width
-                )
-            )
+            activity.setContentView(self.webview)
+            
 
     class GeckoViewApp(App):
         def build(self):
@@ -241,20 +236,13 @@ class WebCanvas:
         with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
             f.write("""
 env:
-  MOZ_LOG: CanvasRenderer:5,Acceleration:5,Worker:5
+  MOZ_LOG: CanvasRenderer:5,Acceleration:5
 
 args:
   - --enable-hardware-canvas
 
 prefs:
-  layers.gpu-process.allow-software: false
-  layers.gpu-process.enabled: true
-  layers.acceleration.force-enabled: true
-  layers.gpu-process.force-enabled: true
-  layers.offmainthreadcomposition.enabled: true
-  gfx.webrender.all: true
-  gfx.webrender.multithreading: true
-  gfx.blocklist.all: false
+  
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
   
