@@ -21,7 +21,7 @@ import graplib_webview
 
 disengage_webview = "--disengage-webview" in sys.argv
 
-if checksys != 'Android': import webview
+if checksys != 'Android' or True: import webview
 if checksys == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
@@ -217,7 +217,7 @@ class WebCanvas:
         self.jslog_f = open(jslog_path, "w", encoding="utf-8") if self.jslog else None
         
         html_path = abspath(html_path)
-        if checksys != 'Android':
+        if checksys != 'Android' or True:
             self.web = webview.create_window(
                 title = title,
                 url = html_path,
@@ -229,7 +229,7 @@ class WebCanvas:
             self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
-        self.start = self.geckoview_start if checksys == 'Android' else self.start
+        #self.start = self.geckoview_start if checksys == 'Android' else self.start
 
     def geckoview_start(self):
         
