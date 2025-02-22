@@ -37,6 +37,7 @@ host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv
 logging.debug(f"server host: {host}")
 
 if checksys == 'Android':
+    '''
     from kivy.app import App
     from kivy.uix.widget import Widget
     from kivy.clock import Clock
@@ -75,6 +76,81 @@ if checksys == 'Android':
     class GeckoViewApp(App):
         def build(self):
             return GeckoViewWv()
+    '''
+    from w4k.webview4kivy import GLWebView
+    # 在webcv.py中添加以下类定义
+    from kivy.app import App
+    from kivy.uix.floatlayout import FloatLayout
+    from kivy.core.window import Window
+
+    class WebCanvasKivyApp(App):
+        def __init__(self, webcanvas: WebCanvas, **kwargs):
+            super().__init__(**kwargs)
+            self.webcanvas = webcanvas
+        
+        def build(self):
+            return WebCanvasLayout(webcanvas=self.webcanvas)
+
+    class WebCanvasLayout(FloatLayout):
+        def __init__(self, webcanvas: WebCanvas, **kwargs):
+            super().__init__(**kwargs)
+            self.webcanvas = webcanvas
+            Window.bind(on_keyboard=self._android_back_handler)
+            
+            # 创建GLWebView实例
+            self.gwebview = GLWebView(
+                url=os.path.abspath('web_canvas.html'),
+                enable_javascript=True,
+                update_fps=30
+            )
+            self.add_widget(self.gwebview)
+            
+            # 初始化控制UI
+            self._build_controls()
+
+        def _build_controls(self):
+            from kivy.uix.textinput import TextInput
+            from kivy.uix.button import Button
+            
+            # URL输入框
+            self.url_input = TextInput(
+                size_hint=(0.8, None),
+                height=50,
+                pos_hint={'center_x': 0.5, 'y': 0.92}
+            )
+            self.add_widget(self.url_input)
+            
+            # 控制按钮组
+            controls = [
+                ('Start Update', 0.2, self._start_update),
+                ('Load URL', 0.5, self._load_url),
+                ('Stop Update', 0.7, self._stop_update)
+            ]
+            
+            for text, x_pos, callback in controls:
+                btn = Button(
+                    text=text,
+                    size_hint=(None, None),
+                    size=(100, 50),
+                    pos_hint={'x': x_pos, 'y': 0.05}
+                )
+                btn.bind(on_release=callback)
+                self.add_widget(btn)
+
+        def _start_update(self, *args):
+            self.gwebview.connect_webview()
+
+        def _stop_update(self, *args):
+            self.gwebview.disconnect_webview()
+
+        def _load_url(self, *args):
+            url = self.url_input.text
+            self.gwebview.load_url(url)
+
+        def _android_back_handler(self, window, key, *args):
+            if key == 27:  # ESC键
+                self.gwebview.go_back()
+                return True
 
 class JsApi:
     def __init__(self) -> None:
@@ -225,7 +301,8 @@ class WebCanvas:
 
     def geckoview_start(self):
         logging.info('Initializing Geckoview')
-        GeckoViewApp().run()
+        WebCanvasKivyApp(webcanvas=self).run()
+        #GeckoViewApp().run()
         
     
     def _init(self, width: int, height: int, x: int, y: int):
