@@ -242,7 +242,7 @@ args:
   - --enable-hardware-canvas
 
 prefs:
-  layers.gpu-process.allow-software: false
+  layers.gpu-process.allow-software: true
   gfx.webrender.fallback.software: false
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
@@ -261,11 +261,11 @@ prefs:
   canvas.workers.enabled: true
   gfx.webrender.all: true
   gfx.webrender.compositor: true
-  gfx.webrender.enable-gpu-markers: true
-  gfx.webrender.enable-item-cache: true
-  gfx.webrender.fallback.software: false
+  gfx.webrender.fallback.software: true
   gfx.webrender.multithreading: true
   gfx.webrender.software: false
+  layers.gpu-process.restart-on-crash: true
+  layers.gpu-process.max-restarts: 3
   
 """)
         logging.info('Initializing Geckoview')
