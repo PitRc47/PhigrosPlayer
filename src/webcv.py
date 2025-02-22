@@ -242,7 +242,8 @@ args:
   - --enable-hardware-canvas
 
 prefs:
-  
+  layers.gpu-process.allow-software: false
+  gfx.webrender.fallback.software: false
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
   
