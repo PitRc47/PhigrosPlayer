@@ -71,6 +71,16 @@ if checksys == 'Android':
             self.session.loadUri(os.path.abspath('web_canvas.html'))
             
             activity.setContentView(self.webview)
+            from kvdroid.jclass.android import View # type: ignore
+            view = View()
+            activity.getWindow().getDecorView().setSystemUiVisibility(
+                view.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | view.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | view.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | view.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | view.SYSTEM_UI_FLAG_FULLSCREEN
+                | view.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
 
     class GeckoViewApp(App):
         def build(self):
