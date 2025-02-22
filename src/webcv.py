@@ -88,6 +88,7 @@ if checksys == 'Android':
                 | view.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | view.SYSTEM_UI_FLAG_FULLSCREEN
                 | view.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | view.SYSTEM_UI_FLAG_LOW_PROFILE
             )
 
     class GeckoViewApp(App):
