@@ -93,7 +93,6 @@ class directSoundAndroid:
         self._enable_cache = enable_cache
         self._volume = 1.0
         self._sdesc = None
-        return
         if isinstance(data, str):
             self._file_path = data
         else:
@@ -118,7 +117,6 @@ class directSoundAndroid:
         return self._audio_format
     
     def set_volume(self, v: float):
-        return 
         self._volume = max(0.0, min(1.0, v))
         if self._media_player is None:
             fis = FileInputStream(self._file_path)
@@ -130,7 +128,6 @@ class directSoundAndroid:
         self._media_player.setVolume(self._volume, self._volume)
     
     def play(self, wait: bool = False):
-        return 
         if self._media_player is None:
             fis = FileInputStream(self._file_path)
             fd = cast(FileDescriptor, fis.getFD())
@@ -145,7 +142,6 @@ class directSoundAndroid:
         return self._media_player
     
     def create(self, playMethod: typing.Literal[0, 1] = 0):
-        return
         if self._media_player is None:
             self._media_player = MediaPlayer()
             fis = FileInputStream(self._file_path)
@@ -156,13 +152,11 @@ class directSoundAndroid:
         return (None, self._media_player)
 
     def stop(self):
-        return
         if self._media_player:
             self._media_player.stop()
             self._media_player.prepare()
     
     def release(self):
-        return
         if self._media_player is not None:
             self._media_player.release()
             self._media_player = None

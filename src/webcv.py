@@ -224,6 +224,33 @@ class WebCanvas:
         self.start = self.geckoview_start if checksys == 'Android' else self.start
 
     def geckoview_start(self):
+        
+        with open('/data/local/tmp/org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
+            f.write("""
+env:
+  MOZ_LOG: CanvasRenderer:5,Acceleration:5,Worker:5
+
+args:
+  - --enable-hardware-canvas
+
+prefs:
+  layers.gpu-process.allow-software: false
+  layers.gpu-process.enabled: true
+  layers.acceleration.force-enabled: true
+  layers.gpu-process.force-enabled: true
+  layers.offmainthreadcomposition.enabled: true
+  gfx.webrender.all: true
+  gfx.webrender.multithreading: true
+  gfx.blocklist.all: false
+  gfx.canvas.accelerated: true
+  gfx.canvas.accelerated.cache-items: 8192
+  gfx.canvas.accelerated.cache-size: 256
+  gfx.canvas.accelerated.force-enabled: true
+  gfx.canvas.accelerated.workers.enabled: true
+  canvas.workers.enabled: true
+  canvas.offscreencreators.enabled: true
+  
+""")
         logging.info('Initializing Geckoview')
         GeckoViewApp().run()
         
