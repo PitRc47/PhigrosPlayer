@@ -43,7 +43,8 @@ if checksys == 'Android':
     from jnius import autoclass # type: ignore
     from android.runnable import run_on_ui_thread # type: ignore
 
-    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')
+    GeckoRuntimeSettings = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings')
+    #Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')
     GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
     GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
@@ -56,6 +57,8 @@ if checksys == 'Android':
 
         @run_on_ui_thread
         def create_webview(self, *args):
+            Builder = GeckoRuntimeSettings.Builder  # 直接通过父类获取 Builder
+
             builder = Builder()
             builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
             runtime_settings = builder.build()
