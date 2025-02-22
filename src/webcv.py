@@ -40,10 +40,11 @@ if checksys == 'Android':
     from kivy.app import App
     from kivy.uix.widget import Widget
     from kivy.clock import Clock
-    from jnius import autoclass # type: ignore
+    from jnius import autoclass, cast # type: ignore
     from android.runnable import run_on_ui_thread # type: ignore
 
-    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')
+    GeckoRuntimeSettings = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings')
+    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')  # 使用 $ 符号
     GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
     GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
