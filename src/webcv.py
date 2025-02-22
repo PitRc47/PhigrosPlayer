@@ -271,7 +271,11 @@ prefs:
   gfx.webrender.picture-cache-size: 128
   gfx.canvas.worker-thread-pool-size: 4
   gfx.webgpu.power-preference: high-performance
-  
+  gfx.blocklist.all: 0
+  gfx.webrender.blocklist.all: false
+  gfx.driver-version.blocklist: ""
+  gl.allow-higher-version: true
+  gl.ignore-dx-interop2-blocklist: true
                     
 """)
         logging.info('Initializing Geckoview')
