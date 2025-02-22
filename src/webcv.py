@@ -51,6 +51,8 @@ if checksys == 'Android':
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
     activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
+    View = autoclass('android.view.View')
+
     class GeckoViewWv(Widget):
         def __init__(self, **kwargs):
             super(GeckoViewWv, self).__init__(**kwargs)
@@ -61,8 +63,8 @@ if checksys == 'Android':
             builder = Builder()
             builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
             builder.aboutConfigEnabled(True)
-            builder.build()
-            self.runtime = GeckoRuntime.create(activity)
+            builder = cast(GeckoRuntimeSettings, builder.build())
+            self.runtime = GeckoRuntime.create(activity, builder)
             self.settings = self.runtime.getSettings()
             self.settings.setRemoteDebuggingEnabled(True)
             self.settings.setConsoleOutputEnabled(True)
@@ -78,8 +80,7 @@ if checksys == 'Android':
             self.session.loadUri(os.path.abspath('web_canvas.html'))
             
             activity.setContentView(self.webview)
-            from kvdroid.jclass.android import View # type: ignore
-            view = View()
+            view = View(activity)
             activity.getWindow().getDecorView().setSystemUiVisibility(
                 view.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | view.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
