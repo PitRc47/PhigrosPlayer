@@ -252,6 +252,20 @@ prefs:
   dom.webgpu.enabled: true
   dom.webgpu.workers.enabled: true
   gfx.webgpu.ignore-blocklist: true
+  layers.gpu-process.enabled: true
+  layers.gpu-process.force-enabled: true
+  gfx.canvas.remote: true
+  gfx.canvas.remote.allow-in-parent: true
+  gfx.canvas.remote.allow-offscreen: true
+  gfx.canvas.accelerated.stroke-to-fill-path: true
+  canvas.workers.enabled: true
+  gfx.webrender.all: true
+  gfx.webrender.compositor: true
+  gfx.webrender.enable-gpu-markers: true
+  gfx.webrender.enable-item-cache: true
+  gfx.webrender.fallback.software: false
+  gfx.webrender.multithreading: true
+  gfx.webrender.software: false
   
 """)
         logging.info('Initializing Geckoview')
