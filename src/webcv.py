@@ -77,7 +77,13 @@ if checksys == 'Android':
             self.webview.setSession(self.session)
             self.session.loadUri(os.path.abspath('web_canvas.html'))
             
-            activity.setContentView(self.webview)
+            activity.addContentView(
+                self.webview,
+                autoclass('android.view.ViewGroup$LayoutParams')(
+                    screen_width, 
+                    screen_width
+                )
+            )
 
     class GeckoViewApp(App):
         def build(self):
