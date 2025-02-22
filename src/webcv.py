@@ -43,6 +43,7 @@ if checksys == 'Android':
     from jnius import autoclass # type: ignore
     from android.runnable import run_on_ui_thread # type: ignore
 
+    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')
     GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
     GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
@@ -55,7 +56,10 @@ if checksys == 'Android':
 
         @run_on_ui_thread
         def create_webview(self, *args):
-            self.runtime = GeckoRuntime.create(activity)
+            builder = Builder()
+            builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
+            runtime_settings = builder.build()
+            self.runtime = GeckoRuntime.create(activity, runtime_settings)
             self.settings = self.runtime.getSettings()
             self.settings.setRemoteDebuggingEnabled(True)
             self.settings.setConsoleOutputEnabled(True)
@@ -235,7 +239,7 @@ class WebCanvas:
 
     def geckoview_start(self):
         
-        with open('/data/local/tmp/org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
+        with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
             f.write("""
 env:
   MOZ_LOG: CanvasRenderer:5,Acceleration:5,Worker:5
