@@ -236,7 +236,7 @@ class WebCanvas:
         with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
             f.write("""
 env:
-  MOZ_LOG: CanvasRenderer:5,Acceleration:5
+  MOZ_LOG: CanvasRenderer:5,Acceleration:5,Worker:5
 
 args:
   - --enable-hardware-canvas
@@ -266,7 +266,13 @@ prefs:
   gfx.webrender.software: false
   layers.gpu-process.restart-on-crash: true
   layers.gpu-process.max-restarts: 3
+  gfx.webrender.blob-tile-size: 512
+  gfx.webrender.picture-caching.enabled: true
+  gfx.webrender.picture-cache-size: 128
+  gfx.canvas.worker-thread-pool-size: 4
+  gfx.webgpu.power-preference: high-performance
   
+                    
 """)
         logging.info('Initializing Geckoview')
         GeckoViewApp().run()
