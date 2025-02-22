@@ -51,8 +51,6 @@ if checksys == 'Android':
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
     activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-    View = autoclass('android.view.View')
-
     class GeckoViewWv(Widget):
         def __init__(self, **kwargs):
             super(GeckoViewWv, self).__init__(**kwargs)
@@ -77,19 +75,9 @@ if checksys == 'Android':
             self.session = GeckoSession()
             self.session.open(self.runtime)
             self.webview.setSession(self.session)
-            self.session.loadUri(os.path.abspath('web_canvas.html'))
+            self.session.loadUri('about:support')
             
             activity.setContentView(self.webview)
-            view = View(activity)
-            activity.getWindow().getDecorView().setSystemUiVisibility(
-                view.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | view.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | view.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | view.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | view.SYSTEM_UI_FLAG_FULLSCREEN
-                | view.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | view.SYSTEM_UI_FLAG_LOW_PROFILE
-            )
 
     class GeckoViewApp(App):
         def build(self):
