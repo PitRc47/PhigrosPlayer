@@ -980,7 +980,6 @@ def main():
     )
     Thread(target=root.init, args=(init, ), daemon=True).start()
     root.start()
-    atexit_run()
 
 if checksys != 'Android':
     try:
