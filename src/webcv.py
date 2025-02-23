@@ -253,6 +253,7 @@ prefs:
   layers.gpu-process.driver-blacklist: "" 
   gfx.webrender.precache-shaders: true
   gfx.webrender.ignore-driver-blacklist: true
+  webgl.use-canvas-render-thread: true
   layers.gpu-process.driver-whitelist: ""
                     
 """)
