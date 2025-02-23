@@ -223,6 +223,7 @@ prefs:
   gfx.webgpu.ignore-blocklist: true
   layers.gpu-process.enabled: true
   layers.gpu-process.force-enabled: true
+  gfx.canvas.willreadfrequently.enabled: false
   gfx.canvas.remote: true
   gfx.canvas.remote.allow-in-parent: true
   gfx.canvas.remote.allow-offscreen: true
