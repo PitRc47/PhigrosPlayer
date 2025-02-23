@@ -234,6 +234,9 @@ prefs:
   gfx.webrender.fallback.software: false
   gfx.webrender.multithreading: true
   gfx.webrender.software: false
+  webgl.disable-angle: false
+  gfx.webrender.angle.suppress-device-loss: true
+  gfx.webrender.force-angle: true
   layers.gpu-process.restart-on-crash: true
   layers.gpu-process.max-restarts: 3
   gfx.webrender.blob-tile-size: 512
