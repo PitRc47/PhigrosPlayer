@@ -15,4 +15,4 @@ Chart.lfdaot
 .vscode
 ppr-jslog-nofmt.js
 default-argvs.json
-kivy_venv/
+venv/
