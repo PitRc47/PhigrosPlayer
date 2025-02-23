@@ -51,39 +51,6 @@ if checksys == 'Android':
     GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
     activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-    class GeckoViewWv(Widget):
-        def __init__(self, **kwargs):
-            super(GeckoViewWv, self).__init__(**kwargs)
-            Clock.schedule_once(lambda dt: self.create_webview(), 0)
-
-        @run_on_ui_thread
-        def create_webview(self, *args):
-            builder = Builder()
-            builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
-            builder.aboutConfigEnabled(True)
-            builder = cast(GeckoRuntimeSettings, builder.build())
-            self.runtime = GeckoRuntime.create(activity, builder)
-            self.settings = self.runtime.getSettings()
-            self.settings.setRemoteDebuggingEnabled(True)
-            self.settings.setConsoleOutputEnabled(True)
-            self.settings.setJavaScriptEnabled(True)
-            #self.settings.setParallelMarkingEnabled(True)
-            self.settings.setGlMsaaLevel(0) # disable MSAA
-            
-            self.webview = GeckoView(activity)
-            
-            self.session = GeckoSession()
-            self.session.open(self.runtime)
-            self.webview.setSession(self.session)
-            self.session.loadUri(os.path.abspath('web_canvas.html'))
-            
-            activity.setContentView(self.webview)
-            
-
-    class GeckoViewApp(App):
-        def build(self):
-            return GeckoViewWv()
-
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
@@ -279,7 +246,26 @@ prefs:
                     
 """)
         logging.info('Initializing Geckoview')
-        GeckoViewApp().run()
+        builder = Builder()
+        builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
+        builder.aboutConfigEnabled(True)
+        builder = cast(GeckoRuntimeSettings, builder.build())
+        self.runtime = GeckoRuntime.create(activity, builder)
+        self.settings = self.runtime.getSettings()
+        self.settings.setRemoteDebuggingEnabled(True)
+        self.settings.setConsoleOutputEnabled(True)
+        self.settings.setJavaScriptEnabled(True)
+        #self.settings.setParallelMarkingEnabled(True)
+        self.settings.setGlMsaaLevel(0) # disable MSAA
+        
+        self.webview = GeckoView(activity)
+        
+        self.session = GeckoSession()
+        self.session.open(self.runtime)
+        self.webview.setSession(self.session)
+        self.session.loadUri(os.path.abspath('web_canvas.html'))
+        
+        activity.setContentView(self.webview)
         
     
     def _init(self, width: int, height: int, x: int, y: int):
