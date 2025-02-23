@@ -209,6 +209,7 @@ args:
   - --enable-webgl2-compute-context
 
 prefs:
+  layers.gpu-process.driver-vendor-whitelist: ""
   layers.gpu-process.allow-software: false
   gfx.webrender.fallback.software: false
   gfx.canvas.accelerated: true
@@ -244,12 +245,12 @@ prefs:
   gl.allow-higher-version: true
   layers.gpu-process.allow-software: false
   gl.ignore-dx-interop2-blocklist: true
-  gfx.webrender.enable-gpu-markers: true
-  gfx.webrender.force-gpu-mem-zero: true
   gfx.canvas.azure.accelerated: 1
   layers.gpu-process.driver-vendor-blacklist: ""
   layers.gpu-process.driver-blacklist: "" 
   gfx.webrender.precache-shaders: true
+  gfx.webrender.ignore-driver-blacklist: true
+  layers.gpu-process.driver-whitelist: ""
                     
 """)
         logging.info('Initializing Geckoview')
