@@ -204,10 +204,12 @@ env:
   MOZ_LOG: CanvasRenderer:5,Acceleration:5,Worker:5
 
 args:
-  - --enable-hardware-canvas
+  - --enable-gpu
+  - --enable-webgl
+  - --enable-webgl2-compute-context
 
 prefs:
-  layers.gpu-process.allow-software: true
+  layers.gpu-process.allow-software: false
   gfx.webrender.fallback.software: false
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
@@ -226,7 +228,7 @@ prefs:
   canvas.workers.enabled: true
   gfx.webrender.all: true
   gfx.webrender.compositor: true
-  gfx.webrender.fallback.software: true
+  gfx.webrender.fallback.software: false
   gfx.webrender.multithreading: true
   gfx.webrender.software: false
   layers.gpu-process.restart-on-crash: true
@@ -240,7 +242,14 @@ prefs:
   gfx.webrender.blocklist.all: false
   gfx.driver-version.blocklist: ""
   gl.allow-higher-version: true
+  layers.gpu-process.allow-software: false
   gl.ignore-dx-interop2-blocklist: true
+  gfx.webrender.enable-gpu-markers: true
+  gfx.webrender.force-gpu-mem-zero: true
+  gfx.canvas.azure.accelerated: 1
+  layers.gpu-process.driver-vendor-blacklist: ""
+  layers.gpu-process.driver-blacklist: "" 
+  gfx.webrender.precache-shaders: true
                     
 """)
         logging.info('Initializing Geckoview')
