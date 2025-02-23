@@ -207,6 +207,7 @@ args:
   - --enable-gpu
   - --enable-webgl
   - --enable-webgl2-compute-context
+  - --ignore-gpu-blocklist
 
 prefs:
   layers.gpu-process.driver-vendor-whitelist: ""
@@ -245,6 +246,7 @@ prefs:
   gl.allow-higher-version: true
   layers.gpu-process.allow-software: false
   gl.ignore-dx-interop2-blocklist: true
+  gfx.webrender.batched-upload.enabled: true
   gfx.canvas.azure.accelerated: 1
   layers.gpu-process.driver-vendor-blacklist: ""
   layers.gpu-process.driver-blacklist: "" 
