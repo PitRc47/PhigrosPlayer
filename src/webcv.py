@@ -225,6 +225,7 @@ prefs:
   layers.gpu-process.force-enabled: true
   gfx.canvas.willreadfrequently.enabled: false
   gfx.canvas.remote: true
+  gfx.canvas.accelerated.debug: true
   gfx.canvas.remote.allow-in-parent: true
   gfx.canvas.remote.allow-offscreen: true
   gfx.canvas.accelerated.stroke-to-fill-path: true
