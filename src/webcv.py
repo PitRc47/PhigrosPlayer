@@ -39,14 +39,7 @@ logging.debug(f"server host: {host}")
 if checksys == 'Android':
     from jnius import autoclass, cast # type: ignore
     from android.runnable import run_on_ui_thread # type: ignore
-
-    
-    GeckoRuntimeSettings = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings')
-    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')  # 使用 $ 符号
-    GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
-    GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
-    GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
-    activity = autoclass('org.kivy.android.PythonActivity').mActivity
+    session = autoclass('org.kivy.android.PythonActivity').msession
 
 class JsApi:
     def __init__(self) -> None:
@@ -212,26 +205,7 @@ prefs:
                     
 """)
         logging.info('Initializing Geckoview')
-        builder = Builder()
-        builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
-        builder.aboutConfigEnabled(True)
-        builder = cast(GeckoRuntimeSettings, builder.build())
-        self.runtime = GeckoRuntime.create(activity, builder)
-        self.settings = self.runtime.getSettings()
-        self.settings.setRemoteDebuggingEnabled(True)
-        self.settings.setConsoleOutputEnabled(True)
-        self.settings.setJavaScriptEnabled(True)
-        #self.settings.setParallelMarkingEnabled(True)
-        self.settings.setGlMsaaLevel(0) # disable MSAA
-        
-        self.webview = GeckoView(activity)
-        
-        self.session = GeckoSession()
-        self.session.open(self.runtime)
-        self.webview.setSession(self.session)
-        self.session.loadUri(os.path.abspath('web_canvas.html'))
-        
-        activity.setContentView(self.webview)
+        session.loadUri(os.path.abspath('web_canvas.html'))
         
     
     def _init(self, width: int, height: int, x: int, y: int):
