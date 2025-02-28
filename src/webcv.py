@@ -195,7 +195,6 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
         self.start = self.geckoview_start if checksys == 'Android' else self.start
 
-    @run_on_ui_thread
     def geckoview_start(self):
         
         with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:

@@ -40,7 +40,7 @@ def getOrder():
     return order
 
 def clearCanvas(wait_execute: bool = False):
-    root.run_js_code(f"{ctx}.clear();", wait_execute, order)
+    root.run_js_code(f"{ctx}.clear2();", wait_execute, order)
     
 def drawLine(
     x0: number, y0: number,
