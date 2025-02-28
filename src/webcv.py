@@ -280,7 +280,7 @@ prefs:
         self.webview.setSession(self.session)
         self.session.loadUri(os.path.abspath('web_canvas.html'))
         
-        #activity.setContentView(self.webview)
+        activity.setContentView(self.webview)
         
     
     def _init(self, width: int, height: int, x: int, y: int):
