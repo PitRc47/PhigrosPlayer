@@ -63,10 +63,6 @@
     }
 </style>
 
-<script src="js/gl-matrix-min.js"></script>
-<script src="js/litegl.min.js"></script>
-<script src="js/Canvas2DtoWebGL.js"></script>
-
 <script>
     (() => {
         const cv = document.createElement("canvas");
@@ -185,6 +181,21 @@ void main() {
 </script>
 
 <script>
+    CanvasRenderingContext2D.prototype.reset = (
+        CanvasRenderingContext2D.prototype.reset ||
+        function () {
+            this.resetTransform();
+            this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    );
+
+    CanvasRenderingContext2D.prototype.roundRect = (
+        CanvasRenderingContext2D.prototype.roundRect ||
+        CanvasRenderingContext2D.prototype.rect
+    );
+</script>
+
+<script>
     root_ele = document.getRootNode();
     html_ele = root_ele.children[0];
     body_ele = html_ele.children[1];
@@ -195,22 +206,10 @@ void main() {
     body_ele.appendChild(canvas_ele);
     body_ele.appendChild(dialog_canvas_ele);
     mask = document.querySelector(".mask");
-    /*ctx = canvas_ele.getContext("2d", {
-        willReadFrequently: false,
-        alpha: false
-    });*/
-    ctx = enableWebGLCanvas( canvas_ele , {
+    ctx = canvas_ele.getContext("2d", {
         willReadFrequently: false,
         alpha: false
     });
-    ctx.reset = (
-        ctx.reset ||
-        function () {
-            ctx.resetTransform();
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        }
-    );
-    ctx.start2D();
     dialog_canvas_ctx = dialog_canvas_ele.getContext("2d");
     jscodes = new Array();
     resize_task = false;
@@ -288,7 +287,7 @@ void main() {
             uniforms["screenSize"] = [cv.width, cv.height];
             let result = this.render(cv, name, uniforms);
             if (result === null) return;
-            ctx.clear2();
+            ctx.clear();
             ctx.save();
             ctx.translate(cv.width / 2, cv.height / 2);
             ctx.scale(1, -1);
@@ -596,243 +595,243 @@ void main() {
         return im;
     }
 
-    ctx._drawImage = ctx.drawImage;
+    CanvasRenderingContext2D.prototype._drawImage = CanvasRenderingContext2D.prototype.drawImage;
 
-    ctx.drawImage = function(...args) {
+    CanvasRenderingContext2D.prototype.drawImage = function(...args) {
         args[0] = toLowQualityImage(args[0]);
-        if (!ctx.globalAlpha) return;
-        return ctx._drawImage(...args);
+        if (!this.globalAlpha) return;
+        return this._drawImage(...args);
     }
 
-    ctx.drawRotateImage = function(im, x, y, width, height, deg, alpha) { // draw at the position center
-        ctx.save();
-        ctx.globalAlpha *= alpha;
+    CanvasRenderingContext2D.prototype.drawRotateImage = function(im, x, y, width, height, deg, alpha) { // draw at the position center
+        this.save();
+        this.globalAlpha *= alpha;
         if (!!deg) {
-            ctx.translate(x, y);
-            ctx.rotate(deg * Math.PI / 180);
-            ctx.drawImage(im, -width / 2, -height / 2, width, height);
+            this.translate(x, y);
+            this.rotate(deg * Math.PI / 180);
+            this.drawImage(im, -width / 2, -height / 2, width, height);
         } else {
-            ctx.drawImage(im, x - width / 2, y - height / 2, width, height);
+            this.drawImage(im, x - width / 2, y - height / 2, width, height);
         }
-        ctx.restore();
+        this.restore();
     }
 
-    ctx.drawAnchorESRotateImage = function(im, x, y, width, height, deg, alpha) {
-        ctx.save();
-        ctx.globalAlpha *= alpha;
+    CanvasRenderingContext2D.prototype.drawAnchorESRotateImage = function(im, x, y, width, height, deg, alpha) {
+        this.save();
+        this.globalAlpha *= alpha;
         if (!!deg) {
-            ctx.translate(x, y);
-            ctx.rotate(deg * Math.PI / 180);
-            ctx.drawImage(im, -width / 2, -height, width, height);
+            this.translate(x, y);
+            this.rotate(deg * Math.PI / 180);
+            this.drawImage(im, -width / 2, -height, width, height);
         } else {
-            ctx.drawImage(im, x - width / 2, y - height, width, height);
+            this.drawImage(im, x - width / 2, y - height, width, height);
         }
-        ctx.restore();
+        this.restore();
     }
 
-    ctx.drawScaleImage = function(im, x, y, width, height, xs, ys) {
+    CanvasRenderingContext2D.prototype.drawScaleImage = function(im, x, y, width, height, xs, ys) {
         x += width / 2; y += height / 2;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(xs, ys);
-        ctx.drawImage(im, -width / 2, -height / 2, width, height);
-        ctx.restore();
+        this.save();
+        this.translate(x, y);
+        this.scale(xs, ys);
+        this.drawImage(im, -width / 2, -height / 2, width, height);
+        this.restore();
     }
 
-    ctx.drawRPEMultipleRotateText = function(text, x, y, deg, fontsize, color, xs, ys) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(deg * Math.PI / 180);
-        ctx.scale(xs, ys);
-        ctx.fillStyle = color;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `${fontsize}px PhigrosFont`;
+    CanvasRenderingContext2D.prototype.drawRPEMultipleRotateText = function(text, x, y, deg, fontsize, color, xs, ys) {
+        this.save();
+        this.translate(x, y);
+        this.rotate(deg * Math.PI / 180);
+        this.scale(xs, ys);
+        this.fillStyle = color;
+        this.textAlign = "center";
+        this.textBaseline = "middle";
+        this.font = `${fontsize}px PhigrosFont`;
 
         if (text.includes("\n") && RPEVersion >= 150) {
             let texts = text.split("\n");
             let x = 0.0; let y = 0.0;
             for (let currtext of texts) {
-                if (currtext) ctx.fillText(currtext, x, y);
-                let measure = ctx.measureText(currtext);
+                if (currtext) this.fillText(currtext, x, y);
+                let measure = this.measureText(currtext);
                 y += (measure.actualBoundingBoxDescent + measure.actualBoundingBoxAscent) * 1.25;
             }
         }
         else {
-            ctx.fillText(text, 0, 0);
+            this.fillText(text, 0, 0);
         }
 
-        ctx.restore();
+        this.restore();
     }
 
-    ctx.drawRotateText = function(text, x, y, deg, fontsize, color, xscale, yscale) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(deg * Math.PI / 180);
-        ctx.scale(xscale, yscale);
-        ctx.fillStyle = color;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `${fontsize}px PhigrosFont`;
-        ctx.fillText(text, 0, 0);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawRotateText = function(text, x, y, deg, fontsize, color, xscale, yscale) {
+        this.save();
+        this.translate(x, y);
+        this.rotate(deg * Math.PI / 180);
+        this.scale(xscale, yscale);
+        this.fillStyle = color;
+        this.textAlign = "center";
+        this.textBaseline = "middle";
+        this.font = `${fontsize}px PhigrosFont`;
+        this.fillText(text, 0, 0);
+        this.restore();
     }
 
-    ctx.drawAlphaImage = function(im, x, y, width, height, alpha) {
-        ctx.save()
-        ctx.globalAlpha *= alpha;
-        ctx.drawImage(im, x, y, width, height);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawAlphaImage = function(im, x, y, width, height, alpha) {
+        this.save()
+        this.globalAlpha *= alpha;
+        this.drawImage(im, x, y, width, height);
+        this.restore();
     }
 
-    ctx.drawAlphaCenterImage = function(im, x, y, width, height, alpha) {
-        ctx.save()
-        ctx.globalAlpha *= alpha;
-        ctx.drawImage(im, x - width / 2, y - height / 2, width, height);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawAlphaCenterImage = function(im, x, y, width, height, alpha) {
+        this.save()
+        this.globalAlpha *= alpha;
+        this.drawImage(im, x - width / 2, y - height / 2, width, height);
+        this.restore();
     }
 
-    ctx.drawTextEx = function(text, x, y, font, color, align, baseline) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
-        ctx.font = font;
-        ctx.fillText(text, x, y);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawTextEx = function(text, x, y, font, color, align, baseline) {
+        this.save();
+        this.fillStyle = color;
+        this.textAlign = align;
+        this.textBaseline = baseline;
+        this.font = font;
+        this.fillText(text, x, y);
+        this.restore();
     }
 
-    ctx.fillRectEx = function(x, y, w, h, color) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, w, h);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.fillRectEx = function(x, y, w, h, color) {
+        this.save();
+        this.fillStyle = color;
+        this.fillRect(x, y, w, h);
+        this.restore();
     }
 
-    ctx.fillRectExConvert2LeftCenter = function(x, y, w, h, color) {
+    CanvasRenderingContext2D.prototype.fillRectExConvert2LeftCenter = function(x, y, w, h, color) {
         y += h / 2;
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(x, y - h / 2);
-        ctx.lineTo(x + w, y - h / 2);
-        ctx.lineTo(x + w, y + h / 2);
-        ctx.lineTo(x, y + h / 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        this.save();
+        this.fillStyle = color;
+        this.beginPath();
+        this.moveTo(x, y - h / 2);
+        this.lineTo(x + w, y - h / 2);
+        this.lineTo(x + w, y + h / 2);
+        this.lineTo(x, y + h / 2);
+        this.closePath();
+        this.fill();
+        this.restore();
     }
 
-    ctx.fillRectExByRect = function(x0, y0, x1, y1, color) {
-        return ctx.fillRectEx(x0, y0, x1 - x0, y1 - y0, color);
+    CanvasRenderingContext2D.prototype.fillRectExByRect = function(x0, y0, x1, y1, color) {
+        return this.fillRectEx(x0, y0, x1 - x0, y1 - y0, color);
     }
 
-    ctx.strokeRectEx = function(x, y, w, h, color, width) {
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.strokeRect(x, y, w, h);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.strokeRectEx = function(x, y, w, h, color, width) {
+        this.save();
+        this.strokeStyle = color;
+        this.lineWidth = width;
+        this.strokeRect(x, y, w, h);
+        this.restore();
     }
 
-    ctx.addRoundRectData = function(x, y, w, h, r) {
-        if (ctx._roundDatas == undefined) ctx._roundDatas = [];
-        ctx._roundDatas.push({ x: x, y: y, w: w, h: h, r: r });
+    CanvasRenderingContext2D.prototype.addRoundRectData = function(x, y, w, h, r) {
+        if (this._roundDatas == undefined) this._roundDatas = [];
+        this._roundDatas.push({ x: x, y: y, w: w, h: h, r: r });
     }
 
-    ctx.drawRoundDatas = function(color) {
-        if (ctx._roundDatas) {
-            ctx.roundRectsEx(color, ctx._roundDatas);
-            ctx._roundDatas = undefined;
+    CanvasRenderingContext2D.prototype.drawRoundDatas = function(color) {
+        if (this._roundDatas) {
+            this.roundRectsEx(color, this._roundDatas);
+            this._roundDatas = undefined;
         }
     }
 
-    ctx.roundRectsEx = function(color, datas) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.beginPath();
+    CanvasRenderingContext2D.prototype.roundRectsEx = function(color, datas) {
+        this.save();
+        this.fillStyle = color;
+        this.beginPath();
         for (let i of datas) {
-            ctx.roundRect(i.x, i.y, i.w, i.h, i.r);
+            this.roundRect(i.x, i.y, i.w, i.h, i.r);
         }
-        ctx.fill();
-        ctx.restore();
+        this.fill();
+        this.restore();
     }
 
-    ctx.drawLineEx = function(x1, y1, x2, y2, width, color) {
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawLineEx = function(x1, y1, x2, y2, width, color) {
+        this.save();
+        this.strokeStyle = color;
+        this.lineWidth = width;
+        this.beginPath();
+        this.moveTo(x1, y1);
+        this.lineTo(x2, y2);
+        this.stroke();
+        this.restore();
     }
 
-    ctx._diagonalRectangle = function(x0, y0, x1, y1, power) {
-        ctx.moveTo(x0 + (x1 - x0) * power, y0);
-        ctx.lineTo(x1, y0);
-        ctx.lineTo(x1 - (x1 - x0) * power, y1);
-        ctx.lineTo(x0, y1);
-        ctx.lineTo(x0 + (x1 - x0) * power, y0);
+    CanvasRenderingContext2D.prototype._diagonalRectangle = function(x0, y0, x1, y1, power) {
+        this.moveTo(x0 + (x1 - x0) * power, y0);
+        this.lineTo(x1, y0);
+        this.lineTo(x1 - (x1 - x0) * power, y1);
+        this.lineTo(x0, y1);
+        this.lineTo(x0 + (x1 - x0) * power, y0);
     }
 
-    ctx.clipDiagonalRectangle = function(x0, y0, x1, y1, power) {
-        ctx.beginPath();
-        ctx._diagonalRectangle(x0, y0, x1, y1, power);
-        ctx.clip();
+    CanvasRenderingContext2D.prototype.clipDiagonalRectangle = function(x0, y0, x1, y1, power) {
+        this.beginPath();
+        this._diagonalRectangle(x0, y0, x1, y1, power);
+        this.clip();
     }
 
-    ctx.clipRect = function(x0, y0, x1, y1) {
-        ctx.beginPath();
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
-        ctx.clip();
+    CanvasRenderingContext2D.prototype.clipRect = function(x0, y0, x1, y1) {
+        this.beginPath();
+        this.rect(x0, y0, x1 - x0, y1 - y0);
+        this.clip();
     }
     
-    ctx.drawClipXText = function(text, x, y, align, baseline, color, font, clipx0, clipx1) {
-        ctx.save();
-        ctx.clipRect(clipx0, 0, clipx1, ctx.canvas.height);
-        ctx.fillStyle = color;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
-        ctx.font = font;
-        ctx.fillText(text, x, y);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawClipXText = function(text, x, y, align, baseline, color, font, clipx0, clipx1) {
+        this.save();
+        this.clipRect(clipx0, 0, clipx1, this.canvas.height);
+        this.fillStyle = color;
+        this.textAlign = align;
+        this.textBaseline = baseline;
+        this.font = font;
+        this.fillText(text, x, y);
+        this.restore();
     }
 
-    ctx.drawDiagonalRectangle = function(x0, y0, x1, y1, power, color) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx._diagonalRectangle(x0, y0, x1, y1, power);
-        ctx.fill();
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawDiagonalRectangle = function(x0, y0, x1, y1, power, color) {
+        this.save();
+        this.fillStyle = color;
+        this.beginPath();
+        this._diagonalRectangle(x0, y0, x1, y1, power);
+        this.fill();
+        this.restore();
     }
 
-    ctx.drawDiagonalDialogRectangleText = function(x0, y0, x1, y1, power, text1, text2, color, font) {
-        ctx.save();
-        ctx.fillStyle = color;
-        ctx.font = font;
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "left";
-        ctx.fillText(text1, x0 + (x1 - x0) * power * 3.0, y0 + (y1 - y0) * 0.5);
-        ctx.textAlign = "right";
-        ctx.fillText(text2, x1 - (x1 - x0) * power * 2.0, y0 + (y1 - y0) * 0.5);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawDiagonalDialogRectangleText = function(x0, y0, x1, y1, power, text1, text2, color, font) {
+        this.save();
+        this.fillStyle = color;
+        this.font = font;
+        this.textBaseline = "middle";
+        this.textAlign = "left";
+        this.fillText(text1, x0 + (x1 - x0) * power * 3.0, y0 + (y1 - y0) * 0.5);
+        this.textAlign = "right";
+        this.fillText(text2, x1 - (x1 - x0) * power * 2.0, y0 + (y1 - y0) * 0.5);
+        this.restore();
     }
 
-    ctx.drawDiagonalRectangleClipImage = function(x0, y0, x1, y1, im, imx, imy, imw, imh, power, alpha) {
+    CanvasRenderingContext2D.prototype.drawDiagonalRectangleClipImage = function(x0, y0, x1, y1, im, imx, imy, imw, imh, power, alpha) {
         if (alpha == 0.0) return;
-        ctx.save();
-        ctx.globalAlpha *= alpha;
-        ctx.beginPath();
-        ctx._diagonalRectangle(x0, y0, x1, y1, power);
-        ctx.clip();
-        ctx.drawImage(im, x0 + imx, y0 + imy, imw, imh);
-        ctx.restore();
+        this.save();
+        this.globalAlpha *= alpha;
+        this.beginPath();
+        this._diagonalRectangle(x0, y0, x1, y1, power);
+        this.clip();
+        this.drawImage(im, x0 + imx, y0 + imy, imw, imh);
+        this.restore();
     }
 
-    ctx.drawDiagonalRectangleClipImageOnlyHeight = function(x0, y0, x1, y1, im, imh, power, alpha) {
+    CanvasRenderingContext2D.prototype.drawDiagonalRectangleClipImageOnlyHeight = function(x0, y0, x1, y1, im, imh, power, alpha) {
         let imw = imh * im.width / im.height;
         if (imw < x1 - x0) {
             imw = x1 - x0;
@@ -840,72 +839,72 @@ void main() {
         }
         let imx = (x1 - x0) / 2 - imw / 2;
         let imy = (y1 - y0) / 2 - imh / 2;
-        return ctx.drawDiagonalRectangleClipImage(x0, y0, x1, y1, im, imx, imy, imw, imh, power, alpha);
+        return this.drawDiagonalRectangleClipImage(x0, y0, x1, y1, im, imx, imy, imw, imh, power, alpha);
     }
 
-    ctx.drawRotateText2 = function(text, x, y, deg, color, font, align, baseline) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(deg * Math.PI / 180);
-        ctx.fillStyle = color;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
-        ctx.font = font;
-        ctx.fillText(text, 0, 0);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawRotateText2 = function(text, x, y, deg, color, font, align, baseline) {
+        this.save();
+        this.translate(x, y);
+        this.rotate(deg * Math.PI / 180);
+        this.fillStyle = color;
+        this.textAlign = align;
+        this.textBaseline = baseline;
+        this.font = font;
+        this.fillText(text, 0, 0);
+        this.restore();
     }
 
-    ctx.drawTriangleFrame = function(x0, y0, x1, y1, x2, y2, color, width) {
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.drawTriangleFrame = function(x0, y0, x1, y1, x2, y2, color, width) {
+        this.save();
+        this.strokeStyle = color;
+        this.lineWidth = width;
+        this.beginPath();
+        this.moveTo(x0, y0);
+        this.lineTo(x1, y1);
+        this.lineTo(x2, y2);
+        this.closePath();
+        this.stroke();
+        this.restore();
     }
 
-    ctx.drawRectMultilineText = function(x0, y0, x1, y1, text, color, font, fontsize, lineOffsetScale) {
-        ctx.save();
+    CanvasRenderingContext2D.prototype.drawRectMultilineText = function(x0, y0, x1, y1, text, color, font, fontsize, lineOffsetScale) {
+        this.save();
 
-        ctx.font = font;
-        ctx.fillStyle = color;
-        ctx.textBaseline = "top";
-        ctx.textAlign = "left";
+        this.font = font;
+        this.fillStyle = color;
+        this.textBaseline = "top";
+        this.textAlign = "left";
         let texts = splitText(x0, y0, x1, y1, text, this);
 
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
+        this.rect(x0, y0, x1 - x0, y1 - y0);
         let dy = 0.0;
 
         for (let i = 0; i < texts.length; i++) {
-            ctx.fillText(texts[i], x0, y0 + dy);
+            this.fillText(texts[i], x0, y0 + dy);
             dy += fontsize * lineOffsetScale;
             if (dy >= (y1 - y0)) break;
         }
 
-        ctx.restore();
+        this.restore();
         return texts.length * fontsize * lineOffsetScale;
     }
 
-    ctx.drawRectMultilineTextDiagonal = function(x0, y0, x1, y1, text, color, font, fontsize, lineDiagonal, lineOffsetScale) {
-        ctx.save();
+    CanvasRenderingContext2D.prototype.drawRectMultilineTextDiagonal = function(x0, y0, x1, y1, text, color, font, fontsize, lineDiagonal, lineOffsetScale) {
+        this.save();
 
-        ctx.font = font;
-        ctx.fillStyle = color;
-        ctx.textBaseline = "top";
-        ctx.textAlign = "left";
+        this.font = font;
+        this.fillStyle = color;
+        this.textBaseline = "top";
+        this.textAlign = "left";
         let texts = splitText(x0, y0, x1, y1, text, this);
 
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
+        this.rect(x0, y0, x1 - x0, y1 - y0);
         let dx = 0.0;
         let dy = 0.0;
 
         for (let i = 0; i < texts.length; i++) {
             if (texts[i]) {
-                ctx.fillText(texts[i], x0 + dx, y0 + dy);
+                this.fillText(texts[i], x0 + dx, y0 + dy);
                 dy += fontsize * lineOffsetScale;
                 dx += lineDiagonal;
             } else {
@@ -915,61 +914,61 @@ void main() {
             if (dy >= (y1 - y0)) break;
         }
 
-        ctx.restore();
+        this.restore();
         return texts.length * fontsize * lineOffsetScale;
     }
 
-    ctx.drawRectMultilineTextCenter = function(x0, y0, x1, y1, text, color, font, fontsize, lineOffsetScale) {
-        ctx.save();
+    CanvasRenderingContext2D.prototype.drawRectMultilineTextCenter = function(x0, y0, x1, y1, text, color, font, fontsize, lineOffsetScale) {
+        this.save();
 
-        ctx.font = font;
-        ctx.fillStyle = color;
-        ctx.textBaseline = "top";
-        ctx.textAlign = "center";
+        this.font = font;
+        this.fillStyle = color;
+        this.textBaseline = "top";
+        this.textAlign = "center";
         let texts = splitText(x0, y0, x1, y1, text, this);
 
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
+        this.rect(x0, y0, x1 - x0, y1 - y0);
         let dy = 0.0;
 
         for (let i = 0; i < texts.length; i++) {
-            ctx.fillText(texts[i], x0 + (x1 - x0) / 2, y0 + dy);
+            this.fillText(texts[i], x0 + (x1 - x0) / 2, y0 + dy);
             dy += fontsize * lineOffsetScale;
             if (dy >= (y1 - y0)) break;
         }
 
-        ctx.restore();
+        this.restore();
         return texts.length * fontsize * lineOffsetScale;
     }
 
-    ctx.drawUIItems = function(datas) {
+    CanvasRenderingContext2D.prototype.drawUIItems = function(datas) {
         for (let i of datas) {
             if (i == null) continue;
 
             if (i.type == "text") {
-                ctx.save();
-                ctx.font = `${i.fontsize}px PhigrosFont`;
-                ctx.textBaseline = i.textBaseline;
-                ctx.textAlign = i.textAlign;
-                ctx.fillStyle = i.color;
-                ctx.translate(i.x + i.dx, i.y + i.dy);
-                if (i.sx != 1.0 || i.sy != 1.0) ctx.scale(i.sx, i.sy);
-                if (i.rotate != 0.0) ctx.rotate(i.rotate * Math.PI / 180);
-                ctx.fillText(i.text, 0, 0);
-                ctx.restore();
+                this.save();
+                this.font = `${i.fontsize}px PhigrosFont`;
+                this.textBaseline = i.textBaseline;
+                this.textAlign = i.textAlign;
+                this.fillStyle = i.color;
+                this.translate(i.x + i.dx, i.y + i.dy);
+                if (i.sx != 1.0 || i.sy != 1.0) this.scale(i.sx, i.sy);
+                if (i.rotate != 0.0) this.rotate(i.rotate * Math.PI / 180);
+                this.fillText(i.text, 0, 0);
+                this.restore();
             }
             else if (i.type == "image") {
-                ctx.save();
+                this.save();
                 const img = eval(i.image);
                 const [r, g, b, a] = i.color;
-                ctx.translate(i.x + i.dx, i.y + i.dy);
-                if (i.rotate != 0.0) ctx.rotate(i.rotate * Math.PI / 180);
-                if (a != 1.0) ctx.globalAlpha = a;
+                this.translate(i.x + i.dx, i.y + i.dy);
+                if (i.rotate != 0.0) this.rotate(i.rotate * Math.PI / 180);
+                if (a != 1.0) this.globalAlpha = a;
                 if (r != 255 || g != 255 || b != 255) {
                     setColorMatrix(r, g, b);
-                    ctx.filter = "url(#textureLineColorFilter)";
+                    this.filter = "url(#textureLineColorFilter)";
                 }
-                ctx.drawImage(img, 0, 0, i.width, i.height);
-                ctx.restore();
+                this.drawImage(img, 0, 0, i.width, i.height);
+                this.restore();
             }
             else if (i.type == "call") {
                 this[i.name](...i.args);
@@ -977,26 +976,24 @@ void main() {
             else if (i.type == "pbar") {
                 const { w, pw, process } = i;
 
-                ctx.save();
-                // if (i.dx != 0.0 || i.dy != 0.0) ctx.translate(i.dx, i.dy);
-                // if (i.rotate != 0.0) ctx.rotate(i.rotate * Math.PI / 180);
-                // if (i.scale != 0.0) ctx.scale(i.sx, i.sy);
+                this.save();
+                // if (i.dx != 0.0 || i.dy != 0.0) this.translate(i.dx, i.dy);
+                // if (i.rotate != 0.0) this.rotate(i.rotate * Math.PI / 180);
+                // if (i.scale != 0.0) this.scale(i.sx, i.sy);
 
                 const [r, g, b, a] = i.color.split("(")[1].split(")")[0].split(", ");
-                ctx.fillRectExConvert2LeftCenter(0, 0, w * process, pw, `rgba(${145 * r / 255}, ${145 * g / 255}, ${145 * b / 255}, ${0.85 * a})`);
-                ctx.fillRectExConvert2LeftCenter(w * process - w * 0.00175, 0, w * 0.00175, pw, `rgba(${r}, ${g}, ${b}, ${0.9 * a})`);
-                ctx.restore();
+                this.fillRectExConvert2LeftCenter(0, 0, w * process, pw, `rgba(${145 * r / 255}, ${145 * g / 255}, ${145 * b / 255}, ${0.85 * a})`);
+                this.fillRectExConvert2LeftCenter(w * process - w * 0.00175, 0, w * 0.00175, pw, `rgba(${r}, ${g}, ${b}, ${0.9 * a})`);
+                this.restore();
             }
         }
     }
 
-    ctx.clear2 = function() {
-        ctx.finish2D();
-        ctx.start2D();
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.restore();
+    CanvasRenderingContext2D.prototype.clear = function() {
+        this.save();
+        this.setTransform(1, 0, 0, 1, 0, 0);
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.restore();
     }
 
     const proxyTouchEvent = function (from, to) {
