@@ -190,20 +190,6 @@ class WebCanvas:
 
     @run_on_ui_thread
     def geckoview_start(self):
-        
-        with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
-            f.write("""
-env:
-  MOZ_LOG: Acceleration:5
-
-args:
-  - --ignore-gpu-blocklist
-
-prefs:
-  gfx.canvas.accelerated: true
-  gfx.canvas.accelerated.force-enabled: true
-                    
-""")
         logging.info('Initializing Geckoview')
         session.loadUri(os.path.abspath('web_canvas.html'))
         
