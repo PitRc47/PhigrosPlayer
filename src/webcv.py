@@ -210,7 +210,7 @@ prefs:
   gfx.work-around-driver-bugs: true
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
-                    
+  layers.gpu-process.force-enabled: true
 """)
         logging.info('Initializing Geckoview')
         builder = Builder()
