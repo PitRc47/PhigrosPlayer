@@ -209,7 +209,7 @@ args:
 prefs:
   gfx.work-around-driver-bugs: true
   gfx.canvas.accelerated: true
-  gfx.canvas.accelerated.force-enabled: true
+  
   layers.gpu-process.force-enabled: true
   security.sandbox.gpu.level: 0
   gfx.webrender.all: true
