@@ -211,6 +211,9 @@ prefs:
   gfx.canvas.accelerated: true
   gfx.canvas.accelerated.force-enabled: true
   layers.gpu-process.force-enabled: true
+  security.sandbox.gpu.level: 0
+
+                    
 """)
         logging.info('Initializing Geckoview')
         builder = Builder()
