@@ -212,6 +212,9 @@ prefs:
   gfx.canvas.accelerated.force-enabled: true
   layers.gpu-process.force-enabled: true
   security.sandbox.gpu.level: 0
+  gfx.webrender.all: true
+  gfx.webrender.software: false
+  gfx.webrender.fallback.software: false
 
                     
 """)
