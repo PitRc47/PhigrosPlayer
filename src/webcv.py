@@ -49,6 +49,7 @@ if checksys == 'Android':
     Color = autoclass('android.graphics.Color')
     PorterDuffMode = autoclass('android.graphics.PorterDuff$Mode')
     PaintAlign = autoclass('android.graphics.Paint$Align')
+    PaintStyle = autoclass('android.graphics.Paint$Style')
     BitmapConfig = autoclass('android.graphics.Bitmap$Config')
 
 
