@@ -304,15 +304,15 @@ else:
             super().__init__(**kwargs)
             with self.canvas:
                 self.rect = Rectangle()
-            ctx.fillRect(50, 50, 100, 100)
             Clock.schedule_once(self.update_texture, 0)
 
         def update_texture(self, dt):
+            ctx.fillRect(50, 50, 100, 100)
             new_texture = ctx.update_texture(dt)
             if new_texture:
                 self.rect.texture = new_texture
-                self.rect.size = (self.width, self.height)
                 self.rect.pos = (0, 0)
+                self.rect.size = (screen_width, screen_height)
 
     class KivyCanvas(App):
         def build(self): return MainWidget()
