@@ -276,45 +276,39 @@ if checksys == 'Android':
                 # 处理字体字符串解析错误
                 self.paint.setTextSize(12)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
+    import kivy
+    from kivy.app import App
+    from kivy.uix.widget import Widget
+    from kivy.graphics import Rectangle
+    from kivy.graphics.texture import Texture
+    from jnius import autoclass
 
-    screen_width = 400
-    screen_height = 400
-    from jnius import autoclass, PythonJavaClass, java_method
+    class MyWidget(Widget):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
-    PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    View = autoclass('android.view.View')
-    Canvas = autoclass('android.graphics.Canvas')
-    Paint = autoclass('android.graphics.Paint')
-    Color = autoclass('android.graphics.Color')
-    PaintStyle = autoclass('android.graphics.Paint$Style')
+            screen_width = 400
+            screen_height = 400
+
+            bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
+            ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
+
+            # 示例绘制操作
+            ctx.fillRect(50, 50, 100, 100)
+
+            # 将 Android 的 Bitmap 转换为 Kivy 的 Texture
+            pixels = bytearray(bitmap.getRowBytes() * bitmap.getHeight())
+            bitmap.copyPixelsToBuffer(pixels)
+            texture = Texture.create(size=(bitmap.getWidth(), bitmap.getHeight()), colorfmt='rgba')
+            texture.blit_buffer(pixels, colorfmt='rgba', bufferfmt='ubyte')
+
+            with self.canvas:
+                Rectangle(texture=texture, pos=self.pos, size=self.size)
 
 
-    class CustomDrawingView(View, PythonJavaClass):
-        __javaclass__ = 'com.example.CustomDrawingView'
-        def __init__(self, activity):
-            super().__init__(activity)
-            self.paint = Paint()
-            self.paint.setColor(Color.GREEN)
-            self.paint.setStyle(PaintStyle.FILL)
-
-        @java_method('(Landroid/graphics/Canvas;)V')
-        def onDraw(self, canvas):
-            canvas.drawRect(50, 50, 250, 250, self.paint)
-    
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
-    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
-
-    
-    PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    activity = PythonActivity.mActivity
-
-    custom_view = CustomDrawingView(activity)
-
-    # 获取 Activity 的根布局
-    root_layout = activity.getWindow().getDecorView().findViewById(android.R.id.content)
-
-    # 将自定义 View 添加到根布局
-    root_layout.addView(custom_view)
+class MyApp(App):
+    def build(self):
+        return MyWidget()
 
 class JsApi:
     def __init__(self) -> None:
@@ -463,7 +457,7 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
     
     def _init(self, width: int, height: int, x: int, y: int):
-        ctx.fillRect(10,20,30,40)
+        #ctx.fillRect(10,20,30,40)
         while True: pass
         if not disengage_webview:
             self.web_hwnd = 0
