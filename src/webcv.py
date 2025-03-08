@@ -293,9 +293,6 @@ if checksys == 'Android':
             super().__init__(**kwargs)
 
             # 创建 Android 的 Bitmap 对象
-            bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888)
-            # 这里假设你已经有 CanvasRenderingContext2D 类进行绘制操作
-            ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
             ctx.fillRect(50, 50, 100, 100)  # 示例绘制
 
             # 创建 Java 的 ByteBuffer
