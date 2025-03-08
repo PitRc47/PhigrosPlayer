@@ -283,6 +283,30 @@ if checksys == 'Android':
     bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
     ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
 
+    View = autoclass('android.view.View')
+    from jnius import autoclass, PythonJavaClass, java_method #type: ignore
+        class CustomDrawingView(View, PythonJavaClass):
+        def __init__(self, activity):
+            super().__init__(activity)
+            self.paint = Paint()
+            self.paint.setColor(Color.GREEN)
+            self.paint.setStyle(PaintStyle.FILL)
+
+        @java_method('(Landroid/graphics/Canvas;)V')
+        def onDraw(self, canvas):
+            # 在这里进行绘制操作，例如绘制一个矩形
+            canvas.drawRect(50, 50, 250, 250, self.paint)
+    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+    activity = PythonActivity.mActivity
+
+    custom_view = CustomDrawingView(activity)
+
+    # 获取 Activity 的根布局
+    root_layout = activity.getWindow().getDecorView().findViewById(android.R.id.content)
+
+    # 将自定义 View 添加到根布局
+    root_layout.addView(custom_view)
+
 class JsApi:
     def __init__(self) -> None:
         self.things: dict[str, typing.Any] = {}
