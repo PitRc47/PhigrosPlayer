@@ -48,6 +48,8 @@ if checksys == 'Android':
     Typeface = autoclass('android.graphics.Typeface')
     Color = autoclass('android.graphics.Color')
     PorterDuffMode = autoclass('android.graphics.PorterDuff$Mode')
+    BitmapConfig = autoclass('android.graphics.Bitmap$Config')
+
 
 
     class CanvasRenderingContext2D:
@@ -239,7 +241,8 @@ if checksys == 'Android':
 
     screen_width = 400
     screen_height = 400
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.ARGB_8888)
+    
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
     ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
 
 class JsApi:
