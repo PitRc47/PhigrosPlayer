@@ -284,6 +284,7 @@ else:
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
 
         def update_texture(self, dt):
+            self.fillRect(50, 50, 100, 100)
             if self.texture is None:
                 self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
 
