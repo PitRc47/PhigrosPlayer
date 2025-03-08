@@ -278,29 +278,38 @@ if checksys == 'Android':
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
     import kivy
     from kivy.app import App
+    ByteBuffer = autoclass('java.nio.ByteBuffer')
     from kivy.uix.widget import Widget
     from kivy.graphics import Rectangle
     from kivy.graphics.texture import Texture
     from jnius import autoclass
+    screen_width = 400
+    screen_height = 400
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
+    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
 
     class MyWidget(Widget):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
 
-            screen_width = 400
-            screen_height = 400
-
-            bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
+            # 创建 Android 的 Bitmap 对象
+            bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888)
+            # 这里假设你已经有 CanvasRenderingContext2D 类进行绘制操作
             ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
+            ctx.fillRect(50, 50, 100, 100)  # 示例绘制
 
-            # 示例绘制操作
-            ctx.fillRect(50, 50, 100, 100)
+            # 创建 Java 的 ByteBuffer
+            buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
+            # 将 Bitmap 像素复制到 ByteBuffer
+            bitmap.copyPixelsToBuffer(buffer)
 
-            # 将 Android 的 Bitmap 转换为 Kivy 的 Texture
-            pixels = bytearray(bitmap.getRowBytes() * bitmap.getHeight())
-            bitmap.copyPixelsToBuffer(pixels)
+            # 重新定位缓冲区指针到起始位置
+            buffer.rewind()
+
+            # 创建 Kivy 的 Texture
             texture = Texture.create(size=(bitmap.getWidth(), bitmap.getHeight()), colorfmt='rgba')
-            texture.blit_buffer(pixels, colorfmt='rgba', bufferfmt='ubyte')
+            # 将 ByteBuffer 数据复制到 Texture
+            texture.blit_buffer(buffer.array(), colorfmt='rgba', bufferfmt='ubyte')
 
             with self.canvas:
                 Rectangle(texture=texture, pos=self.pos, size=self.size)
