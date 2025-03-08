@@ -21,22 +21,23 @@ import graplib_webview
 
 disengage_webview = "--disengage-webview" in sys.argv
 
-if checksys != 'Android': import webview
+host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
+logging.debug(f"server host: {host}")
+
 if checksys == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
-if checksys == "Android":
+
+if checksys != 'Android': import webview
+else:
+    from kivy.app import App
+    from kivy.uix.widget import Widget
+    from kivy.graphics import Rectangle
+    from kivy.graphics.texture import Texture
     from jnius import autoclass # type: ignore
+    
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
-    screen_width = metrics.widthPixels
-    screen_height = metrics.heightPixels
-
-host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
-logging.debug(f"server host: {host}")
-
-if checksys == 'Android':
     Bitmap = autoclass('android.graphics.Bitmap')
     Canvas = autoclass('android.graphics.Canvas')
     Paint = autoclass('android.graphics.Paint')
@@ -50,8 +51,12 @@ if checksys == 'Android':
     PorterDuffMode = autoclass('android.graphics.PorterDuff$Mode')
     PaintAlign = autoclass('android.graphics.Paint$Align')
     PaintStyle = autoclass('android.graphics.Paint$Style')
+    ByteBuffer = autoclass('java.nio.ByteBuffer')
     BitmapConfig = autoclass('android.graphics.Bitmap$Config')
 
+    metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
+    screen_width = metrics.widthPixels
+    screen_height = metrics.heightPixels
 
 
     class CanvasRenderingContext2D:
@@ -273,27 +278,16 @@ if checksys == 'Android':
                 self.paint.setTextSize(size)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
             except (IndexError, ValueError):
-                # 处理字体字符串解析错误
                 self.paint.setTextSize(12)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
-    import kivy
-    from kivy.app import App
-    ByteBuffer = autoclass('java.nio.ByteBuffer')
-    from kivy.uix.widget import Widget
-    from kivy.graphics import Rectangle
-    from kivy.graphics.texture import Texture
-    from jnius import autoclass
-    screen_width = 400
-    screen_height = 400
+    
     bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
     ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
-
-    class MyWidget(Widget):
+    
+    class MainWidget(Widget):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-
-            # 创建 Android 的 Bitmap 对象
-            ctx.fillRect(50, 50, 100, 100)  # 示例绘制
+            ctx.fillRect(50, 50, 100, 100)
 
             buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
             # 将 Bitmap 像素复制到 ByteBuffer
@@ -317,11 +311,10 @@ if checksys == 'Android':
                 Rectangle(texture=texture, pos=self.pos, size=self.size)
 
 
-    class MyApp(App):
-        def build(self):
-            return MyWidget()
+    class KivyCanvas(App):
+        def build(self): return MainWidget()
     
-    MyApp().run()
+    KivyCanvas().run()
 
 class JsApi:
     def __init__(self) -> None:
