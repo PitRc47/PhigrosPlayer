@@ -35,6 +35,7 @@ else:
     from kivy.uix.widget import Widget
     from kivy.graphics import Rectangle
     from kivy.graphics.texture import Texture
+    from kivy.clock import Clock
     from jnius import autoclass # type: ignore
     
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
@@ -77,6 +78,7 @@ else:
             self.globalAlpha = 1
             self.imageSmoothingEnabled = True
             self.transformMatrix = [1, 0, 0, 1, 0, 0]
+            self.texture = None
 
         def clearRect(self, x, y, width, height):
             self.canvas.drawColor(Color.TRANSPARENT, PorterDuffMode.CLEAR)
@@ -280,18 +282,14 @@ else:
             except (IndexError, ValueError):
                 self.paint.setTextSize(12)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
-    
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
-    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
-    
-    class MainWidget(Widget):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            ctx.fillRect(50, 50, 100, 100)
 
-            buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
+        def update_texture(self):
+            if self.texture is None:
+                self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
+
+            buffer = ByteBuffer.allocate(self.bitmap.getRowBytes() * self.bitmap.getHeight())
             # 将 Bitmap 像素复制到 ByteBuffer
-            bitmap.copyPixelsToBuffer(buffer)
+            self.bitmap.copyPixelsToBuffer(buffer)
 
             # 重新定位缓冲区指针到起始位置
             buffer.rewind()
@@ -302,14 +300,18 @@ else:
             # 将 Java 字节数组转换为 Python 的 bytes 对象
             python_bytes = bytes([java_byte_array[i] for i in range(len(java_byte_array))])
 
-            # 创建 Kivy 的 Texture
-            texture = Texture.create(size=(bitmap.getWidth(), bitmap.getHeight()), colorfmt='rgba')
             # 将 bytes 数据复制到 Texture
-            texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
+            self.texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
+            return self.texture
 
-            with self.canvas:
-                Rectangle(texture=texture, pos=self.pos, size=self.size)
-
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
+    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
+    
+    class MainWidget(Widget):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            ctx.fillRect(50, 50, 100, 100)
+            Clock.schedule_once(ctx.update_texture, 0)
 
     class KivyCanvas(App):
         def build(self): return MainWidget()
