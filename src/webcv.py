@@ -64,7 +64,6 @@ if checksys == 'Android':
             self.lineWidth = 1
             self.font = "normal 12px sans-serif"
             self.textAlign = PaintAlign.LEFT
-            # 修改为字符串形式，对应 HTML5 Canvas 的 textBaseline 概念
             self.textBaseline = "alphabetic"
             self.fillStyle = Color.BLACK
             self.strokeStyle = Color.BLACK
@@ -78,13 +77,13 @@ if checksys == 'Android':
             self.canvas.drawColor(Color.TRANSPARENT, PorterDuffMode.CLEAR)
 
         def fillRect(self, x, y, width, height):
-            self.paint.setStyle(Paint.Style.FILL)
+            self.paint.setStyle(PaintStyle.FILL)
             self.paint.setColor(self.fillStyle)
             self.paint.setAlpha(int(255 * self.globalAlpha))
             self.canvas.drawRect(x, y, x + width, y + height, self.paint)
 
         def strokeRect(self, x, y, width, height):
-            self.paint.setStyle(Paint.Style.STROKE)
+            self.paint.setStyle(PaintStyle.STROKE)
             self.paint.setStrokeWidth(self.lineWidth)
             self.paint.setColor(self.strokeStyle)
             self.paint.setAlpha(int(255 * self.globalAlpha))
