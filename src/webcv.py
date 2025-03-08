@@ -279,12 +279,14 @@ if checksys == 'Android':
 
     screen_width = 400
     screen_height = 400
-    
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
-    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
-
+    PythonActivity = autoclass('org.kivy.android.PythonActivity')
     View = autoclass('android.view.View')
-    from jnius import autoclass, PythonJavaClass, java_method #type: ignore
+    Canvas = autoclass('android.graphics.Canvas')
+    Paint = autoclass('android.graphics.Paint')
+    Color = autoclass('android.graphics.Color')
+    PaintStyle = autoclass('android.graphics.Paint$Style')
+
+
     class CustomDrawingView(View, PythonJavaClass):
         def __init__(self, activity):
             super().__init__(activity)
@@ -294,8 +296,12 @@ if checksys == 'Android':
 
         @java_method('(Landroid/graphics/Canvas;)V')
         def onDraw(self, canvas):
-            # 在这里进行绘制操作，例如绘制一个矩形
             canvas.drawRect(50, 50, 250, 250, self.paint)
+    
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
+    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
+
+    
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     activity = PythonActivity.mActivity
 
