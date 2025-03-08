@@ -31,6 +31,8 @@ if checksys == "Windows":
 
 if checksys != 'Android': import webview
 else:
+    from kivy.config import Config
+    Config.set('kivy', 'show_fps', 1)  # 启用 FPS 显示
     from kivy.app import App
     from kivy.uix.widget import Widget
     from kivy.graphics import Rectangle
@@ -283,7 +285,7 @@ else:
                 self.paint.setTextSize(12)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
 
-        def update_texture(self, dt):
+        def update_texture(self):
             if self.texture is None:
                 self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
 
@@ -307,7 +309,8 @@ else:
             Clock.schedule_interval(self.update_texture, 0)
 
         def update_texture(self, dt):
-            self.rect.texture = ctx.update_texture(dt)
+            print(dt)
+            self.rect.texture = ctx.update_texture()
             self.rect.pos = self.pos
             self.rect.size = self.size
     
@@ -315,10 +318,11 @@ else:
         def build(self): return MainWidget()
     
     def d():
-        import random
+        x = 0
         while True:
             ctx.clearRect(0, 0, screen_width, screen_height)
-            ctx.fillRect(random.randint(0, 2000), random.randint(0, 1000), 20, 20)
+            ctx.fillRect(x, 500, 100, 100)
+            x += 1
     
     threading.Thread(target=d, daemon=True).start()
     KivyCanvas().run()
