@@ -51,8 +51,9 @@ if checksys == 'Android':
 
 
     class CanvasRenderingContext2D:
-        def __init__(self, canvas):
+        def __init__(self, canvas, bitmap):
             self.canvas = canvas
+            self.bitmap = bitmap
             self.paint = Paint()
             self.path = Path()
             self.paint.setAntiAlias(True)
@@ -186,14 +187,11 @@ if checksys == 'Android':
             self.canvas.drawBitmap(bitmap, x, y, self.paint)
 
         def getImageData(self, x, y, width, height):
-            # 确保 self.canvas 有 getBitmap 方法，这里可能需要调整
-            # 假设 self.canvas 是由 Bitmap 创建的
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             tempCanvas = Canvas(bitmap)
             rectSrc = Rect(x, y, x + width, y + height)
             rectDst = Rect(0, 0, width, height)
-            # 这里需要确保 self.canvas 对应的 Bitmap 获取方式正确
-            source_bitmap = None  # 需要根据实际情况获取
+            source_bitmap = self.bitmap  # 使用保存的 Bitmap 引用
             tempCanvas.drawBitmap(source_bitmap, rectSrc, rectDst, None)
             return bitmap
 
@@ -239,6 +237,10 @@ if checksys == 'Android':
                 self.paint.setTextSize(12)
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
 
+    screen_width = 400
+    screen_height = 400
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888)
+    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
 
 class JsApi:
     def __init__(self) -> None:
@@ -387,6 +389,8 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
     
     def _init(self, width: int, height: int, x: int, y: int):
+        ctx.fillRect(10,20,30,40)
+        while True: pass
         if not disengage_webview:
             self.web_hwnd = 0
             if checksys == 'Windows':
