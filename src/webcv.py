@@ -81,6 +81,7 @@ else:
             self.imageSmoothingEnabled = True
             self.transformMatrix = [1, 0, 0, 1, 0, 0]
             self.texture = None
+            self.buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
 
         def clearRect(self, x, y, width, height):
             self.canvas.drawColor(Color.TRANSPARENT, PorterDuffMode.CLEAR)
@@ -288,11 +289,11 @@ else:
         def update_texture(self):
             if self.texture is None:
                 self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
-
-            buffer = ByteBuffer.allocate(self.bitmap.getRowBytes() * self.bitmap.getHeight())
-            self.bitmap.copyPixelsToBuffer(buffer)
-            buffer.rewind()
-            java_byte_array = buffer.array()
+                self.texture.flip_vertical()
+            self.buffer.rewind()  # 重置指针
+            self.bitmap.copyPixelsToBuffer(self.buffer)
+            self.buffer.rewind()
+            java_byte_array = self.buffer.array()
             python_bytes = bytes(java_byte_array)
             
             self.texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
@@ -306,13 +307,15 @@ else:
             super().__init__(**kwargs)
             self.rect = Rectangle()
             self.canvas.add(self.rect)
-            Clock.schedule_interval(self.update_texture, 0)
+            Clock.schedule_interval(self.update_texture, 1/60)
 
         def update_texture(self, dt):
-            print(dt)
+            start_time = time.perf_counter()
             self.rect.texture = ctx.update_texture()
             self.rect.pos = self.pos
             self.rect.size = self.size
+            duration = (time.perf_counter() - start_time) * 1000  # 转换为毫秒
+            logging.debug(f"update_texture took {duration:.2f} ms")  # 输出耗时
     
     class KivyCanvas(App):
         def build(self): return MainWidget()
@@ -323,6 +326,7 @@ else:
             ctx.clearRect(0, 0, screen_width, screen_height)
             ctx.fillRect(x, 500, 100, 100)
             x += 1
+            time.sleep(0.01)
     
     threading.Thread(target=d, daemon=True).start()
     KivyCanvas().run()
