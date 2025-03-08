@@ -314,8 +314,13 @@ else:
     class KivyCanvas(App):
         def build(self): return MainWidget()
     
+    def d():
+        import random
+        while True:
+            ctx.reset()
+            ctx.fillRect(random.randint(0, 2000), random.randint(0, 1000), 20, 20)
     
-
+    threading.Thread(target=d, daemon=True).start()
     KivyCanvas().run()
 
 class JsApi:
