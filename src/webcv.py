@@ -310,7 +310,7 @@ else:
             self.rect.texture = ctx.update_texture(dt)
             self.rect.pos = self.pos
             self.rect.size = self.size
-
+    
     class KivyCanvas(App):
         def build(self): return MainWidget()
     
