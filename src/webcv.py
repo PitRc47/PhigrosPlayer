@@ -284,24 +284,15 @@ else:
                 self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
 
         def update_texture(self, dt):
-            self.fillRect(50, 50, 100, 100)
             if self.texture is None:
                 self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
 
             buffer = ByteBuffer.allocate(self.bitmap.getRowBytes() * self.bitmap.getHeight())
-            # 将 Bitmap 像素复制到 ByteBuffer
             self.bitmap.copyPixelsToBuffer(buffer)
-
-            # 重新定位缓冲区指针到起始位置
             buffer.rewind()
-
-            # 获取 Java 的字节数组
             java_byte_array = buffer.array()
-
-            # 将 Java 字节数组转换为 Python 的 bytes 对象
-            python_bytes = bytes([java_byte_array[i] for i in range(len(java_byte_array))])
-
-            # 将 bytes 数据复制到 Texture
+            python_bytes = bytes(java_byte_array)
+            
             self.texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
             return self.texture
 
@@ -311,8 +302,17 @@ else:
     class MainWidget(Widget):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
+            with self.canvas:
+                self.rect = Rectangle()
             ctx.fillRect(50, 50, 100, 100)
-            Clock.schedule_once(ctx.update_texture, 0)
+            Clock.schedule_once(self.update_texture, 0)
+
+        def update_texture(self, dt):
+            new_texture = ctx.update_texture(dt)
+            if new_texture:
+                self.rect.texture = new_texture
+                self.rect.size = (self.width, self.height)
+                self.rect.pos = (0, 0)
 
     class KivyCanvas(App):
         def build(self): return MainWidget()
