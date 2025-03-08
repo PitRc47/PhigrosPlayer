@@ -295,7 +295,6 @@ if checksys == 'Android':
             # 创建 Android 的 Bitmap 对象
             ctx.fillRect(50, 50, 100, 100)  # 示例绘制
 
-            # 创建 Java 的 ByteBuffer
             buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
             # 将 Bitmap 像素复制到 ByteBuffer
             bitmap.copyPixelsToBuffer(buffer)
@@ -303,10 +302,16 @@ if checksys == 'Android':
             # 重新定位缓冲区指针到起始位置
             buffer.rewind()
 
+            # 获取 Java 的字节数组
+            java_byte_array = buffer.array()
+
+            # 将 Java 字节数组转换为 Python 的 bytes 对象
+            python_bytes = bytes([java_byte_array[i] for i in range(len(java_byte_array))])
+
             # 创建 Kivy 的 Texture
             texture = Texture.create(size=(bitmap.getWidth(), bitmap.getHeight()), colorfmt='rgba')
-            # 将 ByteBuffer 数据复制到 Texture
-            texture.blit_buffer(buffer.array(), colorfmt='rgba', bufferfmt='ubyte')
+            # 将 bytes 数据复制到 Texture
+            texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
 
             with self.canvas:
                 Rectangle(texture=texture, pos=self.pos, size=self.size)
