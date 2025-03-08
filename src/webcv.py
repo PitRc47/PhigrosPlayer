@@ -239,7 +239,7 @@ if checksys == 'Android':
 
     screen_width = 400
     screen_height = 400
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888)
+    bitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.ARGB_8888)
     ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
 
 class JsApi:
