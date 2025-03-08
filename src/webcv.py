@@ -317,7 +317,7 @@ else:
     def d():
         import random
         while True:
-            ctx.reset()
+            ctx.clearRect(0, 0, screen_width, screen_height)
             ctx.fillRect(random.randint(0, 2000), random.randint(0, 1000), 20, 20)
     
     threading.Thread(target=d, daemon=True).start()
