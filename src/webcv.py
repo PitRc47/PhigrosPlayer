@@ -290,6 +290,7 @@ if checksys == 'Android':
 
 
     class CustomDrawingView(View, PythonJavaClass):
+        __javaclass__ = 'com.example.CustomDrawingView'
         def __init__(self, activity):
             super().__init__(activity)
             self.paint = Paint()
