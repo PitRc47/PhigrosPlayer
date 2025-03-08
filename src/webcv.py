@@ -306,9 +306,11 @@ if checksys == 'Android':
                 Rectangle(texture=texture, pos=self.pos, size=self.size)
 
 
-class MyApp(App):
-    def build(self):
-        return MyWidget()
+    class MyApp(App):
+        def build(self):
+            return MyWidget()
+    
+    MyApp().run()
 
 class JsApi:
     def __init__(self) -> None:
