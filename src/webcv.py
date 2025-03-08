@@ -48,6 +48,7 @@ if checksys == 'Android':
     Typeface = autoclass('android.graphics.Typeface')
     Color = autoclass('android.graphics.Color')
     PorterDuffMode = autoclass('android.graphics.PorterDuff$Mode')
+    PaintAlign = autoclass('android.graphics.Paint$Align')
     BitmapConfig = autoclass('android.graphics.Bitmap$Config')
 
 
@@ -61,8 +62,9 @@ if checksys == 'Android':
             self.paint.setAntiAlias(True)
             self.lineWidth = 1
             self.font = "normal 12px sans-serif"
-            self.textAlign = Paint.Align.LEFT
-            self.textBaseline = Paint.BASELINE
+            self.textAlign = PaintAlign.LEFT
+            # 修改为字符串形式，对应 HTML5 Canvas 的 textBaseline 概念
+            self.textBaseline = "alphabetic"
             self.fillStyle = Color.BLACK
             self.strokeStyle = Color.BLACK
             self.shadowBlur = 0
@@ -93,6 +95,24 @@ if checksys == 'Android':
             self.paint.setAlpha(int(255 * self.globalAlpha))
             self.applyFont()
             self.paint.setTextAlign(self.textAlign)
+
+            # 根据 textBaseline 调整 y 坐标
+            font_metrics = self.paint.getFontMetrics()
+            if self.textBaseline == "top":
+                y += -font_metrics.ascent
+            elif self.textBaseline == "hanging":
+                # 近似处理，不同字体可能有差异
+                y += -font_metrics.ascent * 0.8
+            elif self.textBaseline == "middle":
+                y += (font_metrics.descent - font_metrics.ascent) / 2 - font_metrics.descent
+            elif self.textBaseline == "alphabetic":
+                # 默认基线，无需调整
+                pass
+            elif self.textBaseline == "ideographic":
+                y += font_metrics.descent
+            elif self.textBaseline == "bottom":
+                y += font_metrics.bottom
+
             self.canvas.drawText(text, x, y, self.paint)
 
         def strokeText(self, text, x, y):
@@ -102,6 +122,24 @@ if checksys == 'Android':
             self.paint.setAlpha(int(255 * self.globalAlpha))
             self.applyFont()
             self.paint.setTextAlign(self.textAlign)
+
+            # 根据 textBaseline 调整 y 坐标
+            font_metrics = self.paint.getFontMetrics()
+            if self.textBaseline == "top":
+                y += -font_metrics.ascent
+            elif self.textBaseline == "hanging":
+                # 近似处理，不同字体可能有差异
+                y += -font_metrics.ascent * 0.8
+            elif self.textBaseline == "middle":
+                y += (font_metrics.descent - font_metrics.ascent) / 2 - font_metrics.descent
+            elif self.textBaseline == "alphabetic":
+                # 默认基线，无需调整
+                pass
+            elif self.textBaseline == "ideographic":
+                y += font_metrics.descent
+            elif self.textBaseline == "bottom":
+                y += font_metrics.bottom
+
             self.canvas.drawText(text, x, y, self.paint)
 
         def measureText(self, text):
@@ -193,7 +231,7 @@ if checksys == 'Android':
             tempCanvas = Canvas(bitmap)
             rectSrc = Rect(x, y, x + width, y + height)
             rectDst = Rect(0, 0, width, height)
-            source_bitmap = self.bitmap  # 使用保存的 Bitmap 引用
+            source_bitmap = self.bitmap
             tempCanvas.drawBitmap(source_bitmap, rectSrc, rectDst, None)
             return bitmap
 
@@ -212,8 +250,8 @@ if checksys == 'Android':
         def reset(self):
             self.lineWidth = 1
             self.font = "normal 12px sans-serif"
-            self.textAlign = Paint.Align.LEFT
-            self.textBaseline = Paint.BASELINE
+            self.textAlign = PaintAlign.LEFT
+            self.textBaseline = "alphabetic"
             self.fillStyle = Color.BLACK
             self.strokeStyle = Color.BLACK
             self.shadowBlur = 0
