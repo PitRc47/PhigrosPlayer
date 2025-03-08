@@ -279,6 +279,8 @@ if checksys == 'Android':
 
     screen_width = 400
     screen_height = 400
+    from jnius import autoclass, PythonJavaClass, java_method
+
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
     View = autoclass('android.view.View')
     Canvas = autoclass('android.graphics.Canvas')
