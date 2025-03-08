@@ -302,19 +302,20 @@ else:
     class MainWidget(Widget):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.update_texture(0)
-            Clock.schedule_once(self.update_texture, 0)
+            self.rect = Rectangle()
+            self.canvas.add(self.rect)
+            Clock.schedule_interval(self.update_texture, 0)
 
         def update_texture(self, dt):
-            ctx.reset()
-            ctx.fillRect(50, 50, 100+dt*100, 100)
-            ctx.fillText('急急急的我', 100, 500)
-            with self.canvas:
-                Rectangle(texture=ctx.update_texture(dt), pos=self.pos, size=self.size)
+            self.rect.texture = ctx.update_texture(dt)
+            self.rect.pos = self.pos
+            self.rect.size = self.size
 
     class KivyCanvas(App):
         def build(self): return MainWidget()
     
+    
+
     KivyCanvas().run()
 
 class JsApi:
