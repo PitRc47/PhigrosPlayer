@@ -285,7 +285,7 @@ if checksys == 'Android':
 
     View = autoclass('android.view.View')
     from jnius import autoclass, PythonJavaClass, java_method #type: ignore
-        class CustomDrawingView(View, PythonJavaClass):
+    class CustomDrawingView(View, PythonJavaClass):
         def __init__(self, activity):
             super().__init__(activity)
             self.paint = Paint()
