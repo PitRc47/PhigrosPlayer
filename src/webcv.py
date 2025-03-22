@@ -21,315 +21,32 @@ import graplib_webview
 
 disengage_webview = "--disengage-webview" in sys.argv
 
-host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
-logging.debug(f"server host: {host}")
-
+if checksys != 'Android': import webview
 if checksys == "Windows":
     from ctypes import windll
     screen_width = windll.user32.GetSystemMetrics(0)
     screen_height = windll.user32.GetSystemMetrics(1)
-
-if checksys != 'Android': import webview
-else:
-    from kivy.config import Config
-    Config.set('kivy', 'show_fps', 1)  # 启用 FPS 显示
-    from kivy.app import App
-    from kivy.uix.widget import Widget
-    from kivy.graphics import Rectangle
-    from kivy.graphics.texture import Texture
-    from kivy.clock import Clock
+if checksys == "Android":
     from jnius import autoclass # type: ignore
-    
     PythonActivity = autoclass('org.kivy.android.PythonActivity')
-    Bitmap = autoclass('android.graphics.Bitmap')
-    Canvas = autoclass('android.graphics.Canvas')
-    Paint = autoclass('android.graphics.Paint')
-    Path = autoclass('android.graphics.Path')
-    Rect = autoclass('android.graphics.Rect')
-    RectF = autoclass('android.graphics.RectF')
-    LinearGradient = autoclass('android.graphics.LinearGradient')
-    Shader = autoclass('android.graphics.Shader')
-    Typeface = autoclass('android.graphics.Typeface')
-    Color = autoclass('android.graphics.Color')
-    PorterDuffMode = autoclass('android.graphics.PorterDuff$Mode')
-    PaintAlign = autoclass('android.graphics.Paint$Align')
-    PaintStyle = autoclass('android.graphics.Paint$Style')
-    ByteBuffer = autoclass('java.nio.ByteBuffer')
-    BitmapConfig = autoclass('android.graphics.Bitmap$Config')
-
     metrics = PythonActivity.mActivity.getResources().getDisplayMetrics()
     screen_width = metrics.widthPixels
     screen_height = metrics.heightPixels
 
+host = socket.gethostbyname(socket.gethostname()) if "--nolocalhost" in sys.argv else "127.0.0.1"
+logging.debug(f"server host: {host}")
 
-    class CanvasRenderingContext2D:
-        def __init__(self, canvas, bitmap):
-            self.canvas = canvas
-            self.bitmap = bitmap
-            self.paint = Paint()
-            self.path = Path()
-            self.paint.setAntiAlias(True)
-            self.lineWidth = 1
-            self.font = "normal 12px sans-serif"
-            self.textAlign = PaintAlign.LEFT
-            self.textBaseline = "alphabetic"
-            self.fillStyle = Color.BLACK
-            self.strokeStyle = Color.BLACK
-            self.shadowBlur = 0
-            self.shadowColor = Color.TRANSPARENT
-            self.globalAlpha = 1
-            self.imageSmoothingEnabled = True
-            self.transformMatrix = [1, 0, 0, 1, 0, 0]
-            self.texture = None
-            self.buffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight())
+if checksys == 'Android':
+    from jnius import autoclass, cast # type: ignore
+    from android.runnable import run_on_ui_thread # type: ignore
 
-        def clearRect(self, x, y, width, height):
-            self.canvas.drawColor(Color.TRANSPARENT, PorterDuffMode.CLEAR)
-
-        def fillRect(self, x, y, width, height):
-            self.paint.setStyle(PaintStyle.FILL)
-            self.paint.setColor(self.fillStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.canvas.drawRect(x, y, x + width, y + height, self.paint)
-
-        def strokeRect(self, x, y, width, height):
-            self.paint.setStyle(PaintStyle.STROKE)
-            self.paint.setStrokeWidth(self.lineWidth)
-            self.paint.setColor(self.strokeStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.canvas.drawRect(x, y, x + width, y + height, self.paint)
-
-        def fillText(self, text, x, y):
-            self.paint.setStyle(Paint.Style.FILL)
-            self.paint.setColor(self.fillStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.applyFont()
-            self.paint.setTextAlign(self.textAlign)
-
-            # 根据 textBaseline 调整 y 坐标
-            font_metrics = self.paint.getFontMetrics()
-            if self.textBaseline == "top":
-                y += -font_metrics.ascent
-            elif self.textBaseline == "hanging":
-                # 近似处理，不同字体可能有差异
-                y += -font_metrics.ascent * 0.8
-            elif self.textBaseline == "middle":
-                y += (font_metrics.descent - font_metrics.ascent) / 2 - font_metrics.descent
-            elif self.textBaseline == "alphabetic":
-                # 默认基线，无需调整
-                pass
-            elif self.textBaseline == "ideographic":
-                y += font_metrics.descent
-            elif self.textBaseline == "bottom":
-                y += font_metrics.bottom
-
-            self.canvas.drawText(text, x, y, self.paint)
-
-        def strokeText(self, text, x, y):
-            self.paint.setStyle(Paint.Style.STROKE)
-            self.paint.setStrokeWidth(self.lineWidth)
-            self.paint.setColor(self.strokeStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.applyFont()
-            self.paint.setTextAlign(self.textAlign)
-
-            # 根据 textBaseline 调整 y 坐标
-            font_metrics = self.paint.getFontMetrics()
-            if self.textBaseline == "top":
-                y += -font_metrics.ascent
-            elif self.textBaseline == "hanging":
-                # 近似处理，不同字体可能有差异
-                y += -font_metrics.ascent * 0.8
-            elif self.textBaseline == "middle":
-                y += (font_metrics.descent - font_metrics.ascent) / 2 - font_metrics.descent
-            elif self.textBaseline == "alphabetic":
-                # 默认基线，无需调整
-                pass
-            elif self.textBaseline == "ideographic":
-                y += font_metrics.descent
-            elif self.textBaseline == "bottom":
-                y += font_metrics.bottom
-
-            self.canvas.drawText(text, x, y, self.paint)
-
-        def measureText(self, text):
-            self.applyFont()
-            return self.paint.measureText(text)
-
-        def setLineWidth(self, lineWidth):
-            self.lineWidth = lineWidth
-
-        def setFont(self, font):
-            self.font = font
-
-        def setTextAlign(self, textAlign):
-            self.textAlign = textAlign
-
-        def setTextBaseline(self, textBaseline):
-            self.textBaseline = textBaseline
-
-        def setFillStyle(self, fillStyle):
-            self.fillStyle = fillStyle
-
-        def setStrokeStyle(self, strokeStyle):
-            self.strokeStyle = strokeStyle
-
-        def createLinearGradient(self, x0, y0, x1, y1, colors, positions):
-            return LinearGradient(x0, y0, x1, y1, colors, positions, Shader.TileMode.CLAMP)
-
-        def setShadowBlur(self, shadowBlur):
-            self.shadowBlur = shadowBlur
-
-        def setShadowColor(self, shadowColor):
-            self.shadowColor = shadowColor
-
-        def beginPath(self):
-            self.path.reset()
-
-        def closePath(self):
-            self.path.close()
-
-        def moveTo(self, x, y):
-            self.path.moveTo(x, y)
-
-        def lineTo(self, x, y):
-            self.path.lineTo(x, y)
-
-        def rect(self, x, y, width, height):
-            self.path.addRect(x, y, x + width, y + height, Path.Direction.CW)
-
-        def roundRect(self, x, y, width, height, radiusX, radiusY):
-            rectF = RectF(x, y, x + width, y + height)
-            self.path.addRoundRect(rectF, radiusX, radiusY, Path.Direction.CW)
-
-        def fill(self):
-            self.paint.setStyle(Paint.Style.FILL)
-            self.paint.setColor(self.fillStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.canvas.drawPath(self.path, self.paint)
-
-        def stroke(self):
-            self.paint.setStyle(Paint.Style.STROKE)
-            self.paint.setStrokeWidth(self.lineWidth)
-            self.paint.setColor(self.strokeStyle)
-            self.paint.setAlpha(int(255 * self.globalAlpha))
-            self.canvas.drawPath(self.path, self.paint)
-
-        def clip(self):
-            self.canvas.clipPath(self.path)
-
-        def rotate(self, angle):
-            self.canvas.rotate(angle)
-
-        def scale(self, sx, sy):
-            self.canvas.scale(sx, sy)
-
-        def translate(self, dx, dy):
-            self.canvas.translate(dx, dy)
-
-        def resetTransform(self):
-            self.canvas.setMatrix(None)
-
-        def setGlobalAlpha(self, globalAlpha):
-            self.globalAlpha = globalAlpha
-
-        def drawImage(self, bitmap, x, y):
-            self.canvas.drawBitmap(bitmap, x, y, self.paint)
-
-        def getImageData(self, x, y, width, height):
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            tempCanvas = Canvas(bitmap)
-            rectSrc = Rect(x, y, x + width, y + height)
-            rectDst = Rect(0, 0, width, height)
-            source_bitmap = self.bitmap
-            tempCanvas.drawBitmap(source_bitmap, rectSrc, rectDst, None)
-            return bitmap
-
-        def setImageSmoothingEnabled(self, enabled):
-            self.imageSmoothingEnabled = enabled
-
-        def save(self):
-            self.canvas.save()
-
-        def restore(self):
-            self.canvas.restore()
-
-        def getCanvas(self):
-            return self.canvas
-
-        def reset(self):
-            self.lineWidth = 1
-            self.font = "normal 12px sans-serif"
-            self.textAlign = PaintAlign.LEFT
-            self.textBaseline = "alphabetic"
-            self.fillStyle = Color.BLACK
-            self.strokeStyle = Color.BLACK
-            self.shadowBlur = 0
-            self.shadowColor = Color.TRANSPARENT
-            self.globalAlpha = 1
-            self.imageSmoothingEnabled = True
-            self.transformMatrix = [1, 0, 0, 1, 0, 0]
-            self.path.reset()
-            self.canvas.setMatrix(None)
-
-        def setFilter(self, filter):
-            # 目前 Android 没有直接对应的 filter 实现，可根据具体需求添加
-            pass
-
-        def applyFont(self):
-            try:
-                parts = self.font.split(" ")
-                size = int(parts[1].replace("px", ""))
-                self.paint.setTextSize(size)
-                self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
-            except (IndexError, ValueError):
-                self.paint.setTextSize(12)
-                self.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL))
-
-        def update_texture(self):
-            if self.texture is None:
-                self.texture = Texture.create(size=(self.bitmap.getWidth(), self.bitmap.getHeight()), colorfmt='rgba')
-                self.texture.flip_vertical()
-            self.buffer.rewind()  # 重置指针
-            self.bitmap.copyPixelsToBuffer(self.buffer)
-            self.buffer.rewind()
-            java_byte_array = self.buffer.array()
-            python_bytes = bytes(java_byte_array)
-            
-            self.texture.blit_buffer(python_bytes, colorfmt='rgba', bufferfmt='ubyte')
-            return self.texture
-
-    bitmap = Bitmap.createBitmap(screen_width, screen_height, BitmapConfig.ARGB_8888)
-    ctx = CanvasRenderingContext2D(Canvas(bitmap), bitmap)
     
-    class MainWidget(Widget):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.rect = Rectangle()
-            self.canvas.add(self.rect)
-            Clock.schedule_interval(self.update_texture, 1/60)
-
-        def update_texture(self, dt):
-            start_time = time.perf_counter()
-            self.rect.texture = ctx.update_texture()
-            self.rect.pos = self.pos
-            self.rect.size = self.size
-            duration = (time.perf_counter() - start_time) * 1000  # 转换为毫秒
-            logging.debug(f"update_texture took {duration:.2f} ms")  # 输出耗时
-    
-    class KivyCanvas(App):
-        def build(self): return MainWidget()
-    
-    def d():
-        x = 0
-        while True:
-            ctx.clearRect(0, 0, screen_width, screen_height)
-            ctx.fillRect(x, 500, 100, 100)
-            x += 1
-            time.sleep(0.01)
-    
-    threading.Thread(target=d, daemon=True).start()
-    KivyCanvas().run()
+    GeckoRuntimeSettings = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings')
+    Builder = autoclass('org.mozilla.geckoview.GeckoRuntimeSettings$Builder')  # 使用 $ 符号
+    GeckoView = autoclass('org.mozilla.geckoview.GeckoView')
+    GeckoRuntime = autoclass('org.mozilla.geckoview.GeckoRuntime')
+    GeckoSession = autoclass('org.mozilla.geckoview.GeckoSession')
+    activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
 class JsApi:
     def __init__(self) -> None:
@@ -478,8 +195,6 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
     
     def _init(self, width: int, height: int, x: int, y: int):
-        #ctx.fillRect(10,20,30,40)
-        while True: pass
         if not disengage_webview:
             self.web_hwnd = 0
             if checksys == 'Windows':
