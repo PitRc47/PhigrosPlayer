@@ -180,11 +180,21 @@ class WebCanvas:
             ) if not disengage_webview else None
             self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
-        self.start = lambda: webview.start(debug=debug) if not disengage_webview and checksys != 'Android' else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
+        self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
+        self.start = self.flaskStart if checksys == 'Android' else self.start
+
+    def flaskStart(self):
+        from flask import Flask, send_file # type: ignore
+
+        app = Flask(__name__)
+
+        @app.route('/')
+        def home():
+            return send_file('web_canvas.html')
+
+        app.run()
 
     def _init(self, width: int, height: int, x: int, y: int):
-        if checksys == 'Android':
-            PythonActivity.loadUrl(os.path.abspath('web_canvas.html'))
         if not disengage_webview:
             self.web_hwnd = 0
             if checksys == 'Windows':
