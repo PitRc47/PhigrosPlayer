@@ -17,7 +17,7 @@ from checksys import checksys
 if checksys == 'Android':
     from jnius import autoclass  # type: ignore
     from jnius import cast  # type: ignore
-    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+
     MediaPlayer = autoclass('android.media.MediaPlayer')
     File = autoclass('java.io.File')
     FileInputStream = autoclass('java.io.FileInputStream')
