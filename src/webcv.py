@@ -193,7 +193,54 @@ class WebCanvas:
             self.evaljs = lambda x, *args, **kwargs: (self.web.evaluate_js(x) if not disengage_webview else None)
         self.init = lambda func: (self._init(width, height, x, y), func())
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
-    
+        self.start = self.geckoview_start if checksys == 'Android' else self.start
+
+    @run_on_ui_thread
+    def geckoview_start(self):
+        
+        with open('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml', 'w', encoding='utf-8') as f:
+            f.write("""
+env:
+  MOZ_LOG: "Acceleration:5,GLContext:5,Compositor:5,SharedSurface:5,WebRender:5,GPU:5"
+
+args:
+  - --ignore-gpu-blocklist
+
+prefs:
+  gfx.work-around-driver-bugs: true
+  gfx.canvas.accelerated: true
+  
+  layers.gpu-process.force-enabled: true
+  security.sandbox.gpu.level: 0
+  gfx.webrender.all: true
+  gfx.webrender.software: false
+  gfx.webrender.fallback.software: false
+
+                    
+""")
+        logging.info('Initializing Geckoview')
+        builder = Builder()
+        builder.configFilePath(os.path.abspath('org.qaqfei.phigrosplayer.phigrosplayer-geckoview-config.yaml'))
+        builder.aboutConfigEnabled(True)
+        builder = cast(GeckoRuntimeSettings, builder.build())
+        self.runtime = GeckoRuntime.create(activity, builder)
+        self.settings = self.runtime.getSettings()
+        self.settings.setRemoteDebuggingEnabled(True)
+        self.settings.setConsoleOutputEnabled(True)
+        self.settings.setJavaScriptEnabled(True)
+        #self.settings.setParallelMarkingEnabled(True)
+        self.settings.setGlMsaaLevel(0) # disable MSAA
+        
+        self.webview = GeckoView(activity)
+        
+        self.session = GeckoSession()
+        self.session.open(self.runtime)
+        self.webview.setSession(self.session)
+        self.session.loadUri(os.path.abspath('web_canvas.html'))
+        
+        activity.setContentView(self.webview)
+        
+
     def _init(self, width: int, height: int, x: int, y: int):
         if not disengage_webview:
             self.web_hwnd = 0
