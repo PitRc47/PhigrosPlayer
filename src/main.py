@@ -978,11 +978,11 @@ def main():
         jslog = "--enable-jslog" in sys.argv,
         jslog_path = sys.argv[sys.argv.index("--jslog-path")] if "--jslog-path" in sys.argv else "./ppr-jslog-nofmt.js"
     )
+    Thread(target=root.init, args=(init, ), daemon=True).start()
     if checksys != 'Android':
-        Thread(target=root.init, args=(init, ), daemon=True).start()
         root.start()
     else:
-        root.init(init)
+        root.flaskStart()
 
 if checksys != 'Android':
     try:
