@@ -3,7 +3,7 @@ name: Build Android
 on:
   push:
     branches:
-      - deprecated
+      - main
   workflow_dispatch:
 
 jobs:
