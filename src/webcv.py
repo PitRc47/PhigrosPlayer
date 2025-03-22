@@ -183,7 +183,7 @@ class WebCanvas:
         self.start = lambda: webview.start(debug=debug) if not disengage_webview else time.sleep(60 * 60 * 24 * 7 * 4 * 12 * 80)
         self.start = self.flaskStart if checksys == 'Android' else self.start
 
-    def flaskStart(self):
+    def flaskStart(self, *args, **kwargs):
         from flask import Flask, send_file # type: ignore
 
         app = Flask(__name__)
