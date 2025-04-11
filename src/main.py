@@ -76,6 +76,7 @@ render_video_fps = float(sys.argv[sys.argv.index("--render-video-fps") + 1]) if 
 render_video_fourcc = sys.argv[sys.argv.index("--render-video-fourcc") + 1] if "--render-video-fourcc" in sys.argv else "mp4v"
 renderdemand = "--renderdemand" in sys.argv
 renderasync = "--renderasync" in sys.argv
+render_video_buffer_size = 45 if "--render-video-buffer-size" not in sys.argv else int(sys.argv[sys.argv.index("--render-video-buffer-size") + 1])
 
 if render_video and noautoplay:
     noautoplay = False
@@ -88,6 +89,10 @@ if render_video and showfps:
 if render_video and renderasync:
     renderasync = False
     logging.warning("if use --render-video, you cannot use --renderasync")
+
+if render_video and renderdemand:
+    renderdemand = False
+    logging.warning("if use --render-video, you cannot use --renderdemand")
 
 if "--mirror" in sys.argv:
     phicore.enableMirror = True
@@ -609,19 +614,24 @@ def playerStart():
         )
         needrelease.add(writer.release)
         
-        def writeFrame(data: bytes):
-            matlike = utils.bytes2matlike(data, w, h)
-            writer.write(matlike)
+        def writeFrame(frames: list[bytes]):
+            for data in frames:
+                matlike = utils.bytes2matlike(data, w, h)
+                writer.write(matlike)
         
         wcv2matlike.callback = writeFrame
         httpd, port = wcv2matlike.createServer()
+        
+        root.run_js_code(f"initUploadFrame({render_video_buffer_size}, 'http://127.0.0.1:{port}/');")
         
         now_t = 0.0
         while now_t < raw_audio_length + chart_obj.offset:
             extasks = phicore.renderChart_Common(now_t, None)
                 
-            root.wait_jspromise(f"uploadFrame('http://127.0.0.1:{port}/');")
+            root.wait_jspromise("uploadFrame();")
             now_t += 1 / render_video_fps
+        
+        root.wait_jspromise("upload_all_frames(true);")
         
         httpd.shutdown()
         writer.release()

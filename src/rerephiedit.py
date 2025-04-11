@@ -16,7 +16,7 @@ import typing
 import random
 import math
 import hashlib
-from threading import Thread
+from threading import Thread, Timer
 from os import popen, mkdir
 from os.path import exists, isfile
 from shutil import rmtree
@@ -473,6 +473,9 @@ class Input(BaseUI):
     def when_remove(self):
         self.removed = True
         root.run_js_code(f"removeCanvasInput({self.id})")
+    
+    def set_text(self, value: str):
+        root.run_js_code(f"setCanvasInputText({self.id}, {root.string2sctring_hqm(value)})")
 
 class MessageShower(BaseUI):
     def __init__(self):
@@ -480,6 +483,7 @@ class MessageShower(BaseUI):
         self.max_show_time = 2.0
         self.padding_y = h / 50
     
+    @utils.thread_lock_func
     def render(self):
         for msg in self.msgs.copy():
             if time.time() - msg.st > self.max_show_time + msg.left_tr.animation_time:
@@ -528,6 +532,7 @@ class MessageShower(BaseUI):
             
             ctxRestore(wait_execute=True)
     
+    @utils.thread_lock_func(lock=render.lock)
     def submit(self, msg: Message):
         vaild_msgs = [i for i in self.msgs if not i.timeout]
         
@@ -732,7 +737,7 @@ class ModalUI(BaseUI):
         self.master.event_proxy(self.uis, name, *args)
         
 class ButtonList(BaseUI):
-    def __init__(self, x: float, y: float, width: float, height: float, buts: list[dict], fontsize: float):
+    def __init__(self, x: float, y: float, width: float, height: float, buts: list[typing.Optional[dict]], fontsize: float):
         self.x = x
         self.y = y
         self.width = width
@@ -745,25 +750,42 @@ class ButtonList(BaseUI):
         
         self.buts = [
             Button(
-                x + self.padx, y + self.pady + i * (self.butheight + self.pady),
+                x + self.padx, y + self.pady + sum([(self.butheight + self.pady) * (1.0 if j is not None else 0.4) for j in buts[:i]]),
                 butcfg["text"], "skyblue",
                 butcfg["command"],
                 size = apos1k(width - self.padx * 2, self.butheight),
                 fontscale = 0.5
             )
             for i, butcfg in enumerate(buts)
+            if butcfg is not None
         ]
         
         self.set_scroll(0.0)
+        self.w_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[9])
+        self.h_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[9])
+        self.a_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[15])
+        self.w_tr.target = 0.0
+        self.h_tr.target = 0.0
+        self.a_tr.target = 0.0
+        self.w_tr.target = 1.0
+        self.h_tr.target = 1.0
+        self.a_tr.target = 1.0
     
     def render(self):
-        fillRectEx(self.x, self.y, self.width, self.height, "#7474ff", wait_execute=True)
+        ctxSave(wait_execute=True)
+        ctxTranslate(self.x, self.y, wait_execute=True)
+        ctxScale(self.w_tr.value, self.h_tr.value, wait_execute=True)
+        ctxMutGlobalAlpha(self.a_tr.value, wait_execute=True)
+        
+        fillRectEx(0, 0, self.width, self.height, "#7474ff", wait_execute=True)
         
         ctxSave(wait_execute=True)
         ctxBeginPath(wait_execute=True)
         ctxRect(0, self.y + self.pady, w, h - self.pady * 2, wait_execute=True)
         ctxClip(wait_execute=True)
         self.master.render_items(self.buts)
+        ctxRestore(wait_execute=True)
+        
         ctxRestore(wait_execute=True)
     
     def set_master(self, master: UIManager):
@@ -774,11 +796,14 @@ class ButtonList(BaseUI):
     
     def set_scroll(self, scroll: float):
         for i in self.buts:
-            i.dy = -scroll + self.pady
+            if i is not None:
+                i.dy = -scroll + self.pady
 
 class ChartEditor:
-    def __init__(self, chart: phichart.CommonChart):
+    def __init__(self, chart: phichart.CommonChart, chart_config: dict):
         self.chart = chart
+        self.chart_config = chart_config
+        self.chart_dir = f"{CHARTS_PATH}/{chart_config["id"]}"
         
         self.step_dumps: list[bytes] = []
         self.can_undo = False
@@ -852,6 +877,28 @@ class ChartEditor:
         self.when_timejump(ret, ret < self.last_chart_now_t)
         self.last_chart_now_t = ret
         return ret
+    
+    @utils.thread_lock_func
+    def new_save(self):
+        globalMsgShower.submit(Message(f"保存...", Message.INFO_COLOR))
+        dmp = self.chart.dump()
+        
+        with open(f"{self.chart_config["chartPath"]}", "wb") as f:
+            f.write(dmp)
+        
+        self.new_bak(dmp)
+    
+    def new_bak(self, dmp: bytes):
+        try: mkdir(f"{self.chart_dir}/baks")
+        except Exception as e: logging.error(f"baks mkdir failed: {e}")
+        
+        dt = datetime.datetime.now()
+        fn = f"{dt.year}.{dt.month}.{dt.day}.{dt.hour}.{dt.minute}.{dt.second}.{dt.microsecond}.bpc"
+        
+        with open(f"{self.chart_dir}/baks/{fn}", "wb") as f:
+            f.write(dmp)
+            
+        globalMsgShower.submit(Message(f"已创建备份文件: {fn}", Message.INFO_COLOR))
 
 class EditBaseCmd:
     ...
@@ -995,7 +1042,7 @@ def editorRender(chart_config: dict):
     mixer.music.unload()
     
     chart = phichart.CommonChart.loaddump(open(chart_config["chartPath"], "rb").read())
-    editor = ChartEditor(chart)
+    editor = ChartEditor(chart, chart_config)
     
     respacker = webcv.LazyPILResPacker(root)
     
@@ -1046,13 +1093,32 @@ def editorRender(chart_config: dict):
         chart_time_show_labels[2].text = f"{now_t:.2f}/{raw_audio_length:.2f}s"
     
     def popupMenu():
+        def _close_menu():
+            globalUIManager.remove_ui(modal)
+            
+        def _back_tomain(*, isnosave: bool = False):
+            nonlocal nextUI
+            
+            if isnosave:
+                if not web_confirm(f"确定不保存并返回主界面？\n如果有未保存的更改，它们将会丢失！！！"):
+                    return
+            
+                globalMsgShower.submit(Message("你说得对, 但是还是我们还是准备给你创建一个备份...", Message.WARNING_COLOR))
+                editor.new_bak(editor.chart.dump())
+            
+            nextUI = mainRender
+            _close_menu()
+            
         butlst = ButtonList(
             0, 0, w / 6, h,
             [
-                {"text": "关闭菜单", "command": lambda *_: globalUIManager.remove_ui(modal)},
-                {"text": "保存并返回主界面", "command": None},
-                {"text": "保存", "command": None},
+                {"text": "关闭菜单", "command": lambda *_: _close_menu()},
+                None,
+                {"text": "保存", "command": lambda *_: editor.new_save()},
                 {"text": "另存为", "command": None},
+                None,
+                {"text": "保存并返回主界面", "command": lambda *_: (editor.new_save(), _back_tomain(), _close_menu())},
+                {"text": "不保存并返回主界面", "command": lambda *_: _back_tomain(isnosave=True)},
             ], (w + h) / 150
         )
         
@@ -1117,6 +1183,7 @@ def editorRender(chart_config: dict):
         if nextUI is not None:
             globalUIManager.remove_ui_bytag("editorRender")
             respacker.unload(respacker.getnames())
+            mixer.music.fadeout(250)
             Thread(target=nextUI, daemon=True).start()
             return
 
