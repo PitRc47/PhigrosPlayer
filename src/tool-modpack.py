@@ -1,4 +1,5 @@
 import fix_workpath as _
+import check_bin as _
 
 import json
 import typing
@@ -37,9 +38,9 @@ def findinfo_byname(name: str):
 
 def findexinfo_byinfo(iitem: dict, key: str):
     for i in extended_info:
-        if i["key"] == iitem["soundIdBak"] + "/" + key:
+        if i["key"] == iitem["songIdBak"] + "/" + key:
             return i
-    return None
+    return None if not key.endswith(".png") else findexinfo_byinfo(iitem, key[:-4] + ".jpg")
 
 def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.Image, pid: int):
     if bundle is None: return
@@ -53,7 +54,7 @@ def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.
                     realasset.save()
 
 def fail(mod: dict):
-    print(f"""Failed to process mod: {mod["name"]}""")
+    print(f"Failed to process mod: {mod["name"]}")
 
 modlist = json.load(open(argv[1], "r", encoding="utf-8"))
 info = json.load(open(argv[2], "r", encoding="utf-8"))
@@ -67,7 +68,7 @@ for mod in modlist:
                 fail(mod)
                 continue
             
-            exiitem = findexinfo_byinfo(iitem, f'Chart_{mod["level"]}.json')
+            exiitem = findexinfo_byinfo(iitem, f"Chart_{mod["level"]}.json")
             if exiitem is None:
                 fail(mod)
                 continue
@@ -75,10 +76,10 @@ for mod in modlist:
             chart = json.load(open(mod["content_path"], "r", encoding="utf-8"))
             if "META" in chart:
                 rpe2phi = input("rpe2phi runner: ").replace("/", "\\")
-                print(f'Mod {mod["name"]} is rpe format, converting...')
+                print(f"Mod {mod["name"]} is rpe format, converting...")
                 tdir = tempdir.createTempDir()
-                popen(f'{rpe2phi} \"{mod["content_path"]}\" \"{tdir}/chart.json\"').read()
-                chart = json.load(open(f"{tdir}/chart.json", "r", encoding="utf-8"))
+                popen(f"{rpe2phi} \"{mod["content_path"]}\" \"{tdir}\\chart.json\"").read()
+                chart = json.load(open(f"{tdir}\\chart.json", "r", encoding="utf-8"))
             content = json.dumps(chart, ensure_ascii=False).encode("utf-8")
             
             bundle = loadbundle(exiitem["fn"])
@@ -111,7 +112,7 @@ for mod in modlist:
             tdir = tempdir.createTempDir()
             seg: AudioSegment = AudioSegment.from_file(mod["content_path"])
             seg.export(f"{tdir}/music.ogg", format="ogg")
-            popen(f"../bin/oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
+            popen(f".\\bin\\oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
             fsb = open(f"{tdir}/music.fsb", "rb").read()
 
             bundle = loadbundle(exiitem["fn"])
@@ -142,7 +143,7 @@ for mod in modlist:
             
             im = Image.open(mod["content_path"])
             if im.width / im.height != 2048 / 1080:
-                print(f'Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.')
+                print(f"Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.")
                 im = im.resize((2048, 1080))
             
             i1, i2, i3 = (
@@ -161,5 +162,4 @@ for mod in modlist:
             savebundle(b3, i3["fn"])
             
         case _:
-            print(f'Unknown mod type: {mod["type"]}')
-            
+            print(f"Unknown mod type: {mod["type"]}")

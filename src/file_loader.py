@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
-import tool_funcs
+import utils
 from dxsmixer import mixer
 
 class FILE_TYPE:
@@ -18,13 +18,12 @@ class FILE_TYPE:
 class LoadResult:
     filetype: typing.Literal[1, 2, 3, 4]
     data: typing.Any
-    errs: list[Exception]|None
+    errs: typing.Optional[list[Exception]]
 
 class FileLoadError(Exception): ...
 
 def loadfile(fp: str):
     errs: list[Exception] = []
-    logging.info(f'Loading file: {fp}')
     
     try:
         return LoadResult(FILE_TYPE.IMAGE, Image.open(fp), None)
@@ -46,7 +45,7 @@ def loadfile(fp: str):
                 errs.append(e)
             
                 if isinstance(e, json.decoder.JSONDecodeError):
-                    pec2rpeResult, p2r_errs = tool_funcs.pec2rpe(raw)
+                    pec2rpeResult, p2r_errs = utils.pec2rpe(raw)
                     
                     for e in p2r_errs:
                         logging.warning(f"pec2rpe: {repr(e)}")

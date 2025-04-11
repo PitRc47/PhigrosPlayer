@@ -1,0 +1,221 @@
+[
+    {
+        "name": "Legacy",
+        "cn-name": "过去的章节",
+        "o-name": "",
+        "image": "/other_res/ChapterCover/MainStoryLegacy.png",
+        "split": "Glaciaxion.SunsetRay.0",
+        "count": 20
+    },
+    {
+        "name": "Chapter 5",
+        "cn-name": "霓虹灯牌",
+        "o-name": "第五章",
+        "image": "/other_res/ChapterCover/MainStory5.png",
+        "split": "NYA.FLuoRiTe姜米條.0",
+        "count": 7
+    },
+    {
+        "name":"Chapter 6",
+        "cn-name": "方舟蜃景",
+        "o-name": "第六章",
+        "image": "/other_res/ChapterCover/MainStory6.png",
+        "split": "ColorfulDays.P4koofeatつゆり花鈴.0",
+        "count": 6
+    },
+    {
+        "name": "Chapter 7",
+        "cn-name": "时钟链接",
+        "o-name": "第七章",
+        "image": "/other_res/ChapterCover/MainStory7.png",
+        "split": "ClockParadox.WyvernP.0",
+        "count": 6
+    },
+    {
+        "name": "Chapter 8",
+        "cn-name": "凌日潮汐",
+        "o-name": "第八章",
+        "image": "/other_res/ChapterCover/MainStory8_2S.png",
+        "split": "CraveWave.LandRoot.0",
+        "count": 6
+    },
+    {
+        "name": "Side story 1",
+        "cn-name": "忘忧宫",
+        "o-name": "支线章节一",
+        "image": "/other_res/ChapterCover/SideStory1.png",
+        "split": "Poseidon.1112vsStar.0",
+        "count": 5
+    },
+    {
+        "name": "Side story 2",
+        "cn-name": "弥刻日",
+        "o-name": "支线章节二",
+        "image": "/other_res/ChapterCover/SideStory2.png",
+        "split": "Demiurge.Rabpit.0",
+        "count": 6
+    },
+    {
+        "name": "Side story 3",
+        "cn-name": "盗乐行",
+        "o-name": "支线章节三",
+        "image": "/other_res/ChapterCover/SideStory3.png",
+        "split": "Khalid.Dolphin.0",
+        "count": 5
+    },
+    {
+        "name": "Side story 4",
+        "cn-name": "无相乡",
+        "o-name": "支线章节四",
+        "image": "/other_res/ChapterCover/SideStory4.png",
+        "split": "心の記憶.A39沙包P.0",
+        "count": 6
+    },
+    {
+        "name": "节奏大师",
+        "cn-name": "节奏大师 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/RhythmMaster.png",
+        "split": "君往何处QuoVadis.M2U.0",
+        "count": 5
+    },
+    {
+        "name": "TAKUMI³",
+        "cn-name": "TAKUMI³ 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/TAKUMI3.png",
+        "split": "Cuvism.Fl00tvsHalv.0",
+        "count": 3
+    },
+    {
+        "name": "SHINOBI SLASH",
+        "cn-name": "SHINOBI SLASH 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/SHINOBISLASH.png",
+        "split": "幽世桔梗.Capchiifeatまるもこ.0",
+        "count": 3
+    },
+    {
+        "name": "Paradingm: Reboot",
+        "cn-name": "Paradingm: Reboot 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/ParadigmReboot.png",
+        "split": "零號車輛.seatrus.0",
+        "count": 4,
+        "jumps": ["Xenolith.Tatsh.0"]
+    },
+    {
+        "name": "CHUMITHM",
+        "cn-name": "CHUMITHM 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/CHUNITHM.png",
+        "split": "月詠に鳴る.Feryquitousfeat藍月なくる.0",
+        "count": 3
+    },
+    {
+        "name": "Rotaeno",
+        "cn-name": "Rotaeno 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/Rotaeno.png",
+        "split": "JourneywithYou.Iris.0",
+        "count": 6
+    },
+    {
+        "name": "かめりあ",
+        "cn-name": "极星卫",
+        "o-name": "外传章节",
+        "image": "/other_res/ChapterCover/Camellia.png",
+        "split": "SATELLITE.かめりあ.0",
+        "count": 5
+    },
+    {
+        "name": "OverRapid",
+        "cn-name": "OverRapid 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/OverRapid.png",
+        "split": "神話.PicaM2U.0",
+        "count": 6
+    },
+    {
+        "name": "茶鸣拾贰律",
+        "cn-name": "茶鸣拾贰律 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/TEA12.png",
+        "split": "盏茗.茶鸣拾贰律.0",
+        "count": 4
+    },
+    {
+        "name": "姜米條",
+        "cn-name": "姜米條 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/JMT.png",
+        "split": "Shadow.SumaiLightvs姜米條.0",
+        "count": 3
+    },
+    {
+        "name": "Lanota",
+        "cn-name": "Lanota 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/Lanota.png",
+        "split": "Apocalypse.アリスシャッハと魔法の楽団.0",
+        "count": 5
+    },
+    {
+        "name": "KALPA",
+        "cn-name": "KALPA 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/KALPA.png",
+        "split": "TimetoNightSkyfeatLeeYuJin.HyuNKLYDIX.0",
+        "count": 5
+    },
+    {
+        "name": "Muse Dash",
+        "cn-name": "Muse Dash 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/MUSEDASH.png",
+        "split": "XING.ginkiha.0",
+        "count": 3
+    },
+    {
+        "name": "WAVEAT",
+        "cn-name": "WAVEAT 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/WAVEAT.png",
+        "split": "Initialize.iF.0",
+        "count": 4
+    },
+    {
+        "name": "GOOD",
+        "cn-name": "GOOD 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/Good.png",
+        "split": "GOODTEK.EBIMAYO.0",
+        "count": 5
+    },
+    {
+        "name": "HyuN",
+        "cn-name": "HyuN 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/HyuN.png",
+        "split": "InfinityHeaven.HyuN.0",
+        "count": 3
+    },
+    {
+        "name": "Rising Sun Traxx",
+        "cn-name": "Rising Sun Traxx 精选集",
+        "o-name": "额外章节",
+        "image": "/other_res/ChapterCover/RST.png",
+        "split": "AnotherMe.NeutralMoon.0",
+        "count": 5
+    },
+    {
+        "name": "Single",
+        "cn-name": "单曲 精选集",
+        "o-name": "",
+        "image": "/other_res/ChapterCover/Single.png",
+        "split": "Doppelganger.LeaF.0",
+        "count": 120,
+        "insert": 0,
+        "reverse": true
+    }
+]

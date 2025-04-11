@@ -1,4 +1,4 @@
-from random import randint
+import random
 
 pgr_builtin_tips = [
     "!!",
@@ -190,14 +190,16 @@ pgr_builtin_tips = [
 ]
 
 ppr_extended_tips = [
-    "https://github.com/qaqFei/PhigrosPlayer",
+    "https://github.com/qaqFei/phispler",
     "你知道吗, float('nan') != float('nan') 哦",
     "本项目是使用MIT协议开源的哦!",
     "(╯‵□′)╯",
     "你说的对，但是《lchzh3473模拟器》是由李纯真自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「Phigros」的幻想世界，在这里，被李纯真选中的人将被授予「举办」，导引视频删除之力。你将扮演一位名为「沉默-_-微笑」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的补档们，和他们一起击败李纯真，找回失散的视频——同时，逐步发掘「lchzh3473模拟器」的真相。",
     "诶, 怎么卡住了, 咚！Traceback (most recent call last)",
     "!! (python seg fault), 唔...",
-    "如果帧率低可试试启用 BitmapImage 喵~"
+    "如果帧率低可试试启用 BitmapImage 喵~",
+    "你染上喵喵症了！？",
+    "计算机普及到傻逼手里不是什么好事。"
 ]
 
 tips = [
@@ -206,4 +208,9 @@ tips = [
 ]
 
 def get_tip():
-    return tips[randint(0, len(tips) - 1)]
+    rv = random.random()
+    
+    if rv < 0.95:
+        return random.choice(pgr_builtin_tips)
+    else:
+        return random.choice(ppr_extended_tips)

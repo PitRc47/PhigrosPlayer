@@ -3,16 +3,20 @@ __pycache__
 
 phigros_assets
 phigros_userdata.json
+phigros_playdata.json
+rrpe_data
+
 default-argvs.json
 
 error_*.txt
-Chart.lfdaot
 ppr-jslog-nofmt.js
 
 unpack-result
 unpack-temp
-Chart.lfdaot
-.vscode
-ppr-jslog-nofmt.js
-default-argvs.json
-venv/
+
+ffmpeg.exe
+ffprobe.exe
+
+need-ignore-*
+
+imgui.ini

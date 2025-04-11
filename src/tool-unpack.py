@@ -1,15 +1,16 @@
 import fix_workpath as _
-import zipfile
+import check_bin as _
+
 import json
 import struct
 import base64
-
-from os import mkdir, popen, listdir, add_dll_directory
-from os.path import exists, isfile, basename
+from os import mkdir, popen, listdir
+from os.path import exists, isfile, basename, dirname
 from shutil import rmtree
 from threading import Thread
 from time import sleep
 from uuid import uuid4
+from zipfile import ZipFile
 
 import UnityPy
 import UnityPy.files
@@ -17,10 +18,14 @@ import UnityPy.classes
 from UnityPy.enums import ClassIDType
 from fsb5 import FSB5
     
+iothread_num = 32
+packthread_num = 1
+p2rthread_num = 4
+
 class ByteReaderA:
     def __init__(self, data: bytes):
         self.data = data
-        self.position = 0
+        self.position: int = 0
         self.d = {int: self.readInt, float: self.readFloat, str: self.readString}
 
     def readInt(self):
@@ -48,11 +53,11 @@ class ByteReaderA:
                 for key, value in schema.items():
                     if value in (int, str, float):
                         item[key] = self.d[value]()
-                    elif type(value) == list:
+                    elif isinstance(value, list):
                         item[key] = [self.d[value[0]]() for _ in range(self.readInt())]
-                    elif type(value) == tuple:
+                    elif isinstance(value, tuple):
                         for t in value: self.d[t]()
-                    elif type(value) == dict:
+                    elif isinstance(value, dict):
                         item[key] = self.readSchema(value)
                     else:
                         raise Exception("null")
@@ -70,14 +75,21 @@ class ByteReaderB:
     def readInt(self):
         self.position += 4
         return int.from_bytes(self.data[self.position - 4 : self.position], "little")
+    
+def setApk(path: str):
+    global pgrapk
+    pgrapk = path
 
-def getZipItem(path: str) -> str:
-    while path[0] in ("/", "\\"): path = path[1:]
-    with zipfile.ZipFile(pgrapk, 'r') as zip_ref:
-        zip_ref.extract(path, 'unpack-temp')
-    return f"unpack-temp/{path}"
+def getZipItem(path: str) -> bytes:
+    if path[0] in ("/", "\\"): path = path[1:]
+    return ZipFile(pgrapk).read(path)
 
-def run(rpe: bool):
+def createZip(files: str, to: str):
+    with ZipFile(to, "w") as f:
+        for file in files:
+            f.write(file, arcname=basename(file))
+
+def run(rpe: bool, need_otherillu: bool, need_other_res: bool):
     try: rmtree("unpack-temp")
     except Exception: pass
     try: mkdir("unpack-temp")
@@ -88,7 +100,7 @@ def run(rpe: bool):
     print("generated info.json")
     
     print("unpack...")
-    generate_resources()
+    generate_resources(need_otherillu, need_other_res)
     print("unpacked")
     
     print("pack charts...")
@@ -98,6 +110,9 @@ def run(rpe: bool):
     try: rmtree("unpack-temp")
     except Exception: pass
 
+def merge_list(lsts: list):
+    return [item for lst in lsts for item in lst]
+
 def generate_info():
     try: rmtree("unpack-result")
     except Exception: pass
@@ -106,26 +121,43 @@ def generate_info():
     
     env = UnityPy.Environment()
     env.load_file(
-        open(getZipItem("/assets/bin/Data/globalgamemanagers.assets"), "rb").read(),
+        getZipItem("/assets/bin/Data/globalgamemanagers.assets"),
         name = "assets/bin/Data/globalgamemanagers.assets"
     )
-    env.load_file(open(getZipItem("/assets/bin/Data/level0"), "rb").read())
+    env.load_file(getZipItem("/assets/bin/Data/level0"))
+    
+    with open("./resources/pgr_unpack_treetype.json", "r", encoding="utf-8") as f:
+        treetype = json.load(f)
             
     for obj in env.objects:
         if obj.type.name != "MonoBehaviour": continue
         
         try:
             data = obj.read()
-            match data.m_Script.get_obj().read().name:
+            name = data.m_Script.get_obj().read().name
+            match name:
                 case "GameInformation":
-                    information = data.raw_data.tobytes()
+                    information: bytes = data.raw_data.tobytes()
+                    information_ftt = obj.read_typetree(treetype["GameInformation"])
+                    
                 case "GetCollectionControl":
-                    collection = data.raw_data.tobytes()
+                    collection = obj.read_typetree(treetype["GetCollectionControl"])
+                    with open("./unpack-result/collectionItems.json", "w", encoding="utf-8") as f:
+                        json.dump(collection["collectionItems"], f, indent=4, ensure_ascii=False)
+                    
+                    with open("./unpack-result/avatars.json", "w", encoding="utf-8") as f:
+                        json.dump(collection["avatars"], f, indent=4, ensure_ascii=False)
+                        
                 case "TipsProvider":
-                    tips = data.raw_data.tobytes()
+                    tips = obj.read_typetree(treetype["TipsProvider"])
+                    with open("./unpack-result/tips.json", "w", encoding="utf-8") as f:
+                        json.dump(tips["tips"], f, indent=4, ensure_ascii=False)
         except Exception as e:
-            print(e)
+            print(repr(e))
 
+    with open("./unpack-result/info_ftt.json", "w", encoding="utf-8") as f:
+        json.dump(information_ftt, f, indent=4, ensure_ascii=False)
+                        
     reader = ByteReaderA(information)
     reader.position = information.index(b"\x16\x00\x00\x00Glaciaxion.SunsetRay.0\x00\x00\n") - 4
     
@@ -152,6 +184,17 @@ def generate_info():
         "magic": int
     }
     
+    def fttinfo_fromid(ftt: dict, key: str, songid: str):
+        for i in ftt:
+            if i[key] == songid: return i
+        assert False, f"song {songid} not found in fttinfo"
+    
+    ftt_allsongs = merge_list(information_ftt["song"].values())
+    ftt_keystore = information_ftt["keyStore"]
+    
+    with open("./unpack-result/chapters_info.json", "w", encoding="utf-8") as f:
+        json.dump(information_ftt["chapters"], f, indent=4, ensure_ascii=False)
+    
     chartItems = []
     
     while True:
@@ -163,7 +206,7 @@ def generate_info():
                     item["charter"].pop(i)
                     item["levels"].pop(i)
 
-                item["soundIdBak"] = item["songId"]
+                item["songIdBak"] = item["songId"]
                 if item["songId"][-2:] == ".0": item["songId"] = item["songId"][:-2]
                 item["difficulty"] = list(map(lambda x: round(x, 1), item["difficulty"]))
                 del item["songTitle"]
@@ -177,22 +220,35 @@ def generate_info():
         except Exception as e:
             print(e)
     
-    with open("unpack-result/info.json", "w", encoding="utf-8") as f:
+    for i in chartItems:
+        fttinfo = fttinfo_fromid(ftt_allsongs, "songsId", i["songIdBak"])
+        i.update({k: fttinfo[k] for k in [
+            "unlockInfo", "levelMods",
+            "isCnLimited"
+        ]})
+        
+        fttinfo = fttinfo_fromid(ftt_keystore, "keyName", i["songKey"])
+        i.update({"keyStore": {k: fttinfo[k] for k in [
+            "unlockedTimes", "kindOfKey",
+            "unlockTimes"
+        ]}})
+    
+    with open("./unpack-result/info.json", "w", encoding="utf-8") as f:
         json.dump(chartItems, f, ensure_ascii=False, indent=4)
     
     return chartItems
 
-def generate_resources():
-    with open(getZipItem("/assets/aa/catalog.json"), "r", encoding="utf-8") as f:
-        catalog = json.load(f)
+def generate_resources(need_otherillu: bool = False, need_other_res: bool = False):
+    catalog = json.loads(getZipItem("/assets/aa/catalog.json").decode("utf-8"))
     
     for i in [
-        "Chart_EZ", "Chart_HD", "Chart_IN", "Chart_AT", "Chart_Legacy",
-        "IllustrationBlur", "IllustrationLowRes", "Illustration", "music"
+        "Chart_EZ", "Chart_HD", "Chart_IN", "Chart_AT", "Chart_Legacy", "Chart_Error",
+        *(("IllustrationBlur", "IllustrationLowRes") if need_otherillu else ()), "Illustration", "music",
+        "avatars", *(("other_res", ) if need_other_res else ())
     ]:
-        try: rmtree(f"unpack-result/{i}")
+        try: rmtree(f"./unpack-result/{i}")
         except Exception: pass
-        try: mkdir(f"unpack-result/{i}")
+        try: mkdir(f"./unpack-result/{i}")
         except FileExistsError: pass
     
     key = base64.b64decode(catalog["m_KeyDataString"])
@@ -212,10 +268,12 @@ def generate_resources():
                 length = key[key_position]
                 key_position += 4
                 key_value = key[key_position:key_position + length].decode()
+                
             case 1:
                 length = key[key_position]
                 key_position += 4
                 key_value = key[key_position:key_position + length].decode("utf16")
+                
             case 4:
                 key_value = key[key_position]
         
@@ -228,14 +286,32 @@ def generate_resources():
     for i in range(len(table)):
         if table[i][1] != 65535:
             table[i][1] = table[table[i][1]][0]
-            
-    for i in range(len(table) - 1, -1, -1):
-        if type(table[i][0]) == int or table[i][0][:15] == "Assets/Tracks/#" or table[i][0][:14] != "Assets/Tracks/":
-            del table[i]
-        elif table[i][0][:14] == "Assets/Tracks/":
-            table[i][0] = table[i][0][14:]
     
-    def save(key: str, entry: UnityPy.files.BundleFile, fn: str):
+    type res_table_item = tuple[str, str]
+    player_res_table: list[res_table_item] = []
+    avatar_res_table: list[res_table_item] = []
+    other_res_table: list[res_table_item] = []
+    
+    for i in table:
+        if isinstance(i[0], int): continue
+    
+        if i[0].startswith("Assets/Tracks/#"):
+            other_res_table.append((i[0].replace("Assets/Tracks/#", "", 1), i[1]))
+        
+        elif i[0].startswith("Assets/Tracks/"):
+            player_res_table.append((i[0].replace("Assets/Tracks/", "", 1), i[1]))
+        
+        elif i[0].startswith("avatar."):
+            avatar_res_table.append((i[0].replace("avatar.", "", 1), i[1]))
+    
+    with open("./unpack-result/catalog.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "raw": table,
+            "player_res": player_res_table,
+            "avatar_res": avatar_res_table
+        }, f, ensure_ascii=False, indent=4)
+    
+    def save_player_res(key: str, entry: UnityPy.files.BundleFile, fn: str):
         obj: UnityPy.classes.TextAsset | UnityPy.classes.Sprite | UnityPy.classes.AudioClip
         obj = next(entry.get_filtered_objects((ClassIDType.TextAsset, ClassIDType.Sprite, ClassIDType.AudioClip))).read()
         extended_info.append({
@@ -247,30 +323,64 @@ def generate_resources():
             "name": obj.name
         })
         
-        if key[-14:-7] == "/Chart_" and key.endswith(".json"):
-            name = key[:-14]
-            iocommands.append(("save-string", f"Chart_{key[-7:-5]}/{name}.json", obj.script))
+        key = key.replace("\\", "/")
+        keyfoldername = dirname(key)
+        keybasename = basename(key)
+        keymainname = ".".join(keybasename.split(".")[:-1])
+        keyextname = keybasename.split(".")[-1]
+        
+        if keymainname.startswith("Chart_") and keyextname == "json":
+            if not keymainname.endswith("_Error"):
+                iocommands.append(("save-string", f"{keymainname}/{keyfoldername}.json", obj.script))
+            else:
+                level = keymainname.replace("Chart_", "").replace("_Error", "")
+                iocommands.append(("save-string", f"Chart_Error/{keyfoldername}_{level}.json", obj.script))
+        
+        elif keymainname in ("IllustrationBlur", "IllustrationLowRes") and keyextname in ("png", "jpg", "jpeg"):
+            if not need_otherillu: return
+            iocommands.append(("save-pilimg", f"{keymainname}/{keyfoldername}.png", obj.image))
             
-        elif key[-18:-11] == "/Chart_" and key.endswith(".json"):
-            name = key[:-18]
-            iocommands.append(("save-string", f"Chart_{key[-11:-5]}/{name}.json", obj.script))
+        elif keymainname.startswith("Illustration") and keyextname in ("png", "jpg", "jpeg"):
+            iocommands.append(("save-pilimg", f"Illustration/{keyfoldername}.png", obj.image))
             
-        elif key.endswith("/IllustrationBlur.png"):
-            name = key[:-21]
-            iocommands.append(("save-pilimg", f"IllustrationBlur/{name}.png", obj.image))
+        elif keymainname == "music" and keyextname in ("wav", "ogg", "mp3"):
+            fsb = FSB5(obj.m_AudioData.tobytes() if isinstance(obj.m_AudioData, memoryview) else obj.m_AudioData)
+            iocommands.append(("save-music", f"music/{keyfoldername}.ogg", fsb.rebuild_sample(fsb.samples[0])))
+        
+        else:
+            print(f"Unknown res: {key}: {obj}")
+    
+    def save_avatar_res(key: str, entry: UnityPy.files.BundleFile, fn: str):
+        obj: UnityPy.classes.Sprite
+        obj = next(entry.get_filtered_objects((ClassIDType.Sprite, ))).read()
+        extended_info.append({
+            "key": key,
+            "fn": fn,
+            "type": obj.type.value,
+            "type_string": obj.type.name,
+            "path_id": obj.path_id,
+            "name": obj.name
+        })
+        iocommands.append(("save-pilimg", f"avatars/{key}.png", obj.image))
+    
+    def save_other_res(key: str, entry: UnityPy.files.BundleFile, fn: str):
+        obj: UnityPy.classes.TextAsset | UnityPy.classes.Sprite | UnityPy.classes.AudioClip
+        obj = next(entry.get_filtered_objects((ClassIDType.TextAsset, ClassIDType.Sprite, ClassIDType.AudioClip))).read()
+        
+        flodername = dirname(key)
+        fp = f"other_res/{key}"
+        try: mkdir(f"./unpack-result/other_res/{flodername}")
+        except FileExistsError: pass
+        
+        if isinstance(obj, UnityPy.classes.TextAsset):
+            iocommands.append(("save-string", fp, obj.script))
             
-        elif key.endswith("/IllustrationLowRes.png"):
-            name = key[:-23]
-            iocommands.append(("save-pilimg", f"IllustrationLowRes/{name}.png", obj.image))
+        elif isinstance(obj, UnityPy.classes.Sprite):
+            iocommands.append(("save-pilimg", fp, obj.image))
             
-        elif key.endswith("/Illustration.png"):
-            name = key[:-17]
-            iocommands.append(("save-pilimg", f"Illustration/{name}.png", obj.image))
-            
-        elif key.endswith("/music.wav"):
-            name = key[:-10]
-            fsb = FSB5(memoryview(obj.m_AudioData).tobytes())
-            iocommands.append(("save-music", f"music/{name}.ogg", fsb.rebuild_sample(fsb.samples[0])))
+        elif isinstance(obj, UnityPy.classes.AudioClip):
+            fsb = FSB5(obj.m_AudioData.tobytes() if isinstance(obj.m_AudioData, memoryview) else obj.m_AudioData)
+            iocommands.append(("save-music", fp, fsb.rebuild_sample(fsb.samples[0])))
     
     def io():
         nonlocal keunpack_count, save_string_count
@@ -281,30 +391,55 @@ def generate_resources():
             try:
                 item = iocommands.pop()
                 if item is None: break
+                item = list(item)
             except IndexError:
                 break
             
             try:
                 match item[0]:
-                    case "ke-unpack":
+                    case "ke-unpack-player-res":
                         env = UnityPy.Environment()
-                        env.load_file(open(getZipItem(f"/assets/aa/Android/{item[2]}"), "rb").read(), name = item[1])
+                        env.load_file(getZipItem(f"/assets/aa/Android/{item[2]}"), name = item[1])
                         for ikey, ientry in env.files.items():
-                            save(ikey, ientry, item[2])
+                            save_player_res(ikey, ientry, item[2])
                         keunpack_count += 1
+                    
+                    case "ke-unpack-avatar-res":
+                        env = UnityPy.Environment()
+                        env.load_file(getZipItem(f"/assets/aa/Android/{item[2]}"), name = item[1])
+                        for ikey, ientry in env.files.items():
+                            save_avatar_res(ikey, ientry, item[2])
+                        keunpack_count += 1
+                    
+                    case "ke-unpack-other-res":
+                        env = UnityPy.Environment()
+                        env.load_file(getZipItem(f"/assets/aa/Android/{item[2]}"), name = item[1])
+                        for ikey, ientry in env.files.items():
+                            save_other_res(ikey, ientry, item[2])
+                        keunpack_count += 1
+
                     case "save-string":
-                        with open(f"unpack-result/{item[1]}", "wb") as f:
+                        with open(f"./unpack-result/{item[1]}", "wb") as f:
                             f.write(item[2].tobytes())
                         save_string_count += 1
+                        
                     case "save-pilimg":
-                        item[2].save(f"unpack-result/{item[1]}", "png")
+                        replace_exnames = [".jpg", ".jpeg"]
+                        
+                        for name in replace_exnames:
+                            if item[1].endswith(name):
+                                item[1] = item[1][:-len(name)] + ".png"
+                                break
+                            
+                        item[2].save(f"./unpack-result/{item[1]}", "png")
                         save_pilimg_count += 1
+                        
                     case "save-music":
-                        with open(f"unpack-result/{item[1]}", "wb") as f:
+                        with open(f"./unpack-result/{item[1]}", "wb") as f:
                             f.write(item[2])
                         save_music_count += 1
             except Exception as e:
-                raise e
+                print(f"has err in io: {repr(e)}")
         
         stopthread_count += 1
     
@@ -313,13 +448,13 @@ def generate_resources():
     save_pilimg_count = 0
     save_music_count = 0
     
-    iothread_num = 32
     stopthread_count = 0
     iocommands = [None] * iothread_num
     extended_info = []
     
-    for key, entry in table:
-        iocommands.append(("ke-unpack", key, entry))
+    iocommands.extend(("ke-unpack-player-res", *i) for i in player_res_table)
+    iocommands.extend(("ke-unpack-avatar-res", *i) for i in avatar_res_table)
+    iocommands.extend(("ke-unpack-other-res", *i) for i in other_res_table) if need_other_res else None
 
     iots = [Thread(target=io, daemon=True) for _ in range(iothread_num)]
     (*map(lambda x: x.start(), iots), )
@@ -328,41 +463,73 @@ def generate_resources():
         print(f"\r{keunpack_count} | {save_string_count} | {save_pilimg_count} | {save_music_count}", end="")
         sleep(0.1)
     
-    with open(f"unpack-result/extended_info.json", "w", encoding="utf-8") as f:
+    with open(f"./unpack-result/extendedInfo.json", "w", encoding="utf-8") as f:
         json.dump(extended_info, f, indent=4, ensure_ascii=False)
     
     print()
 
 def pack_charts(infos: list[dict], rpe: bool):
-    try: rmtree(f"unpack-result/packed")
+    try: rmtree(f"./unpack-result/packed")
     except Exception: pass
-    try: mkdir(f"unpack-result/packed")
+    try: mkdir(f"./unpack-result/packed")
     except FileExistsError: pass
         
     charts = []
     allcount = 0
     for info in infos:
         for li, l in enumerate(info["levels"]):
-            chartFile = f'unpack-result/Chart_{l}/{info["soundIdBak"]}.json'
-            audioFile = f'unpack-result/music/{info["soundIdBak"]}.ogg'
-            imageFile = f'unpack-result/Illustration/{info["soundIdBak"]}.png'
+            # tip: 2 spaces
+            levelString = f"{l}  Lv.{int(info["difficulty"][li])}"
+            
+            chartExn = "json"
+            audioExn = "ogg"
+            imageExn = "png"
+            
+            chartFile = f"./unpack-result/Chart_{l}/{info["songIdBak"]}.{chartExn}"
+            audioFile = f"./unpack-result/music/{info["songIdBak"]}.{audioExn}"
+            imageFile = f"./unpack-result/Illustration/{info["songIdBak"]}.{imageExn}"
+            
             csvData = "\n".join([
                 "Chart,Music,Image,Name,Artist,Level,Illustrator,Charter,AspectRatio,NoteScale,GlobalAlpha",
-                ",".join(map(lambda x: f'"{x}"' if " " in x else x, [
-                    f'{info["soundIdBak"]}.json',
-                    f'{info["soundIdBak"]}.ogg',
-                    f'{info["soundIdBak"]}.png',
+                ",".join(map(lambda x: f"\"{x}\"" if " " in x else x, [
+                    f"{info["songIdBak"]}.{chartExn}",
+                    f"{info["songIdBak"]}.{audioExn}",
+                    f"{info["songIdBak"]}.{imageExn}",
                     info["songName"],
                     info["composer"],
-                    f'{l} Lv.{int(info["difficulty"][li])}',
+                    levelString,
                     info["illustrator"],
                     info["charter"][li]
                 ]))
             ])
-            charts.append((info["soundIdBak"], l, chartFile, audioFile, imageFile, csvData))
+            
+            txtData = "\n".join([
+                "#",
+                f"Name: {info["songName"]}",
+                "Path: 0",
+                f"Song: {info["songIdBak"]}.{audioExn}",
+                f"Picture: {info["songIdBak"]}.{imageExn}",
+                f"Chart: {info["songIdBak"]}.{chartExn}",
+                f"Level: {levelString}",
+                f"Composer: {info["composer"]}",
+                f"Charter: {info["charter"][li]}"
+            ])
+            
+            ymlData = "\n".join([
+                f"name: {repr(info["songName"])}",
+                f"difficulty: {info["difficulty"][li]}",
+                f"level: {repr(levelString)}",
+                f"charter: {repr(info["charter"])}",
+                f"composer: {repr(info["composer"])}",
+                f"illustrator: {repr(info["illustrator"])}",
+                f"chart: {repr(info["songIdBak"] + f".{chartExn}")}",
+                f"music: {repr(info["songIdBak"] + f".{audioExn}")}",
+                f"illustration: {repr(info["songIdBak"] + f".{imageExn}")}"
+            ])
+            
+            charts.append((info["songIdBak"], l, chartFile, audioFile, imageFile, csvData, txtData, ymlData))
             allcount += 1
     
-    packthread_num = 32
     stopthread_count = 0
     packed_num = 0
     charts_bak = charts.copy()
@@ -378,13 +545,16 @@ def pack_charts(infos: list[dict], rpe: bool):
             
             try:
                 rid = uuid4()
+                rfolder = f"./unpack-temp/pack-{rid}"
+                mkdir(rfolder)
+                with open(f"{rfolder}/info.csv", "w", encoding="utf-8") as f: f.write(item[5])
+                with open(f"{rfolder}/info.txt", "w", encoding="utf-8") as f: f.write(item[6])
+                with open(f"{rfolder}/info.yml", "w", encoding="utf-8") as f: f.write(item[7])
                 
-                with open(f"unpack-temp/pack-{rid}/info.csv", "w", encoding="utf-8") as f:
-                    f.write(item[5])
-                
-                with zipfile.ZipFile('unpack-result/packed/{}_{}{}.zip'.format(item[0], item[1], '_RPE' if p2r else ''), 'w', zipfile.ZIP_DEFLATED) as zip_ref:
-                    for file_path in (item[2], item[3], item[4], f"unpack-temp/pack-{rid}/info.csv"):
-                        zip_ref.write(file_path, arcname = basename(file_path))
+                createZip([
+                    item[2], item[3], item[4],
+                    f"{rfolder}/info.csv", f"{rfolder}/info.txt", f"{rfolder}/info.yml"
+                ], f"./unpack-result/packed/{item[0]}_{item[1]}{"_RPE" if p2r else ""}.zip")
                 packed_num += 1
             except Exception:
                 pass
@@ -402,8 +572,7 @@ def pack_charts(infos: list[dict], rpe: bool):
     if not rpe: return
     
     p2r = "tool-phi2rpe.py" if exists("tool-phi2rpe.py") and isfile("tool-phi2rpe.py") else "tool-phi2rpe.exe"
-    phicharts = [f"unpack-result/Chart_{l}/{i}" for l in ["EZ", "HD", "IN", "AT", "Legacy"] for i in listdir(f"unpack-result/Chart_{l}")]
-    p2rthread_num = 4
+    phicharts = [f"./unpack-result/Chart_{l}/{i}" for l in ["EZ", "HD", "IN", "AT", "Legacy"] for i in listdir(f"./unpack-result/Chart_{l}")]
     p2red_num = 0
     stopthread_count = 0
     
@@ -446,11 +615,18 @@ def pack_charts(infos: list[dict], rpe: bool):
 
 if __name__ == "__main__":
     from sys import argv
-
-    add_dll_directory('../lib')
     if len(argv) < 2:
         print("Usage: tool-unpack <apk>")
         raise SystemExit
     
-    pgrapk = argv[1]
-    run("--rpe" in argv)
+    if "--iothread" in argv:
+        iothread_num = int(argv[argv.index("--iothread") + 1])
+    
+    if "--packthread" in argv:
+        packthread_num = int(argv[argv.index("--packthread") + 1])
+    
+    if "--p2rthread" in argv:
+        p2rthread_num = int(argv[argv.index("--p2rthread") + 1])
+    
+    setApk(argv[1])
+    run("--rpe" in argv, "--need-other-illu" in argv, "--need-other-res" in argv)

@@ -1,12 +1,8 @@
-import init_logging as _
-
-import json
 import typing
-import logging
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-import tool_funcs
+import utils
 
 callback: typing.Callable[[bytes], typing.Any] = lambda x: None
 
@@ -17,15 +13,14 @@ class ArrayBufferHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "*")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
-        self.end_headers()
         data = self.rfile.read(int(self.headers["Content-Length"]))
         callback(data)
-        self.wfile.write(json.dumps({"status": 0}).encode())
+        self.end_headers()
         
     def log_request(self, *args, **kwargs) -> None: ...
     
 def createServer():
-    port = tool_funcs.getNewPort()
+    port = utils.getNewPort()
     server_address = ("", port)
     httpd = HTTPServer(server_address, ArrayBufferHandler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()

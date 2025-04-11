@@ -19,7 +19,7 @@ class ByteReader:
         self.index += n
         
         if len(result) != n:
-            raise EOFError(f"Unexpected EOF")
+            raise EOFError("Unexpected EOF")
         
         return result
     
@@ -290,7 +290,7 @@ class MidiFile:
                     t -= et_sec
                 else:
                     beat += t / sec_per_beat
-                    return beat
+                    break
             else:
                 beat += t / sec_per_beat
         return beat * tick_per_quarter_note
@@ -309,7 +309,7 @@ class MidiFile:
                     t -= et_beat
                 else:
                     sec += t * sec_per_beat
-                    return sec
+                    break
             else:
                 sec += t * sec_per_beat
         return sec
@@ -329,7 +329,12 @@ if __name__ == "__main__":
     import sys
     import tinysoundfont # type: ignore
     
-    mid = MidiFile(open(input("your midi file: "), "rb").read())
+    fn = input("your midi file: ")
+    if fn.startswith("& "): fn = fn[2:]
+    if fn.startswith("'") and fn.endswith("'"): fn = fn[1:-1]
+    if fn.startswith("\"") and fn.endswith("\""): fn = fn[1:-1]
+    
+    mid = MidiFile(open(fn, "rb").read())
     sf2 = input("your sf2 file: ") if "--sf" not in sys.argv else sys.argv[sys.argv.index("--sf") + 1]
     synth = tinysoundfont.Synth(-12)
     sfid = synth.sfload(sf2)
@@ -367,4 +372,3 @@ if __name__ == "__main__":
     
     time.sleep(5.0)
     synth.stop()
-    

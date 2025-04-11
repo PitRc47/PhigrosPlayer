@@ -5,19 +5,22 @@ from random import uniform
 import threading
 import typing
 import time
+import uuid
 
 from PIL import Image
 
-import tool_funcs
+import utils
 import const
 import rpe_easing
+import dxsound
+from dxsmixer_unix import mixer as unix_mixer
 
 @dataclass
 class ClickEvent:
     rect: tuple[float, float, float, float]
     callback: typing.Callable[[int, int], typing.Any]
     once: bool
-    tag: str|None = None
+    tag: typing.Optional[str] = None
     
     def __hash__(self) -> int:
         return id(self)
@@ -25,7 +28,7 @@ class ClickEvent:
 @dataclass
 class MoveEvent:
     callback: typing.Callable[[int, int], typing.Any]
-    tag: str|None = None
+    tag: typing.Optional[str] = None
     
     def __hash__(self) -> int:
         return id(self)
@@ -33,7 +36,7 @@ class MoveEvent:
 @dataclass
 class ReleaseEvent:
     callback: typing.Callable[[int, int], typing.Any]
-    tag: str|None = None
+    tag: typing.Optional[str] = None
 
     def __hash__(self) -> int:
         return id(self)
@@ -46,22 +49,22 @@ class EventManager:
         self.releaseEvents: list[ReleaseEvent] = []
     
     def _callClickCallback(self, e: ClickEvent, x: int, y: int) -> None:
-        if tool_funcs.inrect(x, y, e.rect):
+        if utils.inrect(x, y, e.rect):
             e.callback(x, y)
             if e.once:
                 self.unregEvent(e)
                 
-    @tool_funcs.NoJoinThreadFunc
+    @utils.runByThread
     def click(self, x: int, y: int) -> None:
         for e in self.clickEvents:
             self._callClickCallback(e, x, y)
             
-    @tool_funcs.NoJoinThreadFunc
+    @utils.runByThread
     def move(self, x: int, y: int) -> None:
         for e in self.moveEvents:
             e.callback(x, y)
     
-    @tool_funcs.NoJoinThreadFunc
+    @utils.runByThread
     def release(self, x: int, y: int) -> None:
         for e in self.releaseEvents:
             e.callback(x, y)
@@ -92,7 +95,7 @@ class EventManager:
             except ValueError:
                 pass
     
-    def unregEventByChooseChartControl(self, ccc: ChooseChartControl):
+    def unregEventByChooseChartControl(self, ccc: ChooseChartControler):
         for e in self.clickEvents:
             if e.callback is ccc.scter_mousedown:
                 self.unregEvent(e)
@@ -150,26 +153,52 @@ class FaculaAnimationManager:
         })
 
 @dataclass
-class SongDifficlty:
+class SongDifficulty:
     name: str
-    level: str
+    level: float
     chart_audio: str
     chart_image: str
     chart_file: str
     charter: str
-    iller: str
+    
+    def __post_init__(self):
+        self.strdiffnum = str(int(self.level))
+        self.song = None
+    
+    def unqique_id(self):
+        return uuid.uuid5(uuid.NAMESPACE_DNS, str((
+            self.chart_audio,
+            self.chart_image,
+            self.chart_file
+        ))).hex
     
 @dataclass
 class Song:
     name: str
     composer: str
+    iller: str
     image: str
+    image_lowres: str
     preview: str
-    difficlty: list[SongDifficlty]
+    preview_start: float
+    preview_end: float
+    difficulty: list[SongDifficulty]
+    import_archive_alias: typing.Optional[str]
+    
+    chooseSongs_nameFontSize: float = float("nan")
+    currSong_composerFontSize: float = float("nan")
     
     def __post_init__(self):
         self.songId = int(uniform(0.0, 1.0) * (2 << 31))
-
+        self.difficulty = self.difficulty[:4]
+        self.level_bar_rightx_max = const.LEVEL_BAR_END_XMAP[len(self.difficulty) - 1]
+        
+        for diff in self.difficulty:
+            diff.song = self
+    
+    def __eq__(self, value: typing.Any):
+        return self is value
+    
 @dataclass
 class Chapter:
     name: str
@@ -177,10 +206,12 @@ class Chapter:
     o_name: str
     image: str
     songs: list[Song]
+    all_songs_flag: bool
     im: None|Image.Image = None
     
     def __post_init__(self):
         self.chapterId = int(uniform(0.0, 1.0) * (2 << 31))
+        self.scsd_songs = self.songs.copy()
     
     def __hash__(self):
         return id(self)
@@ -224,7 +255,7 @@ class SettingState:
         st = self.aSTime
         et = self.aSTime + self.atime
         p = (time.time() - st) / (et - st)
-        p = tool_funcs.fixorp(p)
+        p = utils.fixorp(p)
         p = self._ease_slow(p)
         return p * (ev - sv) + sv
     
@@ -236,7 +267,7 @@ class SettingState:
         st = self.aSTime
         et = self.aSTime + self.atime
         p = (time.time() - st) / (et - st)
-        p = tool_funcs.fixorp(p)
+        p = utils.fixorp(p)
         p = self._ease_fast(p)
         return p * (ev - sv) + sv
     
@@ -248,7 +279,7 @@ class SettingState:
         st = self.aSTime
         et = self.aSTime + self.atime
         p = (time.time() - st) / (et - st)
-        p = tool_funcs.fixorp(p)
+        p = utils.fixorp(p)
         p = self._ease_slow(p)
         return p * (ev - sv) + sv
     
@@ -267,7 +298,7 @@ class SettingState:
             st = self.aSTime
             et = self.aSTime + self.atime
             p = (time.time() - st) / (et - st)
-            p = tool_funcs.fixorp(p)
+            p = utils.fixorp(p)
             
             # 这里奇怪的算法: 为了视觉上好看和还原一点
             absv = abs(self.aFrom - self.aTo) if self.aFrom != self.aTo else 1.0
@@ -289,10 +320,10 @@ class SettingState:
             st = self.aSTime
             et = self.aSTime + self.atime
             p = (time.time() - st) / (et - st)
-            p = tool_funcs.fixorp(p)
+            p = utils.fixorp(p)
             p = self._ease_slow(p)
             
-            return tool_funcs.linear_interpolation(p, 0.0, 1.0, 1.175, 1.0) if self.aFrom == t else tool_funcs.linear_interpolation(p, 0.0, 1.0, 1.0, 1.175)
+            return utils.linear_interpolation(p, 0.0, 1.0, 1.175, 1.0) if self.aFrom == t else utils.linear_interpolation(p, 0.0, 1.0, 1.0, 1.175)
     
     def getShadowRect(self):
         sv = const.PHIGROS_SETTING_SHADOW_XRECT_MAP[self.aFrom]
@@ -302,7 +333,7 @@ class SettingState:
         st = self.aSTime
         et = self.aSTime + self.atime
         p = (time.time() - st) / (et - st)
-        p = tool_funcs.fixorp(p)
+        p = utils.fixorp(p)
         p = self._ease_slow(p)
         return (
             p * (ev[0] - sv[0]) + sv[0],
@@ -332,7 +363,7 @@ class SettingState:
         st = self.aSTime
         et = self.aSTime + self.atime
         p = (time.time() - st) / (et - st) if self.aSTime != float("-inf") else 1.0
-        p = tool_funcs.fixorp(p)
+        p = utils.fixorp(p)
         p = self._ease_slow(p)
         
         drawPlaySettingDx = self.getSettingDx(shadowRectLeft, w, const.PHIGROS_SETTING_STATE.PLAY)
@@ -386,9 +417,9 @@ class PhiSlider(PhiBaseWidget):
     numberType: typing.Union[int, float] = float
     command: typing.Callable[[], typing.Any] = lambda *args, **kwargs: None
     
-    sliderRect = (0.0, 0.0, 0.0, 0.0)
-    lconButtonRect = (0.0, 0.0, 0.0, 0.0)
-    rconButtonRect = (0.0, 0.0, 0.0, 0.0)
+    sliderRect = const.EMPTY_RECT
+    lconButtonRect = const.EMPTY_RECT
+    rconButtonRect = const.EMPTY_RECT
     _mouseDown: bool = False
     
     def _fixValue(self):
@@ -401,14 +432,14 @@ class PhiSlider(PhiBaseWidget):
     
     def _SliderEvent(self, x: int, y: int):
         if not self._mouseDown or (
-            tool_funcs.inrect(x, y, self.rconButtonRect)
-            or tool_funcs.inrect(x, y, self.lconButtonRect)
+            utils.inrect(x, y, self.rconButtonRect)
+            or utils.inrect(x, y, self.lconButtonRect)
         ):
             return
         
         p = (x - self.sliderRect[0]) / (self.sliderRect[2] - self.sliderRect[0])
         p = 0.0 if p < 0.02 else (1.0 if p > 0.97 else p)
-        v = tool_funcs.sliderValueValue(p, self.number_points)
+        v = utils.sliderValueValue(p, self.number_points)
         if self.sliderUnit != self.sliderUnit: # nan
             self.value = v
         else:
@@ -419,10 +450,10 @@ class PhiSlider(PhiBaseWidget):
         self._fixValue()
     
     def _ConButtonEvent(self, x: int, y: int):
-        if tool_funcs.inrect(x, y, self.lconButtonRect):
+        if utils.inrect(x, y, self.lconButtonRect):
             self.value -= self.conUnit
             
-        elif tool_funcs.inrect(x, y, self.rconButtonRect):
+        elif utils.inrect(x, y, self.rconButtonRect):
             self.value += self.conUnit
         
         self._fixValue()
@@ -441,9 +472,9 @@ class PhiSlider(PhiBaseWidget):
     
     def InRect(self, x: int, y: int):
         return any([
-            tool_funcs.inrect(x, y, self.sliderRect),
-            tool_funcs.inrect(x, y, self.lconButtonRect),
-            tool_funcs.inrect(x, y, self.rconButtonRect)
+            utils.inrect(x, y, self.sliderRect),
+            utils.inrect(x, y, self.lconButtonRect),
+            utils.inrect(x, y, self.rconButtonRect)
         ])
     
 @dataclass
@@ -454,7 +485,7 @@ class PhiCheckbox(PhiBaseWidget):
     command: typing.Callable[[], typing.Any] = lambda *args, **kwargs: None
     
     check_animation_st: float = float("-inf")
-    checkboxRect = (0.0, 0.0, 0.0, 0.0)
+    checkboxRect = const.EMPTY_RECT
     _mouseDown: bool = False
     
     def MouseDown(self, x: int, y: int):
@@ -468,7 +499,7 @@ class PhiCheckbox(PhiBaseWidget):
         self._mouseDown = False
     
     def InRect(self, x: int, y: int):
-        return tool_funcs.inrect(x, y, self.checkboxRect)
+        return utils.inrect(x, y, self.checkboxRect)
 
 @dataclass
 class PhiButton(PhiBaseWidget):
@@ -476,15 +507,17 @@ class PhiButton(PhiBaseWidget):
     fontsize: float = 1.0
     width: float = 0.0
     command: typing.Callable[[], typing.Any] = lambda *args, **kwargs: None
+    anchor: typing.Literal["left", "center", "right"] = "center"
+    dx: float = 0.0
 
-    buttonRect = (0.0, 0.0, 0.0, 0.0)
+    buttonRect = const.EMPTY_RECT
 
     def MouseDown(self, x: int, y: int):
         if self.InRect(x, y):
             self.command()
 
     def InRect(self, x: int, y: int):
-        return tool_funcs.inrect(x, y, self.buttonRect)
+        return utils.inrect(x, y, self.buttonRect)
 
 class WidgetEventManager:
     def __init__(self, widgets: list[PhiBaseWidget], condition: typing.Callable[[int, int], bool]):
@@ -516,13 +549,16 @@ class WidgetEventManager:
 class SlideControler:
     def __init__(
         self,
-        eventRect: typing.Callable[[int, int], bool],
+        eventRect: (
+            typing.Callable[[int, int], bool]
+            | list[tuple[typing.Callable[[int, int], bool], float]]
+        ),
         setFunc: typing.Callable[[float, float], typing.Any],
         minValueX: float, maxValueX: float,
         minValueY: float, maxValueY: float,
         w: int, h: int
     ):
-        self.eventRect = eventRect
+        self.eventRect = eventRect if isinstance(eventRect, list) else [(eventRect, 1.0)]
         self.setFunc = setFunc
         self.minValueX, self.maxValueX = minValueX, maxValueX
         self.minValueY, self.maxValueY = minValueY, maxValueY
@@ -531,29 +567,57 @@ class SlideControler:
         self._lastclickx, self._lastclicky = 0.0, 0.0
         self._dx, self._dy = 0.0, 0.0
         self._mouseDown = False
+        self._recti = -1
+        
+        self.startcallback = lambda: None
+        self.endcallback = lambda: None
+        self.easeEndXCallback = lambda: None
+        self.easeEndYCallback = lambda: None
+        self.easeScrollCallback = lambda: None
+        
+        self._easeBackXEvents: list[threading.Event] = []
+        self._easeBackYEvents: list[threading.Event] = []
+        self._easeScrollEvents: list[threading.Event] = []
+        
+        self.resistance = 0.93
+    
+    def _inrect(self, x: int, y: int):
+        for i, (f, _) in enumerate(self.eventRect):
+            if f(x, y): return True, i
+        return False, -1
     
     def mouseDown(self, x: int, y: int):
-        if not self.eventRect(x, y):
-            return
+        isinrect, i = self._inrect(x, y)
+        if not isinrect: return
         
+        self._recti = i
         self._lastclickx, self._lastclicky = x, y
         self._lastlastclickx, self._lastlastclicky = x, y
         self._mouseDown = True
+        self.stopAllEase()
+        self.startcallback()
     
     def mouseUp(self, x: int, y: int):
         if self._mouseDown:
-            threading.Thread(target=self._easeSroll, daemon=True).start()
+            threading.Thread(target=self.easeSroll, daemon=True).start()
             
         self._mouseDown = False
+        self.endcallback()
     
     def mouseMove(self, x: int, y: int):
-        if not self._mouseDown:
-            return
+        if not self._mouseDown: return
         
-        self._dx += x - self._lastclickx
-        self._dy += y - self._lastclicky
+        self.mouseMoveBy(
+            (x - self._lastclickx) * self.eventRect[self._recti][1],
+            (y - self._lastclicky) * self.eventRect[self._recti][1]
+        )
         self._lastlastclickx, self._lastlastclicky = self._lastclickx, self._lastclicky
         self._lastclickx, self._lastclicky = x, y
+        self._set()
+    
+    def mouseMoveBy(self, x: int, y: int):
+        self._dx += x
+        self._dy += y
         self._set()
     
     def setDx(self, v: float): self._dx = v
@@ -561,51 +625,76 @@ class SlideControler:
     def getDx(self): return self._dx
     def getDy(self): return self._dy
     
-    def _easeSroll(self):
+    def easeSroll(self):
         dx = self._lastclickx - self._lastlastclickx
         dy = self._lastclicky - self._lastlastclicky
         called_easeBackX, called_easeBackY = False, False
         dx *= 1.2; dy *= 1.2
         
+        for e in self._easeScrollEvents.copy():
+            e.clear()
+            self._easeScrollEvents.remove(e)
+        
+        myevent = threading.Event()
+        myevent.set()
+        self._easeScrollEvents.append(myevent)
+        
         while abs(dx) > self.w * 0.001 or abs(dy) > self.h * 0.001:
-            dx *= 0.92; dy *= 0.92
+            if not myevent.is_set():
+                return
+            
+            dx *= self.resistance; dy *= self.resistance
             self._dx += dx; self._dy += dy
             self._set()
             
             # 往右 = 负, 左 = 正, 反的, 所以`- self._d(x / y)`
             
             if - self._dx <= - self.minValueX or - self._dx >= self.maxValueX - self.minValueX:
-                threading.Thread(target=self._easeBackX, daemon=True).start()
+                threading.Thread(target=self.easeBackX, daemon=True).start()
                 called_easeBackX = True
                 dx = 0.0
             
             if - self._dy <= - self.minValueY or - self._dy >= self.maxValueY - self.minValueY:
-                threading.Thread(target=self._easeBackY, daemon=True).start()
+                threading.Thread(target=self.easeBackY, daemon=True).start()
                 called_easeBackY = True
                 dy = 0.0
             
             time.sleep(1 / 120)
-            
+        
         if not called_easeBackX:
-            threading.Thread(target=self._easeBackX, daemon=True).start()
+            threading.Thread(target=self.easeBackX, daemon=True).start()
+            
         if not called_easeBackY:
-            threading.Thread(target=self._easeBackY, daemon=True).start()
+            threading.Thread(target=self.easeBackY, daemon=True).start()
+        
+        self.easeScrollCallback()
     
-    def _easeBackX(self):
+    def easeBackX(self, target: typing.Optional[float] = None, need_callback: bool = True):
         cdx = - self._dx
-        if self.minValueX <= cdx <= self.maxValueX:
+        if self.minValueX <= cdx <= self.maxValueX and target is None:
             return
         
-        if cdx < 0:
-            dx = - cdx
+        if target is None:
+            if cdx < 0:
+                dx = - cdx
+            else:
+                dx = self.maxValueX - cdx
+            dx *= -1 # 前面cdx = 负的, 所以变回来
+            if self._dx + dx > 0: # 超出左界
+                dx = - self._dx
         else:
-            dx = self.maxValueX - cdx
-        dx *= -1 # 前面cdx = 负的, 所以变回来
-        if self._dx + dx > 0: # 超出左界
-            dx = - self._dx
+            dx = cdx - target
+        
+        for e in self._easeBackXEvents.copy():
+            e.clear()
+            self._easeBackXEvents.remove(e)
+        
+        myevent = threading.Event()
+        myevent.set()
+        self._easeBackXEvents.append(myevent)
         
         lastv, av, ast = 0.0, 0.0, time.time()
-        while True:
+        while myevent.is_set():
             p = (time.time() - ast) / 0.75
             if p > 1.0:
                 self._dx += dx - av
@@ -620,22 +709,36 @@ class SlideControler:
             lastv = v
 
             time.sleep(1 / 120)
+        
+        if need_callback:
+            self.easeEndXCallback()
     
-    def _easeBackY(self):
+    def easeBackY(self, target: typing.Optional[float] = None, need_callback: bool = True):
         cdy = - self._dy
-        if self.minValueY <= cdy <= self.maxValueY:
+        if self.minValueY <= cdy <= self.maxValueY and target is None:
             return
         
-        if cdy < 0:
-            dy = - cdy
+        if target is None:
+            if cdy < 0:
+                dy = - cdy
+            else:
+                dy = self.maxValueY - cdy
+            dy *= -1 # 前面cdy = 负的, 所以变回来
+            if self._dy + dy > 0: # 超出左界
+                dy = - self._dy
         else:
-            dy = self.maxValueY - cdy
-        dy *= -1 # 前面cdy = 负的, 所以变回来
-        if self._dy + dy > 0: # 超出左界
-            dy = - self._dy
+            dy = cdy - target
+        
+        for e in self._easeBackYEvents.copy():
+            e.clear()
+            self._easeBackYEvents.remove(e)
+        
+        myevent = threading.Event()
+        myevent.set()
+        self._easeBackYEvents.append(myevent)
         
         lastv, av, ast = 0.0, 0.0, time.time()
-        while True:
+        while myevent.is_set():
             p = (time.time() - ast) / 0.75
             if p > 1.0:
                 self._dy += dy - av
@@ -650,46 +753,327 @@ class SlideControler:
             lastv = v
 
             time.sleep(1 / 120)
+        
+        if need_callback:
+            self.easeEndYCallback()
 
+    def stopAllEase(self):
+        for e in self._easeScrollEvents.copy():
+            e.clear()
+            self._easeScrollEvents.remove(e)
+        
+        for e in self._easeBackXEvents.copy():
+            e.clear()
+            self._easeBackXEvents.remove(e)
+
+        for e in self._easeBackYEvents.copy():
+            e.clear()
+            self._easeBackYEvents.remove(e)
+    
     def _set(self):
         self.setFunc(self._dx, self._dy)
 
-class ChooseChartControl:
+class ChooseChartControler:
     def __init__(
         self, chapter: Chapter,
-        w: int, h: int # screen size
+        w: int, h: int, # screen size
+        changeUisound: dxsound.directSound,
+        uistate: ChartChooseUI_State
     ):
-        self._chapter = chapter
-        self._songIndex = 0
-        self._songLastIndex = 0
-        self._songLastChooseSt = -float("inf")
+        self.chapter = chapter
+        self.uistate = uistate
+        
         self._chartsShadowRect = (
             w * -0.009375, 0,
             w * 0.4921875, h
         )
-        self._chartsShadowRectDPower = tool_funcs.getDPower(*tool_funcs.getSizeByRect(self._chartsShadowRect), 75)
+        self._chartsShadowRectDPower = utils.getDPower(*utils.getSizeByRect(self._chartsShadowRect), 75)
+        self._previewBgRect = (
+            w * 0.4375, h * (219 / 1080),
+            w * 0.9453125, h * (733 / 1080)
+        )
+        self._previewBgRectDPower = utils.getDPower(*utils.getSizeByRect(self._previewBgRect), 75)
+        
+        self.changeUisound = changeUisound
+        self.itemHeight = h * (120 / 1080)
+        self.itemNowDy = 0.0
+        self._itemLastDy = 0.0
         
         self._slideControl = SlideControler(
-            eventRect = lambda x, y: tool_funcs.indrect(x, y, self._chartsShadowRect, self._chartsShadowRectDPower),
+            eventRect = [
+                (
+                    (lambda x, y: utils.indrect(x, y, self._chartsShadowRect, self._chartsShadowRectDPower) and y > h * (123 / 1080)),
+                    1.0
+                ),
+                (
+                    (lambda x, y: utils.indrect(x, y, self._previewBgRect, self._previewBgRectDPower)),
+                    0.2
+                )
+            ],
             setFunc = self._slide_setfunc,
             minValueX = 0.0, maxValueX = 0.0,
             minValueY = 0.0, maxValueY = 0.0,
             w = h, h = h
         )
+        self._slideControl.resistance = 0.95
+        
         self.scter_mousedown = self._slideControl.mouseDown
         self.scter_mouseup = self._slideControl.mouseUp
         self.scter_mousemove = self._slideControl.mouseMove
+        self._slideControl.easeEndYCallback = self._scoll_end
+        self._slideControl.easeScrollCallback = self._scoll_end
+        self._slideControl.maxValueY = self.itemHeight * (len(self.chapter.songs) - 1)
+        
+        self._preview_events: list[threading.Event] = []
+        self._preview_playing = None
+        self._released = False
+        self.mixer = unix_mixer
+        
+        self.challengeModeSelections: list[tuple[Song, SongDifficulty]] = []
+        self.challengeModeSelectButtonAlpha = valueTranformer(rpe_easing.ease_funcs[0], 0.2)
+        self.challengeModeSelectTextAlpha = valueTranformer(rpe_easing.ease_funcs[0], 0.2)
+        self.challengeModeSelectButtonAlpha.target = 1.0
+        self.challengeModeSelectTextAlpha.target = 1.0
+        
+        self.level_bar_rightx = valueTranformer(rpe_easing.ease_funcs[13])
+        self.level_choose_x = valueTranformer(rpe_easing.ease_funcs[13])
+        self.level_color = (
+            valueTranformer(rpe_easing.ease_funcs[13]),
+            valueTranformer(rpe_easing.ease_funcs[13]),
+            valueTranformer(rpe_easing.ease_funcs[13])
+        )
+        self.level_diffnumber = valueTranformer(rpe_easing.ease_funcs[13])
+        self.chooselevel_textsx = tuple(
+            valueTranformer(rpe_easing.ease_funcs[13], 0.3)
+            for _ in range(const.MAX_LEVEL_NUM)
+        )
+        self._set_level_bar_rightx()
+        
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        self.uistate.max_diffindex = len(song.difficulty) - 1
+        self.set_level_callback = self._set_level_bar_rightx
+        
+        self._start_preview()
+        self._preview_checker()
+        
+        self.challenge_mode_select_change_callback = self._challenge_mode_select_update
     
-    def _slide_setfunc(self, x: float, y: float):
-        print(y)
+    def _set_level_bar_rightx(self):
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        self.level_bar_rightx.target = song.level_bar_rightx_max
+        
+        for i in range(len(song.difficulty)):
+            self.chooselevel_textsx[i].target = const.LEVEL_CHOOSE_XMAP[len(song.difficulty) - 1][i] + const.LEVEL_CHOOSE_BLOCK_WIDTH / 2
+        
+        self._set_level_choose_x()
+    
+    def _set_level_choose_x(self):
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        xs = const.LEVEL_CHOOSE_XMAP[len(song.difficulty) - 1]
+        self.level_choose_x.target = xs[min(self.uistate.diff_index, len(xs) - 1)]
+        self._set_level_color()
+        self._set_level_diffnumber()
+    
+    def _set_level_color(self):
+        color = const.LEVEL_COLOR_MAP[min(self.uistate.diff_index, len(const.LEVEL_COLOR_MAP) - 1)]
+        for i, v in enumerate(color):
+            self.level_color[i].target = v
+    
+    def _set_level_diffnumber(self):
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        self.level_diffnumber.target = song.difficulty[min(self.uistate.diff_index, len(song.difficulty) - 1)].level
+        self._challenge_mode_select_update()
+    
+    def _challenge_mode_select_update(self):
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        diff = song.difficulty[min(self.uistate.diff_index, len(song.difficulty) - 1)]
+        if (song, diff) in self.challengeModeSelections:
+            self.challengeModeSelectButtonAlpha.target = 0.75
+            self.challengeModeSelectTextAlpha.target = 0.0
+        else:
+            self.challengeModeSelectButtonAlpha.target = 1.0
+            self.challengeModeSelectTextAlpha.target = 1.0
+    
+    def get_level_color(self):
+        return tuple(map(lambda x: x.value, self.level_color))
+    
+    def _vaild_index(self, i: int):
+        return 0 <= i <= len(self.chapter.scsd_songs) - 1
+    
+    def _slide_setfunc(self, x: float, y: float, _fromsetto: bool = False):
+        self.itemNowDy = y / self.itemHeight
+        
+        v1, v2 = round(-self.itemNowDy), round(-self._itemLastDy)
+        
+        v1_vaild = max(0, min(v1, len(self.chapter.scsd_songs) - 1))
+        v2_vaild = max(0, min(v2, len(self.chapter.scsd_songs) - 1))
+        
+        for _ in range(int(abs(v1_vaild - v2_vaild)) if not _fromsetto else 0):
+            self.changeUisound.play()
+            self._start_preview()
+            self._set_level_bar_rightx()
+            song = self.chapter.scsd_songs[self.vaildNowIndex]
+            self.uistate.max_diffindex = len(song.difficulty) - 1
+        
+        self._itemLastDy = self.itemNowDy
+    
+    def _scoll_end(self):
+        if -self.itemNowDy < 0: return
+        if -self.itemNowDy >= len(self.chapter.scsd_songs) - 1: return
+        
+        targetDy = min(max(0, round(-self.itemNowDy)), len(self.chapter.scsd_songs) - 1) * self.itemHeight
+        self._slideControl.easeBackY(targetDy, False)
+    
+    def _toae(self):
+        for e in self._preview_events.copy():
+            e.clear()
+            self._preview_events.remove(e)
+        
+        myevent = threading.Event()
+        myevent.set()
+        self._preview_events.append(myevent)
+        
+        return myevent
+    
+    @utils.runByThread
+    def _start_preview(self):
+        myevent = self._toae()
+        song = self.chapter.scsd_songs[self.vaildNowIndex]
+        mixer = self.mixer
+        self._preview_playing = song
+        
+        if mixer.music.get_busy():
+            fadeout = 500
+            mixer.music.fadeout(fadeout)
+            
+            st = time.time()
+            while myevent.is_set() and not self._released:
+                if time.time() - st > fadeout / 1000:
+                    break
+                
+                time.sleep(1 / 20)
+            
+        if not myevent.is_set() or self._released:
+            return
+        
+        mixer.music.load(utils.gtpresp(song.preview), needlength=False)
+        if not myevent.is_set() or self._released: return
+        mixer.music.play()
+        mixer.music.set_volume(0.0)
+        mixer.music.set_pos(song.preview_start)
+        
+        st = time.time()
+        while myevent.is_set() and not self._released:
+            if not mixer.music.get_busy():
+                break
+            
+            p = (time.time() - st) / 0.5
+            if p > 1.0: break
+            
+            mixer.music.set_volume(p)
+        
+        if not myevent.is_set() or self._released:
+            return
+        
+        mixer.music.set_volume(1.0)
+    
+    @utils.runByThread
+    def _preview_checker(self):
+        while not self._released:
+            time.sleep(1 / 10)
+            
+            if not self.mixer.music.get_busy() or self._preview_playing is None:
+                continue
+            
+            nowpos = self.mixer.music.get_pos() + self._preview_playing.preview_start
+            if nowpos > self._preview_playing.preview_end:
+                if self._released: return
+                myevent = self._toae()
+                fadeout = 500
+                self.mixer.music.fadeout(fadeout)
+                
+                st = time.time()
+                while myevent.is_set() and not self._released:
+                    if time.time() - st > fadeout / 1000:
+                        break
 
+                    time.sleep(1 / 20)
+                
+                if self._preview_playing is not None:
+                    self._start_preview()
+    
+    def setto_index(self, index: int):
+        if index == self.nowIndex: return
+        targetDy = min(max(0, index), len(self.chapter.scsd_songs) - 1) * self.itemHeight
+        self._slideControl.stopAllEase()
+        self._slideControl.setDy(-targetDy)
+        self._slide_setfunc(0, -targetDy, True)
+    
+    def setto_index_ease(self, index: int):
+        targetDy = min(max(0, index), len(self.chapter.scsd_songs) - 1) * self.itemHeight
+        self._slideControl.easeBackY(targetDy, False)
+    
+    @property
+    def _valueters(self):
+        return (
+            self.level_bar_rightx,
+            self.level_choose_x,
+            *self.level_color,
+            self.level_diffnumber,
+            *self.chooselevel_textsx
+        )
+    
+    def enable_valueter(self):
+        for valueter in self._valueters:
+            valueter.enable = True
+    
+    def disable_valueter(self):
+        for valueter in self._valueters:
+            valueter.enable = False
+    
+    def __del__(self):
+        self._toae()
+        self._released = True
+        self._preview_playing = None
+    
+    @property
+    def nowIndex(self):
+        return int(round(-self.itemNowDy))
+    
+    @property
+    def vaildNowCeil(self):
+        return max(0, min(int(-self.itemNowDy), len(self.chapter.scsd_songs) - 1))
+    
+    @property
+    def vaildNowNextCeil(self):
+        return max(0, min(int(-self.itemNowDy) + 1, len(self.chapter.scsd_songs) - 1))
+    
+    @property
+    def vaildNowIndex(self):
+        return max(0, min(self.nowIndex, len(self.chapter.scsd_songs) - 1))
+    
+    @property
+    def vaildNextIndex(self):
+        return max(0, min(self.nowIndex + 1, len(self.chapter.scsd_songs) - 1))
+    
+    @property
+    def vaildNowFloatIndex(self):
+        return max(0, min(-self.itemNowDy, len(self.chapter.scsd_songs) - 1))
+        
 @dataclass
 class ChartChooseUI_State:
-    sliding_index: int = 0
-    song_index: int = 0
+    change_diff_sound: dxsound.directSound
     sort_reverse: bool = False
     sort_method: int = const.PHI_SORTMETHOD.DEFAULT
-
+    is_mirror: bool = False
+    is_autoplay: bool = False
+    diff_index: int = 0
+    
+    change_diff_callback: typing.Callable[[], typing.Any] = lambda: None
+    
+    def __post_init__(self):
+        self._max_diffindex = const.MAX_LEVEL_NUM - 1
+            
     def next_sort_method(self):
         tempmethod = self.sort_method + 1
         
@@ -697,3 +1081,110 @@ class ChartChooseUI_State:
             tempmethod = const.PHI_SORTMETHOD.DEFAULT
             
         self.sort_method = tempmethod
+    
+    def change_mirror(self):
+        self.is_mirror = not self.is_mirror
+    
+    def change_autoplay(self):
+        self.is_autoplay = not self.is_autoplay
+    
+    def change_diff(self, i: int):
+        self.diff_index = min(i, self.max_diffindex)
+        self.change_diff_callback()
+    
+    def change_diff_byuser(self, i: int):
+        olddiff = self.diff_index
+        self.change_diff(i)
+        
+        if olddiff != i:
+            self.change_diff_sound.play()
+    
+    def dosort(self, chapter: Chapter, getScore: typing.Callable[[Song], float]):
+        newsongs = chapter.songs.copy()
+        
+        match self.sort_method:
+            case const.PHI_SORTMETHOD.DEFAULT:
+                pass
+            
+            case const.PHI_SORTMETHOD.SONG_NAME:
+                newsongs.sort(key=lambda x: ord(x.name[0]))
+            
+            case const.PHI_SORTMETHOD.DIFFICULTY:
+                newsongs.sort(key=lambda x: x.difficulty[self.diff_index].level if self.diff_index <= len(x.difficulty) - 1 else -1.0)
+            
+            case const.PHI_SORTMETHOD.SCORE:
+                newsongs.sort(key=getScore)
+        
+        if self.sort_reverse:
+            newsongs.reverse()
+        
+        return newsongs
+    
+    @property
+    def max_diffindex(self):
+        return self._max_diffindex
+    
+    @max_diffindex.setter
+    def max_diffindex(self, value: int):
+        self._max_diffindex = value
+        self.change_diff(self.diff_index)
+
+@dataclass
+class valueTranformer:
+    ease: typing.Callable[[float], float] = lambda x: x
+    animation_time: float = 0.5
+    
+    def __post_init__(self):
+       self._last_change = float("-inf")
+       self._last_value = float("-inf")
+       self._target_value = float("-inf")
+       self._inited = False
+       self._enable = True
+    
+    def init(self, value: float):
+        self._last_value = value
+        self._last_change = time.time()
+        self._target_value = value
+    
+    def updater(self):
+        if self._last_change == float("-inf"):
+            self._value = self._target_value
+            return
+        
+        p = (time.time() - self._last_change) / self.animation_time
+        
+        if p > 1.0:
+            self._value = self._target_value
+        else:
+            self._value = utils.easing_interpolation(
+                p, 0.0, 1.0,
+                self._last_value, self._target_value,
+                self.ease
+            )
+    
+    @property
+    def target(self):
+        return self._target_value
+    
+    @target.setter
+    def target(self, value: float):
+        if not self._inited:
+            self._inited = True
+            self.init(value)
+            
+        self._last_value = self.value
+        self._last_change = time.time()
+        self._target_value = value
+    
+    @property
+    def value(self):
+        self.updater()
+        return self._value
+
+    @property
+    def enable(self):
+        return self._inited
+
+    @enable.setter
+    def enable(self, value: bool):
+        self._inited = value
