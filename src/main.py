@@ -374,6 +374,9 @@ def loadResource():
             root.reg_res(video.h264data, f"{video.unqique_id}.mp4")
             root.wait_jspromise(f"loadvideo(\"{root.get_resource_path(f"{video.unqique_id}.mp4")}\", '{video.unqique_id}_img');")
         
+        for k, v in chart_res.items():
+            chart_res[k] = (None, v[1])
+        
     root.reg_res(open("./resources/font.ttf", "rb").read(), "pgrFont.ttf")
     root.reg_res(open("./resources/font-thin.ttf", "rb").read(), "pgrFontThin.ttf")
     respacker.load(*respacker.pack())
@@ -452,30 +455,32 @@ def WaitLoading_FadeIn():
 def showStart():
     WaitLoading.fadeout(450)
     
-    def dle_warn(a: float):
-        drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
-    
-    animationst = time.time()
-    while time.time() - animationst < 1.0:
-        clearCanvas(wait_execute=True)
-        p = (time.time() - animationst) / 1.0
-        dle_warn(1.0 - (1.0 - utils.fixorp(p)) ** 4)
-        root.run_js_wait_code()
-    
-    time.sleep(0.35)
-    
-    animationst = time.time()
-    while time.time() - animationst < 1.0:
+    if not phicore.noanimation:
+        def dle_warn(a: float):
+            drawAlphaImage("le_warn", 0, 0, w, h, a, wait_execute=True)
+        
+        animationst = time.time()
+        while time.time() - animationst < 1.0:
+            clearCanvas(wait_execute=True)
+            p = (time.time() - animationst) / 1.0
+            dle_warn(1.0 - (1.0 - utils.fixorp(p)) ** 4)
+            root.run_js_wait_code()
+        
+        time.sleep(0.35)
+        
+        animationst = time.time()
+        while time.time() - animationst < 1.0:
+            clearCanvas(wait_execute=True)
+            phicore.drawBg()
+            p = (time.time() - animationst) / 1.0
+            dle_warn((utils.fixorp(p) - 1.0) ** 4)
+            root.run_js_wait_code()
+        
+        time.sleep(0.25)
         clearCanvas(wait_execute=True)
         phicore.drawBg()
-        p = (time.time() - animationst) / 1.0
-        dle_warn((utils.fixorp(p) - 1.0) ** 4)
         root.run_js_wait_code()
-    
-    time.sleep(0.25)
-    clearCanvas(wait_execute=True)
-    phicore.drawBg()
-    root.run_js_wait_code()
+        
     Thread(target=playerStart, daemon=True).start()
 
 def checkOffset(now_t: float):

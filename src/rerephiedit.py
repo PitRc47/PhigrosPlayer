@@ -718,6 +718,7 @@ class ModalUI(BaseUI):
     def __init__(self, uis: list[BaseUI], mark_color: str = "black"):
         self.uis = uis
         self.mark_color = mark_color
+        self.bec = True
         
     def render(self):
         ctxSave(wait_execute=True)
@@ -731,7 +732,7 @@ class ModalUI(BaseUI):
         self.master = master
         
     def break_event_chain(self):
-        return True
+        return self.bec
     
     def event_proxy(self, name: str, *args):
         self.master.event_proxy(self.uis, name, *args)
@@ -764,12 +765,16 @@ class ButtonList(BaseUI):
         self.w_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[9])
         self.h_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[9])
         self.a_tr = phigame_obj.valueTranformer(rpe_easing.ease_funcs[15])
-        self.w_tr.target = 0.0
-        self.h_tr.target = 0.0
-        self.a_tr.target = 0.0
-        self.w_tr.target = 1.0
-        self.h_tr.target = 1.0
-        self.a_tr.target = 1.0
+        self._set_trs()
+        self._set_trs(1.0, 1.0, 1.0)
+    
+    def _set_trs(self, w: float = 0.0, h: float = 0.0, a: float = 0.0, at: float = 0.5):
+        self.w_tr.animation_time = at
+        self.h_tr.animation_time = at
+        self.a_tr.animation_time = at
+        self.w_tr.target = w
+        self.h_tr.target = h
+        self.a_tr.target = a
     
     def render(self):
         ctxSave(wait_execute=True)
@@ -798,6 +803,10 @@ class ButtonList(BaseUI):
         for i in self.buts:
             if i is not None:
                 i.dy = -scroll + self.pady
+    
+    def delete_ui(self, callback: typing.Callable[[], typing.Any]):
+        self._set_trs(at=0.4)
+        Timer(self.w_tr.animation_time, callback).start()
 
 class ChartEditor:
     def __init__(self, chart: phichart.CommonChart, chart_config: dict):
@@ -1082,19 +1091,23 @@ def editorRender(chart_config: dict):
         return posm(42 * 1.1 + 63 * c * 1.3, 38 / 2 * 1.1 + 63 * r * 1.3)
     
     def seek_time(t: float):
-        update_time_show_labels()
+        update_info_labels()
         editor.seek_to(t)
     
-    def update_time_show_labels():
+    def update_info_labels():
         editing_line = editor.chart.lines[editor.editing_line]
         now_t = chart_time_slider.value
+        
         chart_time_show_labels[0].text = f"beat: {editing_line.sec2beat(now_t):.2f}"
         chart_time_show_labels[1].text = f"bpm: {editing_line.getBpm(now_t):.2f}"
         chart_time_show_labels[2].text = f"{now_t:.2f}/{raw_audio_length:.2f}s"
+        
+        chart_type_label.text = f"chart type: {editor.chart.type} ({phichart.ChartFormat.get_type_string(editor.chart.type)})"
     
     def popupMenu():
         def _close_menu():
-            globalUIManager.remove_ui(modal)
+            butlst.delete_ui(lambda: globalUIManager.remove_ui(modal))
+            Timer(0.1, lambda: setattr(modal, "bec", False)).start()
             
         def _back_tomain(*, isnosave: bool = False):
             nonlocal nextUI
@@ -1108,6 +1121,17 @@ def editorRender(chart_config: dict):
             
             nextUI = mainRender
             _close_menu()
+        
+        def _save_as():
+            fp = dialog.savefile(Filter="Binary Phigros Chart 文件 (*.bpc)|*.bpc|所有文件 (*.*)|*.*", fn="save_as.bpc")
+            
+            if fp is not None:
+                with open(fp, "wb") as f:
+                    f.write(editor.chart.dump())
+                
+                globalMsgShower.submit(Message(f"已另存到: {fp}", Message.INFO_COLOR))
+            else:
+                globalMsgShower.submit(Message("取消另存", Message.WARNING_COLOR))
             
         butlst = ButtonList(
             0, 0, w / 6, h,
@@ -1115,7 +1139,7 @@ def editorRender(chart_config: dict):
                 {"text": "关闭菜单", "command": lambda *_: _close_menu()},
                 None,
                 {"text": "保存", "command": lambda *_: editor.new_save()},
-                {"text": "另存为", "command": None},
+                {"text": "另存为", "command": lambda *_: _save_as()},
                 None,
                 {"text": "保存并返回主界面", "command": lambda *_: (editor.new_save(), _back_tomain(), _close_menu())},
                 {"text": "不保存并返回主界面", "command": lambda *_: _back_tomain(isnosave=True)},
@@ -1140,11 +1164,13 @@ def editorRender(chart_config: dict):
         Label(chart_time_slider.x + chart_time_slider.width / 2, chart_time_slider.y + chart_time_show_labels_pady, "", "white", f"{(w + h) / 150}px pgrFont", "center"),
         Label(chart_time_slider.x + chart_time_slider.width, chart_time_slider.y + chart_time_show_labels_pady, "", "white", f"{(w + h) / 150}px pgrFont", "right")
     ]
-    update_time_show_labels()
+    chart_type_label = Label(chart_time_show_labels[0].x, chart_time_show_labels[0].y + h / 50, "", "#a4c7ff", f"{(w + h) / 150}px pgrFont")
+    update_info_labels()
     
     globalUIManager.extend_uiitems([
         chart_time_slider,
         *chart_time_show_labels,
+        chart_type_label,
         IconButton(*getButtonPos(0, 0), "menu", popupMenu),
         IconButton(*getButtonPos(1, 0), "unpause", editor.unpause_play),
         IconButton(*getButtonPos(2, 0), "pause", editor.pause_play)
@@ -1157,7 +1183,7 @@ def editorRender(chart_config: dict):
         editor.update()
         editor_now_t = editor.chart_now_t
         chart_time_slider.value = editor_now_t
-        update_time_show_labels()
+        update_info_labels()
         
         fillRectEx(*preview_rect, "rgb(64, 64, 64)", wait_execute=True)
         
@@ -1170,7 +1196,7 @@ def editorRender(chart_config: dict):
         ctxBeginPath(wait_execute=True)
         ctxRect(0, 0, *chart_rect[2:], wait_execute=True)
         ctxClip(wait_execute=True)
-        extasks = phicore.renderChart_Common(editor_now_t, clear=False, rjc=False, need_deepbg=False)
+        extasks = phicore.renderChart_Common(editor_now_t, clear=False, rjc=False, need_deepbg=False, editing_line=editor.editing_line)
         ctxRestore(wait_execute=True)
         
         phicore.processExTask(extasks)
@@ -1271,8 +1297,13 @@ def mainRender():
             try: mkdir(f"{CHARTS_PATH}/{chart_id}")
             except Exception: logging.error(f"chart mkdir failed: {e}")
             
-            chart_obj = phichart.CommonChart(lines=[phichart.JudgeLine() for _ in range(int(createChartData["chartLines"]))])
+            chart_obj = phichart.CommonChart(lines=[phichart.JudgeLine(bpms=[phichart.BPMEvent(0, chart_config["stdBpm"])]) for _ in range(int(createChartData["chartLines"]))])
+            
+            for i, line in enumerate(chart_obj.lines):
+                line.index = i
+            
             chart_obj.type = phichart.ChartFormat.rpe
+            chart_obj.options.globalBpmList = [phichart.BPMEvent(0, chart_config["stdBpm"])]
             chart_obj.init()
             
             with open(f"{CHARTS_PATH}/{chart_id}/chart.bpc", "wb") as f:

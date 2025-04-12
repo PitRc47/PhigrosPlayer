@@ -4,6 +4,7 @@ import time
 import typing
 import logging
 import threading
+import sys
 from dataclasses import dataclass
 from queue import Queue
 
@@ -29,11 +30,12 @@ mainFramerateCalculator = utils.FramerateCalculator()
 
 def initGlobalSettings():
     global enableMirror, enableWatermark
-    global FCAPIndicator
+    global FCAPIndicator, noanimation
     
     enableMirror = False
     enableWatermark = True
     FCAPIndicator = True
+    noanimation = "--noanimation" in sys.argv
 
 initGlobalSettings()
 
@@ -74,7 +76,7 @@ class PhiCoreConfig:
     note_max_size_half: float
     raw_audio_length: float
     
-    chart_res: dict[str, tuple[Image.Image, tuple[int, int]]]
+    chart_res: dict[str, tuple[typing.Optional[Image.Image], tuple[int, int]]]
     cksmanager: ClickSoundManager
     clickeffect_randomblock_roundn: float = 0.0
     enable_clicksound: bool = True
@@ -527,7 +529,7 @@ def processExTask(extasks: list[tuple[str, typing.Any]]):
 def renderChart_Common(
     now_t: float, clear: bool = True, rjc: bool = True,
     pplm: typing.Optional[utils.PhigrosPlayLogicManager] = None,
-    need_deepbg: bool = True
+    need_deepbg: bool = True, editing_line: typing.Optional[int] = None
 ):
     extasks = []
     
@@ -611,6 +613,9 @@ def renderChart_Common(
             lineColor
         ) = line.getState(now_t, nowLineColor)
         
+        if line.index == editing_line:
+            lineColor = (147, 255, 145)
+        
         linePos = (linePos[0] * w, linePos[1] * h)
         lineDrawPos = (
             *utils.rotate_point(*linePos, lineRotate, nowLineWidth / 2 * lineScaleX),
@@ -682,7 +687,7 @@ def renderChart_Common(
                 )
         
         if debug:
-            drawDebugText(f"{line.index}", *linePos, lineRotate - 90, "rgba(255, 255, 170, 0.5)")
+            drawDebugText(f"{line.index}{"" if not line.index == editing_line else " (editing)"}", *linePos, lineRotate - 90, "rgba(255, 255, 170, 0.5)")
                             
             root.run_js_code(
                 f"ctx.fillRectEx(\
@@ -1331,6 +1336,9 @@ def loadingAnimation(
     start_p: float = 0.0,
     blackIn: bool = False
 ):
+    if noanimation:
+        return
+    
     prepareLoadingAnimation(font_options)
     
     animation_time = 4.5
@@ -1354,6 +1362,9 @@ def loadingAnimation(
         root.run_js_wait_code()
         
 def lineOpenAnimation(fcb: typing.Callable[[], typing.Any] = lambda: None):
+    if noanimation:
+        return
+    
     csat = 1.25
     st = time.time()
         

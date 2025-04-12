@@ -390,6 +390,13 @@ class ChartFormat:
     @staticmethod
     def load_pec(data: str):
         return ChartFormat.load_rpe(utils.pec2rpe(data))
+    
+    @staticmethod
+    def get_type_string(t: int):
+        return {
+            getattr(ChartFormat, k): k
+            for k in ("unset", "phi", "rpe")
+        }[t]
 
 @dataclasses.dataclass
 class MemEq:
@@ -764,7 +771,7 @@ class JudgeLine(MemEq):
             else:
                 return e.bpm
         
-        assert False, "Unreachable"
+        return -1.0
 
 class BinaryFlagsGeneric:
     def __init__(self):
