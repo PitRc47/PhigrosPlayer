@@ -1,3 +1,4 @@
+import UnityPy.math
 import fix_workpath as _
 import check_bin as _
 
@@ -19,7 +20,7 @@ import tempdir
 if len(argv) < 6:
     print("Usage: tool-modpack <mod-list> <info> <extended-info> <apk-unpack-dir> <output-dir>")
     raise SystemExit
-
+    
 def loadbundle(fn: str) -> UnityPy.files.BundleFile:
     fp = f"{argv[4]}/assets/aa/Android/{fn}"
     env = UnityPy.load(fp)
@@ -42,16 +43,46 @@ def findexinfo_byinfo(iitem: dict, key: str):
             return i
     return None if not key.endswith(".png") else findexinfo_byinfo(iitem, key[:-4] + ".jpg")
 
+def putinto_t2d(t2d: UnityPy.classes.Texture2D, im: Image.Image):
+    t2d.set_image(im)
+    
+    # https://github.com/K0lb3/UnityPy/issues/230
+    tree = t2d.read_typetree()
+    
+    if "m_MipMap" in tree:
+        tree["m_MipMap"] = t2d.m_MipMap
+    else:
+        tree["m_MipCount"] = t2d.m_MipCount
+
+    tree["m_TextureFormat"] = t2d.m_TextureFormat
+    tree["m_CompleteImageSize"] = len(t2d.image_data)
+    tree["image data"] = t2d.image_data
+
+    tree["m_StreamData"] = {
+        "offset": 0,
+        "size": 0,
+        "path": ""
+    }
+    
+    t2d.reader.save_typetree(tree)
+
 def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.Image, pid: int):
     if bundle is None: return
-    for name, f in bundle.files.items():
+    for name, f in bundle.files.copy().items():
         if isinstance(f, UnityPy.files.SerializedFile):
-            for pid2, asset in f.files.items():
+            for pid2, asset in f.files.copy().items():
                 asset: UnityPy.files.ObjectReader
                 realasset = asset.read()
                 if isinstance(realasset, UnityPy.classes.Texture2D):
-                    realasset.image = im
-                    realasset.save()
+                    putinto_t2d(realasset, im)
+                elif isinstance(realasset, UnityPy.classes.Sprite):
+                    reader: UnityPy.files.ObjectReader = realasset.m_RD.texture.get_obj()
+                    t2d: UnityPy.classes.Texture2D = reader.read()
+                    putinto_t2d(t2d, im)
+                else:
+                    f.files.pop(pid2)
+        else:
+            bundle.files.pop(name)
 
 def fail(mod: dict):
     print(f"Failed to process mod: {mod["name"]}")
@@ -142,8 +173,7 @@ for mod in modlist:
                 continue
             
             im = Image.open(mod["content_path"])
-            if im.width / im.height != 2048 / 1080:
-                print(f"Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.")
+            if im.size != (2048, 1080):
                 im = im.resize((2048, 1080))
             
             i1, i2, i3 = (
