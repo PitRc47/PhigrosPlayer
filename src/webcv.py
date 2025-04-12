@@ -585,7 +585,7 @@ class WebCanvas:
         
         w *= webdpr; h *= webdpr
         
-        return w, h, webdpr, dw_legacy, dh_legacy
+        return int(w), int(h), webdpr, dw_legacy, dh_legacy
     
     def _load_img(self, imgname: str) -> None:
         jsvarname = self.get_img_jsvarname(imgname)
