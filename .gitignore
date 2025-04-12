@@ -20,3 +20,5 @@ ffprobe.exe
 need-ignore-*
 
 imgui.ini
+
+*/*.apk
