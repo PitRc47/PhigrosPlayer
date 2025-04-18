@@ -233,6 +233,30 @@ if speed != 1.0:
     }).set_frame_rate(seg.frame_rate)
     audio_fp = f"{temp_dir}/ppr_temp_audio_{time.time()}.wav"
     seg.export(audio_fp, format="wav")
+    
+phi_rpack = phira_respack.PhiraResourcePack(respath)
+phi_rpack.setToGlobal()
+phi_rpack.printInfo()
+    
+if "--prespwan-clicksound" in sys.argv:
+    logging.warning("prespwan click sound cannot spwan costom click sound.")
+    
+    import audio_utils
+    
+    seg: AudioSegment = AudioSegment.from_file(audio_fp)
+    cs_mixer = audio_utils.AudioMixer(seg)
+    cs_segs = phi_rpack.createResourceDict()["Note_Click_Audio_Pydub"]
+    
+    for line in chart_obj.lines:
+        for note in line.notes:
+            if not note.isFake:
+                t = (note.time + chart_obj.offset) / speed
+                cs_mixer.mix(cs_segs[note.type], t)
+    
+    audio_fp = f"{temp_dir}/ppr_temp_audio_{time.time()}.wav"
+    cs_mixer.get().export(audio_fp, format="wav")
+    
+    enable_clicksound = False
 
 mixer.music.load(audio_fp)
 raw_audio_length = mixer.music.get_length()
@@ -274,10 +298,6 @@ def loadResource():
     WaitLoading.play(-1)
     noteWidth_raw = w * const.NOTE_DEFAULTSIZE
     globalNoteWidth = noteWidth_raw * (eval(sys.argv[sys.argv.index("--scale-note") + 1]) if "--scale-note" in sys.argv else 1.0)
-    
-    phi_rpack = phira_respack.PhiraResourcePack(respath)
-    phi_rpack.setToGlobal()
-    phi_rpack.printInfo()
     
     Resource = {
         "levels":{
@@ -414,34 +434,33 @@ def loadResource():
         "vignette": open("./shaders/vignette.glsl", "r", encoding="utf-8").read()
     }
     
-    if chart_obj.is_rpe():
-        for line in chart_obj.lines:
-            for note in line.notes:
-                if note.hitsound_reskey not in Resource["Note_Click_Audio"]:
-                    try:
-                        Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}/{note.hitsound}")
-                        logging.info(f"Loaded note hitsound {note.hitsound}")
-                    except Exception as e:
-                        logging.warning(f"Cannot load note hitsound {note.hitsound} for note due to {e}")
+    for line in chart_obj.lines:
+        for note in line.notes:
+            if note.hitsound_reskey not in Resource["Note_Click_Audio"]:
+                try:
+                    Resource["Note_Click_Audio"][note.hitsound_reskey] = dxsound.directSound(f"{temp_dir}/{note.hitsound}")
+                    logging.info(f"Loaded note hitsound {note.hitsound}")
+                except Exception as e:
+                    logging.warning(f"Cannot load note hitsound {note.hitsound} for note due to {e}")
+    
+    if chart_obj.extra is not None:
+        for effect in chart_obj.extra.effects:
+            if effect.shader not in shaders.keys():
+                try:
+                    shaders[effect.shader] = utils.fixShader(open(f"{temp_dir}/{effect.shader}", "r", encoding="utf-8").read())
+                    const.EXTRA_DEFAULTS[effect.shader] = utils.getShaderDefault(shaders[effect.shader])
+                except Exception as e:
+                    logging.warning(f"Cannot load shader {effect.shader} due to {e}")
         
-        if chart_obj.extra is not None:
-            for effect in chart_obj.extra.effects:
-                if effect.shader not in shaders.keys():
-                    try:
-                        shaders[effect.shader] = utils.fixShader(open(f"{temp_dir}/{effect.shader}", "r", encoding="utf-8").read())
-                        const.EXTRA_DEFAULTS[effect.shader] = utils.getShaderDefault(shaders[effect.shader])
-                    except Exception as e:
-                        logging.warning(f"Cannot load shader {effect.shader} due to {e}")
-            
-            shadernames = list(set(effect.shader for effect in chart_obj.extra.effects))
-
-            for name, glsl in shaders.items():
-                if name not in shadernames: continue
-                root.run_js_code(f"mainShaderLoader.load({repr(name)}, {repr(glsl)});")
-                if (glerr := root.run_js_code("GLERR;")) is not None:
-                    logging.warning(f"Cannot compile shader {name} due to {glerr}")
-                else:
-                    logging.info(f"Loaded shader {name}")
+        shadernames = list(set(effect.shader for effect in chart_obj.extra.effects))
+        
+        for name, glsl in shaders.items():
+            if name not in shadernames: continue
+            root.run_js_code(f"mainShaderLoader.load({repr(name)}, {repr(glsl)});")
+            if (glerr := root.run_js_code("GLERR;")) is not None:
+                logging.warning(f"Cannot compile shader {name} due to {glerr}")
+            else:
+                logging.info(f"Loaded shader {name}")
     
     cksmanager = phicore.ClickSoundManager(Resource["Note_Click_Audio"])
     logging.info("Load Resource Successfully")

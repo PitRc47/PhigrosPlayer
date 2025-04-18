@@ -1,4 +1,3 @@
-import UnityPy.math
 import fix_workpath as _
 import check_bin as _
 
@@ -12,6 +11,7 @@ import UnityPy
 import UnityPy.classes
 import UnityPy.files
 import UnityPy.streams
+from UnityPy.export import Texture2DConverter
 from pydub import AudioSegment
 from PIL import Image, ImageFilter
 
@@ -43,9 +43,7 @@ def findexinfo_byinfo(iitem: dict, key: str):
             return i
     return None if not key.endswith(".png") else findexinfo_byinfo(iitem, key[:-4] + ".jpg")
 
-def putinto_t2d(t2d: UnityPy.classes.Texture2D, im: Image.Image):
-    t2d.set_image(im)
-    
+def t2d_reset_treetype(t2d: UnityPy.classes.Texture2D):
     # https://github.com/K0lb3/UnityPy/issues/230
     tree = t2d.read_typetree()
     
@@ -55,34 +53,37 @@ def putinto_t2d(t2d: UnityPy.classes.Texture2D, im: Image.Image):
         tree["m_MipCount"] = t2d.m_MipCount
 
     tree["m_TextureFormat"] = t2d.m_TextureFormat
-    tree["m_CompleteImageSize"] = len(t2d.image_data)
-    tree["image data"] = t2d.image_data
-
-    tree["m_StreamData"] = {
-        "offset": 0,
-        "size": 0,
-        "path": ""
-    }
     
     t2d.reader.save_typetree(tree)
 
 def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.Image, pid: int):
     if bundle is None: return
+    t2d: typing.Optional[UnityPy.classes.Texture2D] = None
+    ress: typing.Optional[UnityPy.streams.EndianBinaryReader] = None
+    
     for name, f in bundle.files.copy().items():
         if isinstance(f, UnityPy.files.SerializedFile):
             for pid2, asset in f.files.copy().items():
                 asset: UnityPy.files.ObjectReader
                 realasset = asset.read()
                 if isinstance(realasset, UnityPy.classes.Texture2D):
-                    putinto_t2d(realasset, im)
-                elif isinstance(realasset, UnityPy.classes.Sprite):
-                    reader: UnityPy.files.ObjectReader = realasset.m_RD.texture.get_obj()
-                    t2d: UnityPy.classes.Texture2D = reader.read()
-                    putinto_t2d(t2d, im)
-                else:
-                    f.files.pop(pid2)
-        else:
-            bundle.files.pop(name)
+                    t2d = realasset
+                    
+        elif isinstance(f, UnityPy.streams.EndianBinaryReader):
+            ress = f
+    
+    if t2d is None or ress is None:
+        print("Failed to find texture2d or resources")
+        return
+    
+    temp_t2d: bytes = Texture2DConverter.image_to_texture2d(im, t2d.m_TextureFormat)[0]
+    t2d.m_StreamData.size = len(temp_t2d)
+    t2d.m_Width = im.width
+    t2d.m_Height = im.height
+    t2d.m_CompleteImageSize = len(temp_t2d)
+    t2d.save()
+    ress.view = memoryview(temp_t2d)
+    t2d_reset_treetype(t2d)
 
 def fail(mod: dict):
     print(f"Failed to process mod: {mod["name"]}")
@@ -120,12 +121,14 @@ for mod in modlist:
                     asset: UnityPy.files.ObjectReader
                     if pid == exiitem["path_id"]:
                         textasset: UnityPy.classes.TextAsset = asset.read()
-                        rawchart = textasset.script.tobytes()
-                        rawdata: bytes = asset.get_raw_data().tobytes()
-                        moded = rawdata.replace(rawchart, content)
-                        size = len(rawchart).to_bytes(4, "little")
-                        newsize = len(content).to_bytes(4, "little")
-                        asset.set_raw_data(memoryview(moded.replace(size, newsize, 1)))
+                        textasset.m_Script = content
+                        textasset.save()
+                        # rawchart = textasset.script.tobytes()
+                        # rawdata: bytes = asset.get_raw_data().tobytes()
+                        # moded = rawdata.replace(rawchart, content)
+                        # size = len(rawchart).to_bytes(4, "little")
+                        # newsize = len(content).to_bytes(4, "little")
+                        # asset.set_raw_data(memoryview(moded.replace(size, newsize, 1)))
                         
             savebundle(bundle, exiitem["fn"])
         
