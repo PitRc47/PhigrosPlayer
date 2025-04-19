@@ -13,11 +13,9 @@ class NOTE_JUDGE_RANGE:
     BAD = 0.18
     MISS = 0.2
 
-class NOTE_JUDGE_RANGE_CHALL:
-    PERFECT = 0.04
-    GOOD = 0.075
-    BAD = 0.18
-    MISS = 0.2
+class CHART_TYPE:
+    PHI = 1
+    RPE = 2
 
 class NOTE_STATE:
     PERFECT = 1
@@ -60,10 +58,7 @@ class CHART_RENDER_ORDERS:
 class LINEWIDTH:
     PHI = 0.0075
     RPE = 1 / 180
-
-class SPEC_VALS:
-    RES_NOLOADED = object()
-
+    
 TYPE_STRING_MAP = {
     NOTE_TYPE.TAP: "Tap",
     NOTE_TYPE.DRAG: "Drag",
@@ -83,96 +78,6 @@ PHI_SORTMETHOD_STRING_MAP = {
     PHI_SORTMETHOD.SONG_NAME: "曲名",
     PHI_SORTMETHOD.DIFFICULTY: "难度",
     PHI_SORTMETHOD.SCORE: "成绩"
-}
-
-LEVEL_COLOR_MAP = {
-    0: (16, 178, 47),
-    1: (0, 117, 187),
-    2: (207, 19, 19),
-    3: (56, 56, 56)
-}
-
-LEVEL_CHOOSE_XMAP = {
-    i: [(812 + (
-        0, 150, 114, 99.5
-    )[i] * j) / 1920 for j in range(i + 1)]
-    for i in range(4)
-}
-
-LEVEL_CHOOSE_BLOCK_WIDTH = 0.0546875
-
-LEVEL_BAR_END_XMAP = {
-    i: (981 + sum(90 - j * 10 for j in range(i))) / 1920
-    for i in range(4)
-}
-
-PGR_LEVEL_INTMAP = {
-    "AP": 0, "FC": -1,
-    "V": -2, "S": -3,
-    "A": -4, "B": -5, "C": -6,
-    "F": -7, "never_play": -8
-}
-
-DIFF_STRING_MAP = {
-    0: "EZ", 1: "HD",
-    2: "IN", 3: "AT"
-}
-
-MAX_LEVEL_NUM = 4
-
-PPR_CMDARGS = {
-    "args": [
-        ("调试", "debug"),
-        ("全屏", "fullscreen"),
-        ("自动循环", "loop"),
-        ("禁用点击音效", "noclicksound"),
-        ("扩展渲染范围", "render-range-more"),
-        ("窗口无边框", "frameless"),
-        ("禁用自动游玩", "noautoplay"),
-        ("启用实时准度", "rtacc"),
-        ("低画质模式", "lowquality"),
-        ("显示帧率", "showfps"),
-        ("不播放谱面, 立即结算", "noplaychart"),
-        ("启用rpe谱面control类字段", "rpe-control", "有极大的性能开销"),
-        ("替换文本为中文 (wl)", "wl-more-chinese"),
-        ("使用 raf 限制帧率", "renderdemand"),
-        ("异步渲染", "renderasync"),
-        ("保留渲染的 JavaScript 代码", "enable-jslog"),
-        ("启用 BitmapImage", "enable-jscanvas-bitmap"),
-        ("降级音频API", "soundapi-downgrade"),
-        ("不清理临时文件", "nocleartemp"),
-        ("脱离 WebView", "disengage-webview"),
-        ("禁用 localhost 作为内置服务器地址", "nolocalhost"),
-        ("使用 16:9 的比例", "usu169"),
-        ("渲染视频", "render-video"),
-        ("渲染视频后自动退出", "render-video-autoexit"),
-    ],
-    "kwargs": [
-        ("连击提示文本", "combotips", "AUTOPLAY", "string"),
-        ("打击特效随机块数量", "random-block-num", 4, "int"),
-        ("设置音符缩放", "scale-note", 1.0, "float"),
-        ("设置窗口大小 (如: \"1920 1080\")", "size", None, "string-nowarp"),
-        ("设置渲染范围更多的缩放", "render-range-more-scale", 2.0, "float"),
-        ("设置窗口宿主 (hwnd)", "window-host", None, "int"),
-        ("设置低画质渲染缩放", "lowquality-scale", 2.0, "float"),
-        ("设置资源路径", "res", None, "path-dir"),
-        ("设置谱面速度", "speed", 1.0, "float"),
-        ("设置打击特效方块的圆角系数", "clickeffect-randomblock-roundn", 0.0, "float"),
-        ("设置打击音效音量", "clicksound-volume", 1.0, "float"),
-        ("设置音乐音量", "musicsound-volume", 1.0, "float"),
-        ("设置低画质渲染缩放 (js调用层)", "lowquality-imjscvscale-x", 1.0, "float"),
-        ("使用 phira 谱面 (id)", "phira-chart", None, "int"),
-        ("保存 phira 谱面路径", "phira-chart-save", None, "path"),
-        ("播放时跳过的时间", "skip-time", 0.0, "float"),
-        ("设置 渲染JavaScript 代码输出路径", "jslog-path", None, "path"),
-        ("设置低画质渲染最大尺寸 (js调用层)", "lowquality-imjs-maxsize", 256, "int"),
-        ("设置 rpe 谱面纹理缩放方法", "rpe-texture-scalemethod", "by-width", "choice", ["by-width", "by-height"]),
-        ("扩展", "extended", None, "path"),
-        ("设置渲染视频的帧率", "render-video-fps", 60.0, "float"),
-        ("设置生成视频编码", "render-video-fourcc", "mp4v", "string"),
-        ("设置渲染视频的保存路径", "render-video-savefp", None, "path"),
-        ("手动指定 rpe 谱面版本", "rpeversion", None, "int"),
-    ]
 }
         
 INF = float("inf")
@@ -194,41 +99,12 @@ FLOAT_LESSZERO_MAGIC = -1 / 1024
 CSOUND_MANAGER_THREADNUM = 1
 INFBEAT = 1e9
 ALL_LETTER = "qwertyuiopasdfghjklzxcvbnm"
-REPO_URL = "https://github.com/qaqFei/phispler"
+REPO_URL = "https://github.com/qaqFei/PhigrosPlayer"
 BASE_PORT = 16384
 MAX_PORT = 65535
-PGR_INF = 999999.0
-MIRROR_ICON_LEFT = 1 / 5.72
-EMPTY_RECT = (-1.0, -1.0, -1.0, -1.0)
-USERNAME_CONST_FONT = 70
-MPBJUDGE_RANGE_X = 1.35
-NOTE_DEFAULTSIZE = 0.1234375
-ClickEffectType = list[tuple[
-    float,
-    tuple[tuple[float, ...]],
-    tuple[
-        typing.Callable[[int, int], tuple[float, float]],
-        float
-    ]
-]]
+ClickEffectType = list[tuple[float, tuple[tuple[float, ...]], typing.Callable[[float|int, float|int], tuple[float, float]]]]
 BadEffectType = list[tuple[float, float, tuple[float, float]]]
 MissEffectType = list[tuple[float, typing.Any]] # emm, typing.Any is a note typing.Any
-
-TAPTAP_LOGIN_URL = f"""\
-https://www.taptap.com/oauth2/v1/authorize?\
-scope=public_profile&response_type=code&redirect_uri=tapoauth://authorize&\
-state=be340bd4-8140-4e83-baa2-bbff2d519173&\
-client_id={PHIGROS_TAPTAP_CLIENT_ID}\
-"""
-
-TAPTAP_LOGIN_PROMPT = """\
-将前往 TapTap 登录网页,
-
-请登录后在 F12 控制台找到: 
-'Failed to launch 'tapoauth://authorize?code=xxx' because the scheme does not have a registered handler.'
-
-将其中的 'xxx' 复制到下面的输入框中, 不要包含其他字符
-"""
 
 DSP_SETTING_TIP = """\
 如果你在游戏中遇到游戏中的音乐无法正常播放的情况，请适当的更改这个设置。\n
@@ -237,6 +113,7 @@ DSP_SETTING_TIP = """\
 由于技术性原因，此页面可能无法生效。
 """
 
+# 用 phi 的还是本项目的呢..?
 PHI_OPENSOURCELICENSE = """\
 MIT License
 
@@ -338,13 +215,274 @@ External Communications / 外部联络
 Ctymax
 “主要负责了版权商务相关大大小小的事宜，尽可能为玩家们搜罗来优质的音乐与美术作品。希望大家喜欢！”
 
+（以下所有排名不分先后顺序）
+
+Chart Design / 谱师组
+Catcats（王子恒）
+Ctymax
+Gausbon
+JKy
+StupiGGy
+Uvernight
+Snorkel
+阿爽（周锐）
+Rikko
+晨（林晨曦）
+鲲
+小鹏（周怡鹏）
+百九十八
+月下樱
+CN_115
+亜樹見希子
+Eaimo
+Sillyp
+TangScend
+Barbarianerman（李茂昌）
+NerSAN
+Harakuma
+Pcat
+TimiTini
+XMT小咩兔
+J.R
+Jeitie
+BlindForest
+Clutter
+Su1fuR
+VikingNexus
+_鉄
+Homeee
+Likey
+M3d1uM
+Lumiere
+iv
+Myna
+rN
+Latency
+陈天宇
+钱汉铭
+官忠鑫
+骆新程
+阳鉥
+
+Music / 音乐组
+BelieverInYou
+Ctymax
+Rinth_Live
+佑木いずみ(TNiK)
+ElousΛ.-FZ
+姜米條（青杰）
+A-39
+NceS
+陈天宇
+
+Sound Design / 音效设计
+姜米條（青杰）
+
+Illustration / 美术组
+CH
+Cycats
+DoublePian
+IvyTowers
+Jeffery
+Karyon
+knife美工刀
+KToyo
+L-sp4
+NEKO
+SparkFred_17（周泓怿）
+佑木いずみ(TNiK)
+xperz
+艾是Abby
+坂东
+笔记RE
+赤芽
+雏凉
+翠冷兮
+鸫鸫
+诡异童话
+海产
+何呵
+混乱の艾若拉
+Ctymax
+老张
+林语
+喵n葵（刘贝瑜）
+塔塔
+无良灬无惑
+昔璃
+英英英
+御坂果子
+冰绘
+青鸟
+幽灵星
+Rallxkurara
+天天
+犀牛坨动画工坊
+NerSAN
+Tsuioku
+圆规compasses
+Nico
+子狼
+谭清心
+高倩茹
+陈天宇
+
+Visual & UI Design / 视觉 & UI 设计组
+CN_115（杜锐）
+EndlessZero（郭旭）
+Nico
+SparkFred_17（周泓怿）
+佑木いずみ(TNiK)
+V17AMax（马煜）
+汉堡（覃瀚钰）
+喵n葵（刘贝瑜）
+小鹏（周怡鹏）
+Jizici
+
+Plots Design / 剧情组
+DeathMark（赵芫华）
+关若文
+漓染玄柒
+关河梦
+
+Localization / 翻译组
+312321432（吳安仁）
+hwanyeom
+jack
+Kitty
+Nice Player
+Saimu桜夢（徐泽城）
+Sakuyou
+Mai（Tan Chin Wan）
+TurretOmega
+ViscerΔ
+Yurim
+はなちゃん/はなまる
+徊奏
+鲲
+亘川锌酸猫
+梓澄
+漆伊澄
+ReFyo
+
+Pigeon Animation Team / 动画组
+汉堡（覃瀚钰）
+rN
+AiLANE
+小鹏（周怡鹏）
+V17AMax（马煜）
+
+Advertising / 宣传组
+Barbarianerman
+Ctymax
+EndlessZero（郭旭）
+Findstr
+SparkFred_17（周泓怿）
+佑木いずみ(TNiK)
+V17AMax（马煜）
+东方不buy菌
+华莱士
+七奏
+Sagilio
+小菊花
+小鹏（周怡鹏）
+312321432
+陈天宇
+Mai（Tan Chin Wan）
+阿爽
+rN
+ReFyo
+
+Customer Service / 客服组
+CN_115
+Ctymax
+joiec
+Sparkfred_17（周泓怿）
+Jizici
+阿爽
+喵n葵（刘贝瑜）
+月下樱
+陈天宇
+
+External Communications / 外部联络
+Ctymax
+
+Special Thanks / 特别鸣谢
+omegaPi
+TigerHix
+Soul Notes
+Rising Sun Traxx
+I-Inferno 《同步音律喵赛克》
+A-ZERO Entertainment 《WAVEAT ReLIGHT》
+PeroPeroGames 《Muse Dash 喵斯快跑》
+QueseraGames 《KALPA》
+CEM Records
+SUBBASE
+Noxy Games 《Lanota》
+Beo Meker Studio 《茶鸣拾贰律》
+Abyss Idols
+Oshiribeat
+SoT Records
+
+以及其他所有帮助过我们的人或组织
+
+
+Beta tester / 测试组
+98F
+C爆
+Likey
+Nxnfly
+Soul小东东
+UraniumW
+冰淇淋
+打火机D.H.Jack
+困锁Lockeder
+葉之Leviz
+Attack_cat
+比我还帅的地球人
+Caiyv
+赤赤菌
+垂星
+Excaive
+fanIST
+FrozenX
+晴岚
+Hikari
+哈拿捏口
+坚果
+Kirina
+切切
+Ska
+散唳
+石皮幼鸟
+三色绘本°
+Supa7onyz
+ThirdQuadrant
+VOII
+我爱吃肉wacr
+汐
+晓风竹林
+СУМÎС
+Y1cat
+一游
+ZxyD218
+温柔的小狮子
+Phoenix`palsar
+于铠歌
+肖斌文
+
+And all participants from Taptap's beta program!
+// 此处不展示谱师
+
+
 --------------------------------
-关于 phispler 项目 (https://github.com/qaqFei/phispler),
+(以下内容与Phigros游戏无关)
+关于PhigrosPlayer项目 (https://github.com/qaqFei/PhigrosPlayer),
 
-phispler 使用MIT协议进行开源喵！！
-( MIT 万岁 ！！！
+PhigrosPlayer 是一个项目，使用MIT协议进行开源。
 
-鸣谢
+项目的开发贡献者
+qaqFei (Owner)
 星空孤雁 (Introduction 谱面谱师)
 """
 
@@ -369,7 +507,70 @@ PHIGROS_SETTING_SHADOW_XRECT_MAP = {
     PHIGROS_SETTING_STATE.OTHER: (0.0265625, 0.975),
 }
 
-EXTRA_DEFAULTS: dict[str, dict[str, float|list[float]]] = {
+UAS = [
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36 OPR/26.0.1656.60",
+    "Opera/8.0 (Windows NT 5.1; U; en)",
+    "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.50",
+    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 9.50",
+    "Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; en) Presto/2.8.131 Version/11.11",
+    "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.8.131 Version/11.11",
+    "Opera/9.80 (Android 2.3.4; Linux; Opera Mobi/build-1107180945; U; en-GB) Presto/2.8.149 Version/11.10",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0",
+    "Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv,2.0.1) Gecko/20100101 Firefox/4.0.1",
+    "Mozilla/5.0 (Windows NT 6.1; rv,2.0.1) Gecko/20100101 Firefox/4.0.1",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2",
+    "MAC：Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36",
+    "Windows：Mozilla/5.0 (Windows; U; Windows NT 6.1; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50",
+    "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11",
+    "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.133 Safari/534.16",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_0) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; 360SE)",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/2.0 Safari/536.11",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER",
+    "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; LBBROWSER)",
+    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; QQDownload 732; .NET4.0C; .NET4.0E; LBBROWSER)"
+    "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; QQBrowser/7.0.3698.400)",
+    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; QQDownload 732; .NET4.0C; .NET4.0E)",
+    "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.84 Safari/535.11 SE 2.X MetaSr 1.0",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SV1; QQDownload 732; .NET4.0C; .NET4.0E; SE 2.X MetaSr 1.0)",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SE 2.X MetaSr 1.0; SE 2.X MetaSr 1.0; .NET CLR 2.0.50727; SE 2.X MetaSr 1.0)",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.4.3.4000 Chrome/30.0.1599.101 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_0) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 UBrowser/4.0.3214.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4094.1 Safari/537.36",
+    "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (iPod; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; zh-cn) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5",
+    "Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
+    "Mozilla/5.0 (Linux; U; Android 2.2.1; zh-cn; HTC_Wildfire_A3333 Build/FRG83D) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+    "Mozilla/5.0 (Linux; U; Android 2.3.7; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+    "MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
+    "Opera/9.80 (Android 2.3.4; Linux; Opera Mobi/build-1107180945; U; en-GB) Presto/2.8.149 Version/11.10",
+    "Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13",
+    "Mozilla/5.0 (BlackBerry; U; BlackBerry 9800; en) AppleWebKit/534.1+ (KHTML, like Gecko) Version/6.0.0.337 Mobile Safari/534.1+",
+    "Mozilla/5.0 (hp-tablet; Linux; hpwOS/3.0.0; U; en-US) AppleWebKit/534.6 (KHTML, like Gecko) wOSBrowser/233.70 Safari/534.6 TouchPad/1.0",
+    "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0;",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+    "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)",
+    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; The World)",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)",
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Avant Browser)"
+]
+
+def set_NOTE_DUB_FIXSCALE(scale: float):
+    global NOTE_DUB_FIXSCALE
+    NOTE_DUB_FIXSCALE = scale
+
+EXTRA_DEFAULTS = {
     "chromatic": {
         "sampleCount": 3,
         "power": 0.01
@@ -418,4 +619,4 @@ EXTRA_DEFAULTS: dict[str, dict[str, float|list[float]]] = {
     }
 }
 
-del typing, platform
+del typing

@@ -1,0 +1,16 @@
+Pillow==11.0.0
+pywin32==308
+pydub==0.25.1
+numba==0.60.0
+opencv-python-headless==4.10.0.84
+numpy==2.0.2
+pywebview==5.2
+rjsmin==1.2.3
+librosa==0.10.2.post1
+UnityPy==1.10.18
+fsb5==1.0
+requests==2.32.2
+PyYAML==6.0.2
+pygame-ce==2.5.2
+websockets==13.1
+PyQt-Fluent-Widgets==1.7.1

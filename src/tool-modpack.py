@@ -1,5 +1,4 @@
 import fix_workpath as _
-import check_bin as _
 
 import json
 import typing
@@ -11,7 +10,6 @@ import UnityPy
 import UnityPy.classes
 import UnityPy.files
 import UnityPy.streams
-from UnityPy.export import Texture2DConverter
 from pydub import AudioSegment
 from PIL import Image, ImageFilter
 
@@ -20,7 +18,7 @@ import tempdir
 if len(argv) < 6:
     print("Usage: tool-modpack <mod-list> <info> <extended-info> <apk-unpack-dir> <output-dir>")
     raise SystemExit
-    
+
 def loadbundle(fn: str) -> UnityPy.files.BundleFile:
     fp = f"{argv[4]}/assets/aa/Android/{fn}"
     env = UnityPy.load(fp)
@@ -39,54 +37,23 @@ def findinfo_byname(name: str):
 
 def findexinfo_byinfo(iitem: dict, key: str):
     for i in extended_info:
-        if i["key"] == iitem["songIdBak"] + "/" + key:
+        if i["key"] == iitem["soundIdBak"] + "/" + key:
             return i
-    return None if not key.endswith(".png") else findexinfo_byinfo(iitem, key[:-4] + ".jpg")
-
-def t2d_reset_treetype(t2d: UnityPy.classes.Texture2D):
-    # https://github.com/K0lb3/UnityPy/issues/230
-    tree = t2d.read_typetree()
-    
-    if "m_MipMap" in tree:
-        tree["m_MipMap"] = t2d.m_MipMap
-    else:
-        tree["m_MipCount"] = t2d.m_MipCount
-
-    tree["m_TextureFormat"] = t2d.m_TextureFormat
-    
-    t2d.reader.save_typetree(tree)
+    return None
 
 def putimto_bundle(bundle: typing.Optional[UnityPy.files.BundleFile], im: Image.Image, pid: int):
     if bundle is None: return
-    t2d: typing.Optional[UnityPy.classes.Texture2D] = None
-    ress: typing.Optional[UnityPy.streams.EndianBinaryReader] = None
-    
-    for name, f in bundle.files.copy().items():
+    for name, f in bundle.files.items():
         if isinstance(f, UnityPy.files.SerializedFile):
-            for pid2, asset in f.files.copy().items():
+            for pid2, asset in f.files.items():
                 asset: UnityPy.files.ObjectReader
                 realasset = asset.read()
                 if isinstance(realasset, UnityPy.classes.Texture2D):
-                    t2d = realasset
-                    
-        elif isinstance(f, UnityPy.streams.EndianBinaryReader):
-            ress = f
-    
-    if t2d is None or ress is None:
-        print("Failed to find texture2d or resources")
-        return
-    
-    temp_t2d: bytes = Texture2DConverter.image_to_texture2d(im, t2d.m_TextureFormat)[0]
-    t2d.m_StreamData.size = len(temp_t2d)
-    t2d.m_Width = im.width
-    t2d.m_Height = im.height
-    t2d.m_CompleteImageSize = len(temp_t2d)
-    t2d.save()
-    ress.view = memoryview(temp_t2d)
-    t2d_reset_treetype(t2d)
+                    realasset.image = im
+                    realasset.save()
 
 def fail(mod: dict):
-    print(f"Failed to process mod: {mod["name"]}")
+    print(f"""Failed to process mod: {mod["name"]}""")
 
 modlist = json.load(open(argv[1], "r", encoding="utf-8"))
 info = json.load(open(argv[2], "r", encoding="utf-8"))
@@ -100,7 +67,7 @@ for mod in modlist:
                 fail(mod)
                 continue
             
-            exiitem = findexinfo_byinfo(iitem, f"Chart_{mod["level"]}.json")
+            exiitem = findexinfo_byinfo(iitem, f'Chart_{mod["level"]}.json')
             if exiitem is None:
                 fail(mod)
                 continue
@@ -108,10 +75,10 @@ for mod in modlist:
             chart = json.load(open(mod["content_path"], "r", encoding="utf-8"))
             if "META" in chart:
                 rpe2phi = input("rpe2phi runner: ").replace("/", "\\")
-                print(f"Mod {mod["name"]} is rpe format, converting...")
+                print(f'Mod {mod["name"]} is rpe format, converting...')
                 tdir = tempdir.createTempDir()
-                popen(f"{rpe2phi} \"{mod["content_path"]}\" \"{tdir}\\chart.json\"").read()
-                chart = json.load(open(f"{tdir}\\chart.json", "r", encoding="utf-8"))
+                popen(f'{rpe2phi} \"{mod["content_path"]}\" \"{tdir}/chart.json\"').read()
+                chart = json.load(open(f"{tdir}/chart.json", "r", encoding="utf-8"))
             content = json.dumps(chart, ensure_ascii=False).encode("utf-8")
             
             bundle = loadbundle(exiitem["fn"])
@@ -121,14 +88,12 @@ for mod in modlist:
                     asset: UnityPy.files.ObjectReader
                     if pid == exiitem["path_id"]:
                         textasset: UnityPy.classes.TextAsset = asset.read()
-                        textasset.m_Script = content
-                        textasset.save()
-                        # rawchart = textasset.script.tobytes()
-                        # rawdata: bytes = asset.get_raw_data().tobytes()
-                        # moded = rawdata.replace(rawchart, content)
-                        # size = len(rawchart).to_bytes(4, "little")
-                        # newsize = len(content).to_bytes(4, "little")
-                        # asset.set_raw_data(memoryview(moded.replace(size, newsize, 1)))
+                        rawchart = textasset.script.tobytes()
+                        rawdata: bytes = asset.get_raw_data().tobytes()
+                        moded = rawdata.replace(rawchart, content)
+                        size = len(rawchart).to_bytes(4, "little")
+                        newsize = len(content).to_bytes(4, "little")
+                        asset.set_raw_data(memoryview(moded.replace(size, newsize, 1)))
                         
             savebundle(bundle, exiitem["fn"])
         
@@ -146,7 +111,7 @@ for mod in modlist:
             tdir = tempdir.createTempDir()
             seg: AudioSegment = AudioSegment.from_file(mod["content_path"])
             seg.export(f"{tdir}/music.ogg", format="ogg")
-            popen(f".\\bin\\oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
+            popen(f"../bin/oggvorbis2fsb5.exe \"{tdir}/music.ogg\" \"{tdir}/music.fsb\"").read()
             fsb = open(f"{tdir}/music.fsb", "rb").read()
 
             bundle = loadbundle(exiitem["fn"])
@@ -176,7 +141,8 @@ for mod in modlist:
                 continue
             
             im = Image.open(mod["content_path"])
-            if im.size != (2048, 1080):
+            if im.width / im.height != 2048 / 1080:
+                print(f'Warning: Image aspect ratio is not 2048:1080 for mod: {mod["name"]}.')
                 im = im.resize((2048, 1080))
             
             i1, i2, i3 = (
@@ -195,4 +161,5 @@ for mod in modlist:
             savebundle(b3, i3["fn"])
             
         case _:
-            print(f"Unknown mod type: {mod["type"]}")
+            print(f'Unknown mod type: {mod["type"]}')
+            

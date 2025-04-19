@@ -4,7 +4,6 @@ import copy
 from sys import argv
 
 import rpe_easing
-import light_utils
 
 if len(argv) < 3:
     print("Usage: tool-rpe2phi <input> <output>")
@@ -15,6 +14,8 @@ with open(argv[1], "r", encoding="utf-8") as f:
 
 globalBpm = rpec["BPMList"][0]["bpm"]
 globalT = 1.875 / globalBpm
+easingSplitTimeSec = 0.02
+easingSplitTime = easingSplitTimeSec / globalT
 inft = 1e9
 phic = {
     "formatVersion": 3,
@@ -46,18 +47,8 @@ def rt2pt(t: list[int]):
 def linear(t: float, st: float, et: float, sv: float, ev: float):
     return (t - st) / (et - st) * (ev - sv) + sv
 
-def easing(t: float, st: float, et: float, sv: float, ev: float, e: dict):
-    ef = rpe_easing.ease_funcs[e.get("easingType", 1) - 1] if not e.get("bezier", 0) else light_utils.createBezierFunction(e.get("bezierPoints", [1.0, 1.0, 1.0, 1.0]))
-    return ef((t - st) / (et - st)) * (ev - sv) + sv
-
-def getDt(big_edt: float):
-    # 谱师能不能用点缓动切割
-    # if big_edt >= 512: dt = 16
-    # elif big_edt >= 256: dt = 8
-    # elif big_edt >= 128: dt = 4
-    # else: dt = 1
-    # return dt
-    return 2
+def easing(t: float, st: float, et: float, sv: float, ev: float, easingType: int):
+    return rpe_easing.ease_funcs[easingType]((t - st) / (et - st)) * (ev - sv) + sv
 
 def convertEventsTime(es: list[dict]):
     for e in es:
@@ -125,45 +116,40 @@ def splitEvents(es: list[dict], isspeed: bool):
                 continue
             
             t = e["startTime"]
-            dt = getDt(e["endTime"] - e["startTime"])
+            etype = e["easingType"]
             while t <= e["endTime"]:
                 nes.append({
                     "startTime": t,
-                    "endTime": t + dt,
-                    "start": easing(t, e["startTime"], e["endTime"], e["start"], e["end"], e),
-                    "end": easing(t + dt, e["startTime"], e["endTime"], e["start"], e["end"], e),
+                    "endTime": t + easingSplitTime,
+                    "start": easing(t, e["startTime"], e["endTime"], e["start"], e["end"], etype),
+                    "end": easing(t + easingSplitTime, e["startTime"], e["endTime"], e["start"], e["end"], etype),
                 })
-                t += dt
+                t += easingSplitTime
             
             if t < e["endTime"]:
                 nes.append({
                     "startTime": t,
                     "endTime": e["endTime"],
-                    "start": easing(t, e["startTime"], e["endTime"], e["start"], e["end"], e),
+                    "start": easing(t, e["startTime"], e["endTime"], e["start"], e["end"], etype),
                     "end": e["end"],
                 })
         
         else: # isspeed
             if e["start"] == e["end"]:
-                nes.append({
-                    "startTime": e["startTime"],
-                    "endTime": e["endTime"],
-                    "start": e["start"],
-                    "end": e["start"]
-                })
+                nes.append(e)
                 continue
             
             t = e["startTime"]
-            dt = getDt(e["endTime"] - e["startTime"])
+            etype = e.get("easingType", 1)
             while t <= e["endTime"]:
-                v = easing(t, e["startTime"], e["endTime"], e["start"], e["end"], e)
+                v = easing(t, e["startTime"], e["endTime"], e["start"], e["end"], etype)
                 nes.append({
                     "startTime": t,
-                    "endTime": t + dt,
+                    "endTime": t + easingSplitTime,
                     "start": v,
                     "end": v
                 })
-                t += dt
+                t += easingSplitTime
             
             if t < e["endTime"]:
                 nes.append({
@@ -241,28 +227,24 @@ def getSpeedValue(es: list[dict], t: float):
     return 0.0
 
 def getFloorPosition(es: list[dict], t: float):
-    result = 0.0
+    if not es: return 0.0
     
+    result = 0.0
     for e in es:
-        if e["startTime"] <= t < e["endTime"]:
-            result += (t - e["startTime"]) * e["value"]
-        elif t >= e["endTime"]:
-            result += (e["endTime"] - e["startTime"]) * e["value"]
-        elif t < e["startTime"]:
-            break
+        if e["endTime"] <= t:
+            result += e["value"] * (e["endTime"] - e["startTime"])
+        elif e["startTime"] <= t <= e["endTime"]:
+            result += e["value"] * (t - e["startTime"])
+            
+    if t >= offsetT and es[0]["startTime"] <= offsetT:
+        et = min(t, es[0]["endTime"])
+        result -= es[0]["value"] * (et - es[0]["startTime"])
     
     return result * globalT
 
-def getFloorPositionRange(es: list[dict], t: float):
-    return getFloorPosition(es, t) - getFloorPosition(es, offsetT)
-
 def convertNotes(line: dict, notes: typing.Iterable[dict]):
     nns = []
-    
     for n in notes:
-        if "--remove-fake-note" in argv and n.get("isFake", 0) != 0:
-            continue
-        
         nns.append({
             "type": {1:1, 2:3, 3:4, 4:2}[n["type"]],
             "time": rt2pt(n["startTime"]),
@@ -273,20 +255,13 @@ def convertNotes(line: dict, notes: typing.Iterable[dict]):
         pn = nns[-1]
         
         pn["holdTime"] = rt2pt(n["endTime"]) - pn["time"] if n["endTime"] != n["startTime"] else 0.0
-        pn["floorPosition"] = getFloorPositionRange(line["speedEvents"], pn["time"])
+        pn["floorPosition"] = getFloorPosition(line["speedEvents"], pn["time"])
         
         if pn["type"] == 3:
             pn["speed"] = getSpeedValue(line["speedEvents"], pn["time"])
-            
     return nns
 
-for i, line in enumerate(copy.deepcopy(rpec["judgeLineList"])):
-    if "--remove-nonote-line" in argv and not [None for note in line.get("notes", []) if note.get("isFake", 0) == 0]:
-        continue
-    
-    line: dict
-    print(f"\rconverting line {i + 1}/{len(rpec["judgeLineList"])} ...", end="")
-    
+for line in copy.deepcopy(rpec["judgeLineList"]):
     if line.get("father", -1) != -1:
         first_l = line["eventLayers"][0]
         first_l["moveXEvents"] = first_l.get("moveXEvents", [])
@@ -306,7 +281,6 @@ for i, line in enumerate(copy.deepcopy(rpec["judgeLineList"])):
         "judgeLineRotateEvents": [],
         "judgeLineDisappearEvents": []
     }
-    isAttachUI = line.get("attachUI", None) is not None
     
     speedEvents = []
     moveXEvents = []
@@ -316,13 +290,8 @@ for i, line in enumerate(copy.deepcopy(rpec["judgeLineList"])):
     
     for layer in line["eventLayers"]:
         if layer is None: continue
-        
         aes = [layer.get(f"{i}Events", []) for i in ("speed", "moveX", "moveY", "rotate", "alpha")]
-        
         for i, es in enumerate(aes):
-            if isAttachUI and i == 4: # alpha events
-                continue
-                
             convertEventsTime(es)
             sortEvents(es)
             fillEvents(es)
@@ -332,33 +301,23 @@ for i, line in enumerate(copy.deepcopy(rpec["judgeLineList"])):
         moveXEvents.extend(aes[1])
         moveYEvents.extend(aes[2])
         rotateEvents.extend(aes[3])
-        if not isAttachUI: alphaEvents.extend(aes[4])
+        alphaEvents.extend(aes[4])
     
-    (*map(mergeEvents, [speedEvents, moveXEvents, moveYEvents, rotateEvents, *((alphaEvents, ) if not isAttachUI else ())]), )
+    aes = [speedEvents, moveXEvents, moveYEvents, rotateEvents, alphaEvents]
+    for es in aes:
+        mergeEvents(es)
     
     moveEvents = mergeEvents_move(moveXEvents, moveYEvents)
     
     phil["speedEvents"] = convertEvents2Phi_speed(speedEvents, lambda x: x * 120 / 900 / 0.6)
     phil["judgeLineMoveEvents"] = convertEvents2Phi_move(moveEvents, lambda x: (x + 675) / 1350, lambda y: (y + 450) / 900)
     phil["judgeLineRotateEvents"] = convertEvents2Phi(rotateEvents, lambda x: -x)
-    phil["judgeLineDisappearEvents"] = convertEvents2Phi(alphaEvents, lambda x: (255 & int(x)) / 255) if not isAttachUI else [{
-        "startTime": -inft,
-        "endTime": inft,
-        "start": 0.0,
-        "end": 0.0
-    }]
+    phil["judgeLineDisappearEvents"] = convertEvents2Phi(alphaEvents, lambda x: (255 & int(x)) / 255)
     
     if phil["speedEvents"]: phil["speedEvents"][0]["startTime"] = 0.0
-    
-    phil["speedEvents"].sort(key=lambda x: x["startTime"])
-    phil["judgeLineMoveEvents"].sort(key=lambda x: x["startTime"])
-    phil["judgeLineRotateEvents"].sort(key=lambda x: x["startTime"])
-    phil["judgeLineDisappearEvents"].sort(key=lambda x: x["startTime"])
-    
     phil["notesAbove"] = convertNotes(phil, filter(lambda x: x["above"] == 1, line.get("notes", [])))
     phil["notesBelow"] = convertNotes(phil, filter(lambda x: x["above"] != 1, line.get("notes", [])))
     
     phic["judgeLineList"].append(phil)
 
-print("\nconverting finished.")
 json.dump(phic, open(argv[2], "w", encoding="utf-8"), ensure_ascii=False)

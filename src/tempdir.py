@@ -16,9 +16,9 @@ def createTempDir():
     
     if TEMP_DIR is not None: return TEMP_DIR
     
-    temp_dir = f"{gettempdir().replace("\\", "/")}/qfppr_cctemp_{time.time()}_{THIS_ID}"
+    temp_dir = f"{gettempdir()}/qfppr_cctemp_{time.time()}_{THIS_ID}"
     logging.info(f"create temp dir: {temp_dir}")
-    
+
     try: mkdir(temp_dir)
     except Exception as e: logging.warning(f"error when create temp dir: {e}")
     

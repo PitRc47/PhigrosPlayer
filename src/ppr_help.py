@@ -5,11 +5,13 @@ HELP_ZH = '''\
   --debug: 显示webview调试窗口, 并显示判定线位置点
   --fullscreen: 使窗口全屏
   --loop: 自动循环谱面
+  --lfdaot: 提前加载帧数据, 并输出一个 *.lfdaot 文件
   --noclicksound: 禁用点击音效
   --render-range-more: 渲染范围更多, 可以渲染出屏幕外, 并显示在屏幕上
   --frameless: 使窗口无边框
   --noautoplay: 禁用自动游玩
   --rtacc: 启用实时准度
+  --lfdaot-file-output-autoexit: 使用 --lfdaot 和保存的 lfdaot 文件, 自动退出. (前置参数: --lfdaot)
   --lowquality: 低画质模式
   --showfps: 显示帧率
   --noplaychart: 不播放谱面, 立即结算
@@ -26,18 +28,21 @@ HELP_ZH = '''\
   --usu169: 使用 16:9 的比例
   --render-video: 渲染视频
   --render-video-autoexit: 渲染视频后自动退出 (前置参数: --render-video)
-  --mirror: 谱面镜像
-  --disable-watermark: 禁用水印
   
 <关键字参数>
   --combotips <字符串>: 设置连击提示文本
   --random-block-num <整数>: 打击特效随机块数量
   --scale-note <数字>: 设置音符缩放
+  --lfdaot-file <文件路径字符串>: 设置 *.lfdaot 文件路径, 并加载并播放它. (前置参数: --lfdaot)
   --size <整数> <整数>: 设置窗口大小
+  --lfdaot-frame-speed <整数>: 设置 *.lfdaot 文件的帧速度. (前置参数: --lfdaot, 使用 --lfdaot-file 时无效)
   --render-range-more-scale <数字>: 设置渲染范围更多的缩放. (前置参数: --render-range-more)
   --window-host <整数-窗口句柄>: 设置窗口宿主 窗口句柄
+  --lfdaot-file-savefp <文件路径字符串>: 使用 --lfdaot 时, 设置 lfdaot 文件保存路径. (前置参数: --lfdaot)
   --lowquality-scale <浮点数>: 设置低画质渲染缩放 默认: 2.0
   --res <资源路径>: 设置资源路径
+  --lfdaot-start-frame-num <数字>: 设置 *.lfdaot 文件的开始帧数 (前置参数: --lfdaot, 使用 --lfdaot-file 时无效)
+  --lfdaot-run-frame-num <数字>: 设置生成 *.lfdaot 文件的总帧数 (前置参数: --lfdaot, 使用 --lfdaot-file 时无效)
   --speed <数字>: 设置谱面速度
   --clickeffect-randomblock-roundn <数字>: 设置打击效果方块的圆角系数 (0.0 = 方, 0.5 = 圆), 默认 = 0.0
   --clicksound-volume <数字>: 设置打击音效音量 (0.0 = 无声, 1.0 = 原音), 默认 = 1.0
@@ -53,8 +58,4 @@ HELP_ZH = '''\
   --render-video-fps <数字>: 设置渲染视频的帧率, 默认 = 60.0 (前置参数: --render-video)
   --render-video-fourcc <字符串>: 设置生成视频编码 默认 = mp4v (前置参数: --render-video)
   --render-video-savefp <文件路径字符串>: 设置渲染视频的保存路径 (前置参数: --render-video)
-  --rpeversion <数字>: 手动指定 rpe 谱面版本
-
-<环境变量>
-  ENABLE_JIT: 启用 JIT, 警告: 这会使启动慢 (默认: 0, 环境变量值: ["0", "1"])
 '''

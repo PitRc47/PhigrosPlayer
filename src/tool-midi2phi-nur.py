@@ -112,7 +112,7 @@ result = {
 }
 
 result["judgeLineList"][0]["notesAbove"].sort(key=lambda x: x["time"])
-print(f"length: {result["judgeLineList"][0]["notesAbove"][-1]["time"]} s")
+print(f"""length: {result["judgeLineList"][0]["notesAbove"][-1]["time"]} s""")
 
 with open(argv[2], "w", encoding="utf-8") as f:
     json.dump(result, f)

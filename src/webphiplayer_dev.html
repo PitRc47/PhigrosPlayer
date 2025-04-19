@@ -1,0 +1,546 @@
+<html>
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <label class="nocanvas" for="zipFile">请选择文件: </label><input class="zipFile nocanvas" type="file"><br>
+    <button class="startButton nocanvas">开始</button>
+    <audio class="res mainAudio"></audio>
+    <img class="bg">
+    <img class="res tap" src="resources/Notes/Tap.png">
+    <img class="res tapDub" src="resources/Notes/Tap_dub.png">
+    <img class="res drag" src="resources/Notes/Drag.png">
+    <img class="res dragDub" src="resources/Notes/Drag_dub.png">
+    <img class="res flick" src="resources/Notes/Flick.png">
+    <img class="res flickDub" src="resources/Notes/Flick_dub.png">
+    <img class="res holdHead" src="resources/Notes/Hold_Head.png">
+    <img class="res holdHeadDub" src="resources/Notes/Hold_Head_dub.png">
+    <img class="res holdBody" src="resources/Notes/Hold_Body.png">
+    <img class="res holdBodyDub" src="resources/Notes/Hold_Body_dub.png">
+    <img class="res holdEnd" src="resources/Notes/Hold_End.png">
+    <img class="res holdEndDub" src="resources/Notes/Hold_End_dub.png">
+    <audio class="res tapSound" src="resources/Note_Click_Audio/Tap.wav"></audio>
+    <audio class="res dragSound" src="resources/Note_Click_Audio/Drag.wav"></audio>
+    <audio class="res flickSound" src="resources/Note_Click_Audio/Flick.wav"></audio>
+    <audio class="res holdSound" src="resources/Note_Click_Audio/Hold.wav"></audio>
+    <svg width="0" height="0" xmlns="http://www.w3.org/2000/svg">
+            <filter id="clickEffectColorFilter">
+                <feColorMatrix type="matrix" values="
+                    1 0 0 0 0
+                    0 0.9254901960784314 0 0 0
+                    0 0 0.6274509803921569 0 0
+                    0 0 0 0.8823529411764706 0
+                "></feColorMatrix>
+            </filter>
+        </svg>
+</body>
+
+</html>
+
+<style>
+    body {
+        overflow-x: hidden;
+        overflow-y: hidden;
+        padding: 0;
+        border: 0;
+        margin: 0;
+    }
+    
+    .mainCanvas {
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+    }
+    
+    .res {
+        display: none;
+    }
+    
+    .bg {
+        z-index: -1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background-size: cover;
+        background-position: center;
+    }
+</style>
+
+<script>
+    const chartAudio = document.querySelector(".mainAudio");
+    const Res_Tap = document.querySelector(".res.tap");
+    const Res_TapDub = document.querySelector(".res.tapDub");
+    const Res_Drag = document.querySelector(".res.drag");
+    const Res_DragDub = document.querySelector(".res.dragDub");
+    const Res_Flick = document.querySelector(".res.flick");
+    const Res_FlickDub = document.querySelector(".res.flickDub");
+    const Res_HoldHead = document.querySelector(".res.holdHead");
+    const Res_HoldHeadDub = document.querySelector(".res.holdHeadDub");
+    const Res_HoldBody = document.querySelector(".res.holdBody");
+    const Res_HoldBodyDub = document.querySelector(".res.holdBodyDub");
+    const Res_HoldEnd = document.querySelector(".res.holdEnd");
+    const Res_HoldEndDub = document.querySelector(".res.holdEndDub");
+    const Res_TapSound = document.querySelector(".res.tapSound");
+    const Res_DragSound = document.querySelector(".res.dragSound");
+    const Res_FlickSound = document.querySelector(".res.flickSound");
+    const Res_HoldSound = document.querySelector(".res.holdSound");
+    const ClickEffectNum = 30;
+    const ClickEffects = new Array(ClickEffectNum);
+    const log = console.log;
+
+    alert("!development version!")
+    alert("移动端设备可能打击音效会有延迟哦！");
+
+    for (let i = 0; i < ClickEffectNum; i++) {
+        let img = new Image();
+        img.src = `resources/Note_Click_Effect/Frames/${(i + 1)}.png`;
+        img.loading = "eager";
+        img._n = i;
+        img.onload = (e) => {
+            let procsCv = document.createElement("canvas");
+            procsCv.width = e.target.width;
+            procsCv.height = e.target.height;
+            let procsCtx = procsCv.getContext("2d");
+            procsCtx.filter = "url(#clickEffectColorFilter)";
+            procsCtx.drawImage(e.target, 0, 0);
+            ClickEffects[e.target._n] = procsCv;
+        };
+    }
+
+    function initCanvas() {
+        cv = document.createElement("canvas");
+        cv.className = "mainCanvas";
+        document.body.appendChild(cv);
+        ctx = cv.getContext("2d");
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+    }
+
+    function resizeCanvas() {
+        cv.width = window.innerWidth * window.devicePixelRatio;
+        cv.height = window.innerHeight * window.devicePixelRatio;
+        w = cv.width;
+        h = cv.height;
+        noteWidth = w * 0.1234375;
+        Note_MaxSize = Math.sqrt(noteWidth ** 2 * 2);
+    }
+
+    function linearInterpolation(sv, ev, st, et, t) {
+        return (t - st) / (et - st) * (ev - sv) + sv;
+    }
+
+    function rotatePoint(x, y, deg, r) {
+        return [
+            x + r * Math.cos(deg / 180 * Math.PI),
+            y + r * Math.sin(deg / 180 * Math.PI)
+        ];
+    }
+
+    function start() {
+        chartAudio.play();
+        NOTE_DUB_FIXSCALE = Res_HoldBodyDub.width / Res_HoldBody.width;
+        if (cv.requestFullscreen) cv.requestFullscreen();
+        chartData;
+    }
+
+    function is_intersect(line_1, line_2) {
+        return !(
+            Math.max(line_1[0][0], line_1[1][0]) < Math.min(line_2[0][0], line_2[1][0]) ||
+            Math.max(line_2[0][0], line_2[1][0]) < Math.min(line_1[0][0], line_1[1][0]) ||
+            Math.max(line_1[0][1], line_1[1][1]) < Math.min(line_2[0][1], line_2[1][1]) ||
+            Math.max(line_2[0][1], line_2[1][1]) < Math.min(line_1[0][1], line_1[1][1])
+        )
+    }
+
+    function batch_is_intersect(linesGroup1, linesGroup2) {
+        let results = [];
+        for (let i of linesGroup1) {
+            for (let j of linesGroup2) {
+                results.push(is_intersect(i, j));
+            }
+        }
+        return results;
+    }
+
+    function noteCanRender_Hold(x, y, holdBodyRange) {
+        for (let point of holdBodyRange) {
+            if (noteCanRender_Note(...point)) return true;
+        }
+
+        return batch_is_intersect(
+            [
+                [holdBodyRange[0], holdBodyRange[1]],
+                [holdBodyRange[1], holdBodyRange[2]],
+                [holdBodyRange[2], holdBodyRange[3]],
+                [holdBodyRange[3], holdBodyRange[0]]
+            ], [
+                [
+                    [0, 0],
+                    [w, 0]
+                ],
+                [
+                    [0, 0],
+                    [0, h]
+                ],
+                [
+                    [w, 0],
+                    [w, h]
+                ],
+                [
+                    [0, h],
+                    [w, h]
+                ]
+            ]
+        ).some((e) => e);
+    }
+
+    function noteCanRender_Note(x, y) {
+        return (-Note_MaxSize / 2 <= x &&
+            x <= w + Note_MaxSize / 2 &&
+            -Note_MaxSize / 2 <= y &&
+            y <= h + Note_MaxSize / 2
+        );
+    }
+
+    function procsEffect(curTime, note, t, effectRandomBlocks) {
+        let p = (curTime - t * note.master.T) / (0.5 * chartAudio.playbackRate);
+        if (!(0.0 <= p <= 1.0)) return;
+        let effectLineX = dataGetter.getX(note.master, t);
+        let effectLineY = dataGetter.getY(note.master, t);
+        let effectRotate = dataGetter.getRotate(note.master, t);
+        let [effectX, effectY] = rotatePoint(effectLineX, effectLineY, effectRotate, note.positionX * w * 0.05625);
+        let effectImg = ClickEffects[parseInt(p * (ClickEffectNum - 1)) + 1];
+        let beforedeg = 0;
+        let blockAlpha = (1.0 - p) * 0.85;
+        let randomBlockR = noteWidth * 1.375 * (1.0 - 2 ** (-10 * p)) / 1.35;
+        let blockSize = w * 0.1234375 / 5.5 * (0.4 * Math.sin(p * Math.PI) + 0.6)
+        for (let deg of effectRandomBlocks) {
+            let [effectRandomX, effectRandomY] = rotatePoint(effectX, effectY, beforedeg + deg, randomBlockR);
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(255, 255, 170, ${blockAlpha})`;
+            ctx.fillRect(
+                effectRandomX - blockSize / 2,
+                effectRandomY - blockSize / 2,
+                blockSize, blockSize
+            );
+            ctx.restore();
+            beforedeg += 90;
+        }
+        ctx.drawImage(
+            effectImg,
+            effectX - noteWidth * 1.375 / 2,
+            effectY - noteWidth * 1.375 / 2,
+            noteWidth * 1.375, noteWidth * 1.375
+        );
+
+        requestAnimationFrame(phiRender);
+    }
+
+    CanvasRenderingContext2D.prototype._drawImage = CanvasRenderingContext2D.prototype.drawImage;
+
+    CanvasRenderingContext2D.prototype.drawImage = function(...args) {
+        try {
+            return this._drawImage(...args);
+        } catch (e) {
+            console.log(e);
+            if (!this._showedError) {
+                alert("啊不是，你等资源加载啊喂！等一会再点！");
+                this._showedError = true;
+            }
+        }
+    }
+
+    CanvasRenderingContext2D.prototype.drawLineEx = function(x1, y1, x2, y2, width, color) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    CanvasRenderingContext2D.prototype.drawRotateImage = function(im, x, y, width, height, deg, alpha) { // draw at the position center
+        this.save();
+        this.globalAlpha *= alpha;
+        if (!!deg) {
+            this.translate(x, y);
+            this.rotate(deg * Math.PI / 180);
+            this.drawImage(im, -width / 2, -height / 2, width, height);
+        } else {
+            this.drawImage(im, x - width / 2, y - height / 2, width, height);
+        }
+        this.restore();
+    }
+
+    CanvasRenderingContext2D.prototype.drawAnchorESRotateImage = function(im, x, y, width, height, deg, alpha) {
+        this.save();
+        this.globalAlpha *= alpha;
+        if (!!deg) {
+            this.translate(x, y);
+            this.rotate(deg * Math.PI / 180);
+            this.drawImage(im, -width / 2, -height, width, height);
+        } else {
+            this.drawImage(im, x - width / 2, y - height, width, height);
+        }
+        this.restore();
+    }
+
+    CanvasRenderingContext2D.prototype.clear = function() {
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    class InfoTxtLoader {
+        constructor(string) {
+            this.stringLines = string.split("\n");
+            this.datas = new Array();
+
+            if (this.stringLines[0] == "#") this.stringLines.splice(0, 1);
+            this.stringLines.push("#");
+
+            let lines = new Array();
+            for (let line of this.stringLines) {
+                if (line != "#") {
+                    lines.push(line);
+                }
+                else {
+                    this._loadInfo(lines);
+                    lines = new Array();
+                }
+            }
+        }
+
+        _loadInfo(lines) {
+            let dataMap = new Map();
+
+            for (let line of lines) {
+                let [k, ...v] = line.split(": ");
+                dataMap.set(k, v.join("").replaceAll("\r", ""));
+            }
+
+            this.datas.push(dataMap);
+        }
+
+        getData() {
+            let result = new Array();
+
+            for (let dataItem of this.datas) {
+                result.push({
+                    "chartFn": dataItem.get("Chart"),
+                    "imageFn": dataItem.get("Picture"),
+                    "audioFn": dataItem.get("Song")
+                });
+            }
+
+            return result;
+        }
+    }
+
+    class InfoYmlLoader {
+        constructor(string) {
+            this.info = jsyaml.load(string);
+        }
+
+        getData() {
+            return [{
+                "chartFn": this.info.chart,
+                "imageFn": this.info.illustration,
+                "audioFn": this.info.music
+            }];
+        }
+    }
+
+    class InfoCsvLoader {
+        constructor(string) {
+            this._parsePromise = new Promise((resolve, _) => {
+                Papa.parse(string, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: resolve
+                });
+            });
+        }
+
+        async getData() {
+            let data = (await this._parsePromise).data;
+            let result = new Array();
+
+            for (let dataItem of data) {
+                result.push({
+                    "chartFn": dataItem.Chart,
+                    "imageFn": dataItem.Image,
+                    "audioFn": dataItem.Music
+                });
+            }
+
+            return result;
+        }
+    }
+
+    document.querySelector(".startButton").addEventListener("click", async () => {
+        let res = (await (new JSZip().loadAsync(document.querySelector(".zipFile").files[0])));
+        let getText = async (fn) => await res.file(fn).async("string");
+        let getBlob = async (fn) => await res.file(fn).async("blob");
+        let fileNames = Object.keys(res.files);
+        let infoIndex;
+        let fileChoices;
+
+        if ((infoIndex = fileNames.indexOf("info.txt")) != -1) {
+            fileChoices = (new InfoTxtLoader(await getText("info.txt"))).getData();
+        }
+        else if ((infoIndex = fileNames.indexOf("info.csv") != -1)) {
+            fileChoices = await (new InfoCsvLoader(await getText("info.csv"))).getData();
+        }
+        else if ((infoIndex = fileNames.indexOf("info.yml")) != -1) {
+            fileChoices = (new InfoYmlLoader(await getText("info.yml"))).getData();
+        }
+        else {
+            log("cannot find info file, try to find file by file header.");
+            fileChoices = [{}];
+            for (let fn of fileNames) {
+                let fData = await getText(fn);
+
+                try { // maybe is phi/rpe chart
+                    let jsonResult = JSON.parse(fData);
+                    if (
+                        "formatVersion" in jsonResult
+                        || "META" in jsonResult
+                    ) {
+                        fileChoices[0].chartFn = fn;
+                        continue;
+                    }
+                }
+                catch (e) {}
+
+                // look file header
+
+                if (
+                    fData.startsWith(hex2str("01504E470D0A1A0A"))
+                    || fData.startsWith(hex2str("89504E470D0A1A0A"))
+                    || fData.startsWith(hex2str("FFD8FF"))
+                    || (fData.startsWith(hex2str("FFD8")) && fData.endsWith(hex2str("FFD9")))
+                ) {
+                    fileChoices[0].imageFn = fn;
+                    continue;
+                }
+
+                if (
+                    fData.startsWith("OggS")
+                    || fData.startsWith("ID3")
+                    || fData.startsWith("RIFF")
+                    || fData.startsWith(hex2str("fff1"))
+                    || fData.startsWith(hex2str("fff9"))
+                ) {
+                    fileChoices[0].audioFn = fn;
+                    continue;
+                }
+            }
+
+            if (
+                fileChoices[0].chartFn === void 0
+                || fileChoices[0].imageFn === void 0
+                || fileChoices[0].audioFn === void 0
+            ) {
+                alert("connot find chart||image||audio file,\nplease try to add a info file.")
+            }
+        }
+
+        if (fileChoices.length == 0) {
+            alert("connot find chart||image||audio file,\nplease try to add a info file.");
+            return;
+        }
+        else if (fileChoices.length > 1) {
+            let promptText = "please select a file to play\n";
+            let i = 0;
+            for (let choice of fileChoices) {
+                i += 1;
+                promptText += `\n${i}.\nchart: ${choice.chartFn}\nimage: ${choice.imageFn}\naudio: ${choice.audioFn}\n`;
+            }
+            let choiceIndex = parseInt(prompt(promptText)) - 1;
+            fileChoices = [fileChoices[choiceIndex]];
+        }
+
+        let chartFn = fileChoices[0].chartFn;
+        let imageFn = fileChoices[0].imageFn;
+        let audioFn = fileChoices[0].audioFn;
+
+        let chartJson = JSON.parse(await getText(chartFn));
+        let imageURL =  URL.createObjectURL(await getBlob(imageFn));
+        let audioURL =  URL.createObjectURL(await getBlob(audioFn));
+
+        chartAudio.src = audioURL;
+
+        initCanvas();
+
+        let bg = document.querySelector(".bg");
+        bg.src = imageURL;
+        cv.style.backdropFilter = `blur(${(w + h) / 50}px)`;
+        document.querySelectorAll(".nocanvas").forEach((e) => e.remove());
+        chartAudio.play();
+        requestAnimationFrame(() => render(new CommonChart(chartJson)));
+    });
+
+    class ChartObjectLine {
+        constructor(
+            bpms, notes,
+            speedEvents,
+            alphaEvents,
+            rotateEvents,
+            moveXEvents,
+            moveYEvents,
+            Extended
+        ) {
+
+        }
+    }
+
+    class CommonChart {
+        constructor(chartJson) {
+            if ("formatVersion" in chartJson) _phiParse();
+            else if ("META" in chartJson) _rpeParse();
+            else throw new Error("unknown chart format");
+        }
+
+        _phiParse(chartJson) {
+            this.offset = chartJson.offset;
+        }
+
+        _rpeParse(chartJson) {
+            this.offset = chartJson.META.offset / 1000;
+        }
+    }
+
+    function render(chartObject) {
+        requestAnimationFrame(() => render(chartObject));
+    }
+
+    function hex2str(hex) {
+        let result = [];
+        for (let i = 0; i < hex.length; i += 2) {
+            result.push(String.fromCharCode(parseInt(hex.substr(i, 2), 16)));
+        }
+        return result.join("");
+    }
+
+    if (typeof String.prototype.startsWith != "function") {
+        String.prototype.startsWith = function (prefix) {
+            return this.slice(0, prefix.length) === prefix;
+        };
+    }
+
+    if (typeof String.prototype.endsWith != "function") {
+        String.prototype.endsWith = function (suffix) {
+            return this.slice(-suffix.length) === suffix;
+        };
+    }
+</script>
