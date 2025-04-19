@@ -308,7 +308,7 @@ android.no-byte-compile-python = False
 # android.release_artifact = aab
 
 # (str) The format used to package the app for debug mode (apk or aar).
-android.debug_artifact = apk
+android.debug_artifact = aar
 
 #
 # Python for android (p4a) specific
